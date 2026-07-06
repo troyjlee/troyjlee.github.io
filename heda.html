@@ -1,0 +1,4317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Heda's Learning Patch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:    #F5EDD8;
+    --cream-2:  #EFE5C9;
+    --cream-3:  #E8DCB8;
+    --green:    #6B8E4E;
+    --green-d:  #4f6b39;
+    --green-l:  #C7DEB0;
+    --ochre:    #C97B3A;
+    --ochre-d:  #A2602B;
+    --ochre-l:  #F5C893;
+    --red:      #B5453A;
+    --red-d:    #8b3329;
+    --red-l:    #E8B5AD;
+    --sky:      #7BB3D6;
+    --sky-d:    #5a91b2;
+    --sky-l:    #C5DEEC;
+    --ink:      #3d4a2a;
+    --muted:    #6B6857;
+    --ok:       #4f8a4a;
+    --warn:     #C9583A;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--cream);
+    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  button {
+    font: inherit; color: inherit; border: none; background: none;
+    cursor: pointer; padding: 0; -webkit-tap-highlight-color: transparent;
+  }
+  button:active { transform: translateY(1px); }
+  button:focus-visible {
+    outline: 3px solid var(--sky-d);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  /* ============== SHELL ============== */
+  #app {
+    height: 100vh; width: 100vw;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .top-bar {
+    flex: 0 0 auto;
+    padding: 14px 22px;
+    display: grid;
+    grid-template-columns: 48px 1fr 80px;
+    align-items: center;
+    gap: 12px;
+    background: var(--cream);
+  }
+  .home-btn {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--cream-2); color: var(--muted);
+    font-size: 22px; line-height: 1;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+    transition: opacity 0.15s;
+  }
+  .home-btn.hidden { opacity: 0; pointer-events: none; }
+  .crumb {
+    font-weight: 700; font-size: 18px;
+    display: flex; align-items: center; gap: 10px;
+    min-width: 0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .crumb.clickable { cursor: pointer; }
+  .crumb.clickable:active { background: var(--cream-2); }
+  @media (hover: hover) {
+    .crumb.clickable:hover { background: var(--cream-2); }
+  }
+  .crumb .mascot { font-size: 24px; }
+  .stars-pill {
+    background: #fff;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 14px; font-weight: 700;
+    color: var(--ochre);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+    text-align: center;
+    justify-self: end;
+  }
+  .main {
+    flex: 1 1 auto;
+    overflow: hidden;
+    position: relative;
+  }
+  .view {
+    position: absolute; inset: 0;
+    overflow-y: auto; overflow-x: hidden;
+    padding: 4px 22px 22px;
+    display: none;
+    flex-direction: column;
+  }
+  .view.active { display: flex; }
+
+  .back-btn {
+    align-self: flex-start;
+    padding: 8px 16px 8px 12px;
+    background: var(--cream-2);
+    border-radius: 999px;
+    font-weight: 700; font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+  }
+
+  /* ============== HUB ============== */
+  .hub-title {
+    text-align: center;
+    font-weight: 700; font-size: 28px;
+    color: var(--green);
+    margin: 12px 0 28px;
+  }
+  .hub-tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    max-width: 540px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .hub-tile {
+    border-radius: 22px;
+    padding: 22px 20px;
+    color: #fff;
+    font-weight: 700; font-size: 20px;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    aspect-ratio: 1.2 / 1;
+    transition: transform 0.1s;
+  }
+  .hub-tile:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(0,0,0,0.1); }
+  .hub-tile .em { font-size: 56px; line-height: 1; }
+  .t-math    { background: var(--ochre); }
+  .t-words   { background: var(--green); }
+  .t-history { background: var(--red); }
+  .t-science { background: var(--sky); }
+  .hub-foot {
+    margin-top: auto;
+    padding-top: 24px;
+    display: flex; justify-content: center; gap: 24px;
+    font-weight: 600; font-size: 14px;
+    color: var(--muted);
+  }
+  .hub-foot span { background: #fff; border-radius: 999px; padding: 8px 16px; box-shadow: 0 2px 0 rgba(0,0,0,0.05); }
+
+  /* ============== SUBJECT HUB (math, science) ============== */
+  .sub-hub-title {
+    text-align: center; font-weight: 700; font-size: 22px;
+    margin: 8px 0 20px;
+  }
+  .sub-hub-title.math    { color: var(--ochre); }
+  .sub-hub-title.science { color: var(--sky-d); }
+  .sub-hub-tiles {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    max-width: 520px; width: 100%; margin: 0 auto;
+  }
+  .sub-tile {
+    background: #fff; border-radius: 18px; padding: 18px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
+    transition: transform 0.1s;
+  }
+  .sub-tile:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+  .sub-tile .icon { font-size: 42px; line-height: 1; }
+  .sub-tile .name { font-weight: 700; font-size: 16px; }
+  .sub-tile .desc { font-size: 12px; color: var(--muted); }
+  .sub-tile.math  .icon, .sub-tile.math  .name { color: var(--ochre); }
+  .sub-tile.sci   .icon, .sub-tile.sci   .name { color: var(--sky-d); }
+  .sub-tile.words .icon, .sub-tile.words .name { color: var(--green); }
+
+  /* ============== MATH FLASHCARD ============== */
+  .math-stage {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 24px;
+    max-width: 480px; width: 100%; margin: 0 auto;
+  }
+  .math-q {
+    background: #fff; border-radius: 26px;
+    padding: 24px 36px;
+    font-size: 48px; font-weight: 700;
+    color: var(--ink);
+    box-shadow: 0 5px 0 rgba(0,0,0,0.06);
+    letter-spacing: 3px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .ans-slot {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 110px; padding: 6px 14px;
+    background: var(--cream-2);
+    border-radius: 14px;
+    color: var(--ochre-d);
+    border-bottom: 4px solid var(--ochre);
+    min-height: 60px;
+  }
+  .ans-slot.empty { color: rgba(162, 96, 43, 0.3); }
+  .ans-slot.correct {
+    background: #d6efd0; border-bottom-color: var(--ok); color: var(--ok);
+    animation: pop 0.4s;
+  }
+  .ans-slot.wrong {
+    background: #f5d6d0; border-bottom-color: var(--warn); color: var(--warn);
+    animation: shake 0.4s;
+  }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 76px);
+    gap: 10px;
+  }
+  .num {
+    background: #fff; border-radius: 14px;
+    padding: 14px 0; text-align: center;
+    font-size: 26px; font-weight: 700;
+    color: var(--ink);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+  }
+  .num:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.08); }
+  .num.del   { background: var(--cream-2); color: var(--muted); }
+  .num.enter { background: var(--ochre); color: #fff; box-shadow: 0 4px 0 var(--ochre-d); }
+  .num.enter:active { box-shadow: 0 2px 0 var(--ochre-d); }
+  .num.disabled { opacity: 0.4; pointer-events: none; }
+  .math-progress {
+    display: flex; justify-content: center; gap: 8px;
+    padding: 14px 0 0;
+  }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(0,0,0,0.12);
+    transition: background 0.2s;
+  }
+  .dot.ok { background: var(--ok); }
+  .dot.no { background: var(--warn); }
+  .dot.current { background: var(--ochre); transform: scale(1.4); }
+
+  .session-summary {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 18px;
+  }
+  .summary-card {
+    background: #fff; border-radius: 22px;
+    padding: 28px 32px;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.06);
+    text-align: center;
+    max-width: 360px;
+  }
+  .summary-card .big {
+    font-size: 52px; font-weight: 700; color: var(--ochre);
+  }
+  .summary-card .lbl { color: var(--muted); font-weight: 600; }
+  .summary-card .stars-earned {
+    font-size: 22px; margin-top: 10px;
+  }
+  .btn {
+    background: #fff; border-radius: 16px;
+    padding: 14px 24px;
+    font-weight: 700; font-size: 16px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.08); }
+  .btn.ochre { background: var(--ochre); color: #fff; box-shadow: 0 4px 0 var(--ochre-d); }
+  .btn.ochre:active { box-shadow: 0 2px 0 var(--ochre-d); }
+  .btn.green { background: var(--green); color: #fff; box-shadow: 0 4px 0 var(--green-d); }
+  .btn.green:active { box-shadow: 0 2px 0 var(--green-d); }
+  .btn.red   { background: var(--red); color: #fff; box-shadow: 0 4px 0 var(--red-d); }
+  .btn.red:active { box-shadow: 0 2px 0 var(--red-d); }
+  .btn.sky   { background: var(--sky); color: #fff; box-shadow: 0 4px 0 var(--sky-d); }
+  .btn.sky:active { box-shadow: 0 2px 0 var(--sky-d); }
+
+  /* ============== TIMES TABLE ============== */
+  .times-wrap {
+    max-width: 620px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .times-readout {
+    background: #fff; border-radius: 16px;
+    padding: 14px 18px; min-height: 56px;
+    font-size: 22px; font-weight: 700; color: var(--ochre);
+    text-align: center;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.05);
+    display: flex; align-items: center; justify-content: center;
+    letter-spacing: 1px;
+  }
+  .times-table {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 3px;
+    background: var(--cream-2);
+    border-radius: 14px;
+    padding: 6px;
+  }
+  .tt-cell {
+    background: #fff;
+    text-align: center;
+    font-weight: 600;
+    font-size: 15px;
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    user-select: none;
+    cursor: pointer;
+    color: var(--ink);
+    transition: background 0.1s, color 0.1s, transform 0.1s;
+  }
+  .tt-cell.header  { background: var(--ochre); color: #fff; font-weight: 700; }
+  .tt-cell.corner  { background: var(--ochre-d); color: #fff; font-size: 18px; }
+  .tt-cell.row-hi  { background: var(--ochre-l); color: var(--ochre-d); }
+  .tt-cell.col-hi  { background: var(--ochre-l); color: var(--ochre-d); }
+  .tt-cell.header.row-hi,
+  .tt-cell.header.col-hi { background: var(--ochre-d); color: #fff; }
+  .tt-cell.cell-hi {
+    background: var(--ochre);
+    color: #fff;
+    transform: scale(1.1);
+    z-index: 2;
+    position: relative;
+    box-shadow: 0 3px 0 var(--ochre-d);
+  }
+  @media (max-width: 480px) {
+    .tt-cell { font-size: 11px; }
+    .tt-cell.corner { font-size: 14px; }
+    .times-readout { font-size: 18px; min-height: 48px; padding: 10px; }
+  }
+
+  /* ============== SHAPES ============== */
+  .shapes-stage {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 24px;
+    max-width: 480px; width: 100%; margin: 0 auto;
+  }
+  .shape-box {
+    background: #fff; border-radius: 22px; padding: 24px;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.06);
+    display: flex; align-items: center; justify-content: center;
+    width: 200px; height: 200px;
+  }
+  .shape-prompt { font-weight: 700; font-size: 18px; color: var(--ochre); }
+  .shape-choices {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    width: 100%; max-width: 360px;
+  }
+  .shape-choice {
+    background: #fff; border-radius: 14px; padding: 14px;
+    font-weight: 700; font-size: 17px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    text-align: center;
+  }
+  .shape-choice.correct { background: var(--green); color: #fff; }
+  .shape-choice.wrong   { background: var(--red); color: #fff; }
+  .shape-choice:active { transform: translateY(2px); }
+
+  /* ============== WORD BUILDER ============== */
+  .word-stage {
+    flex: 1; display: flex; flex-direction: column;
+    gap: 18px;
+    max-width: 540px; width: 100%; margin: 0 auto;
+  }
+  .word-display {
+    background: #fff; border-radius: 20px;
+    padding: 18px;
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px; min-height: 90px;
+    box-shadow: inset 0 2px 0 rgba(0,0,0,0.05);
+  }
+  .slot {
+    min-width: 48px; height: 60px; padding: 0 6px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: 700;
+  }
+  .slot.vowel { background: var(--ochre-l); color: var(--ochre-d); }
+  .slot.cons  { background: var(--green-l); color: var(--green-d); }
+  .word-display.empty::after {
+    content: "Tap letters to build a word";
+    color: var(--muted); font-size: 15px; font-weight: 500;
+    font-style: italic;
+  }
+  .letter-group { display: flex; flex-direction: column; gap: 6px; }
+  .letter-group .lbl {
+    font-size: 12px; font-weight: 700; color: var(--muted);
+    letter-spacing: 0.8px; text-transform: uppercase;
+    padding-left: 4px;
+  }
+  .letter-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .ltr {
+    width: 44px; height: 48px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+    user-select: none;
+  }
+  .ltr:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
+  .ltr.v { background: var(--ochre); color: #fff; }
+  .ltr.c { background: var(--green); color: #fff; }
+  .word-actions {
+    display: flex; gap: 12px; justify-content: center;
+    padding-top: 4px;
+  }
+
+  /* ============== SOUND BOXES ============== */
+  .sb-stage {
+    max-width: 560px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 22px;
+  }
+  .sb-levels {
+    display: inline-flex;
+    background: var(--cream-2);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .sb-level {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .sb-level.active {
+    background: var(--green);
+    color: #fff;
+    box-shadow: 0 2px 0 var(--green-d);
+  }
+  /* Generic segmented pill (same look as .sb-levels, with accent variants) */
+  .pill-row {
+    display: inline-flex;
+    background: var(--cream-2);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .pill {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .pill.active.green { background: var(--green); color: #fff; box-shadow: 0 2px 0 var(--green-d); }
+  .pill.active.ochre { background: var(--ochre); color: #fff; box-shadow: 0 2px 0 var(--ochre-d); }
+  .sb-word {
+    font-size: 44px; font-weight: 700; color: var(--ink);
+    letter-spacing: 4px;
+    background: #fff; border-radius: 18px;
+    padding: 14px 32px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+  }
+  .sb-hint {
+    font-size: 14px; color: var(--muted); font-weight: 600;
+    text-align: center;
+  }
+  .sb-boxes {
+    display: flex; gap: 12px; justify-content: center;
+    flex-wrap: wrap;
+  }
+  .sb-box {
+    min-width: 84px; height: 96px; padding: 0 16px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 700;
+    color: #fff;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.12);
+    user-select: none;
+    transition: transform 0.1s;
+    position: relative;
+  }
+  .sb-box:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.12); }
+  .sb-box.vowel       { background: var(--ochre); }
+  .sb-box.vowel-long  { background: var(--ochre); padding-top: 14px; }
+  .sb-box.vowel-long::before {
+    content: ""; position: absolute;
+    top: 14px; left: 50%; transform: translateX(-50%);
+    width: 34px; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.9);
+  }
+  .sb-box.consonant   { background: var(--green); }
+  .sb-box.digraph     { background: var(--red); }
+  .sb-box.qu          { background: var(--sky-d); }
+  .sb-box.silent {
+    background: var(--cream-2);
+    color: rgba(0,0,0,0.35);
+    font-style: italic;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.06);
+  }
+  .sb-box.silent.tapped {
+    animation: silent-nudge 0.4s;
+  }
+  @keyframes silent-nudge {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-4px); }
+    75%      { transform: translateX(4px); }
+  }
+  .sb-box.played::after {
+    content: ""; position: absolute; top: 6px; right: 8px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.85);
+  }
+  .sb-box.silent.played::after { display: none; }
+  .sb-actions {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  }
+  .sb-key {
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    font-size: 12px; color: var(--muted); font-weight: 600;
+    padding-top: 4px;
+  }
+  .sb-key span { display: inline-flex; gap: 4px; align-items: center; }
+  .sb-key i {
+    width: 12px; height: 12px; border-radius: 3px; display: inline-block;
+  }
+  .sb-key .v { background: var(--ochre); }
+  .sb-key .c { background: var(--green); }
+  .sb-key .d { background: var(--red); }
+  .sb-tip {
+    background: #FFF7DD; border-left: 4px solid var(--ochre);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; color: var(--ink); font-style: italic;
+    max-width: 480px;
+  }
+
+  /* ============== RECORDINGS UI ============== */
+  .rec-section-title {
+    font-weight: 700; font-size: 16px; color: var(--green);
+    margin: 8px 0 10px; padding-left: 4px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .rec-section-title .count { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+    max-width: 720px; width: 100%; margin: 0 auto 22px;
+  }
+  .rec-card {
+    background: #fff; border-radius: 14px;
+    padding: 10px 8px 12px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.05);
+    position: relative;
+  }
+  .rec-card .label {
+    font-size: 22px; font-weight: 700; color: var(--ink);
+    line-height: 1; padding-top: 4px;
+  }
+  .rec-card .ex {
+    font-size: 10px; color: var(--muted); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .rec-card.has-clip { background: #EFF7E8; }
+  .rec-card .dot {
+    position: absolute; top: 8px; right: 8px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: rgba(0,0,0,0.12);
+  }
+  .rec-card.has-clip .dot { background: var(--ok); }
+  .rec-card.recording .dot {
+    background: var(--warn);
+    animation: pulse 0.8s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(1.4); }
+  }
+  .rec-btn-row { display: flex; gap: 6px; }
+  .rec-btn {
+    flex: 1;
+    background: var(--cream-2); border-radius: 8px;
+    padding: 6px 10px; font-size: 12px; font-weight: 700;
+    color: var(--muted);
+    text-align: center;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+  }
+  .rec-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0,0,0,0.06); }
+  .rec-btn.rec    { background: var(--green); color: #fff; box-shadow: 0 2px 0 var(--green-d); }
+  .rec-btn.stop   { background: var(--warn); color: #fff; box-shadow: 0 2px 0 #8a3a2a; }
+  .rec-btn.play   { background: #fff; color: var(--green); }
+  .rec-btn.disabled { opacity: 0.4; pointer-events: none; }
+  .rec-help {
+    background: #fff; border-radius: 12px; padding: 12px 16px;
+    font-size: 13px; line-height: 1.5; color: var(--ink);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.05);
+    max-width: 560px; margin: 0 auto 18px;
+  }
+  .rec-help b { color: var(--green); }
+
+  /* ============== READING ============== */
+  .reading-list {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    max-width: 540px; width: 100%; margin: 0 auto;
+  }
+  .reading-card {
+    background: #fff; border-radius: 14px; padding: 12px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    display: flex; gap: 10px; align-items: center;
+    text-align: left;
+    min-height: 56px;
+  }
+  .reading-card:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+  .reading-card .em { font-size: 26px; flex: 0 0 auto; }
+  .reading-card .info { flex: 1; min-width: 0; }
+  .reading-card .num { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .reading-card .ttl { font-weight: 700; font-size: 14px; color: var(--green); line-height: 1.2; }
+  .reading-card.read { opacity: 0.65; }
+  .reading-card .check { color: var(--ok); font-size: 18px; }
+
+  .reading-page {
+    max-width: 600px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .reading-hero {
+    text-align: center; font-size: 72px; line-height: 1;
+  }
+  .reading-title {
+    text-align: center; font-size: 26px; font-weight: 700;
+    color: var(--green);
+  }
+  .reading-body {
+    background: #fff; border-radius: 18px;
+    padding: 22px 26px;
+    font-size: 19px; line-height: 1.75;
+    color: var(--ink);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+  }
+  .reading-body p { margin: 0 0 14px; }
+  .reading-body p:last-child { margin-bottom: 0; }
+  .reading-done-row { display: flex; justify-content: center; padding: 2px 0; }
+
+  /* ============== HISTORY ============== */
+  .story-list {
+    display: flex; flex-direction: column; gap: 12px;
+    max-width: 520px; width: 100%; margin: 0 auto;
+  }
+  .story-card {
+    background: #fff; border-radius: 16px; padding: 16px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    display: flex; gap: 14px; align-items: center;
+    text-align: left;
+  }
+  .story-card:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.06); }
+  .story-card .em { font-size: 38px; flex: 0 0 auto; }
+  .story-card .ttl { font-weight: 700; font-size: 17px; color: var(--red); }
+  .story-card .sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .story-card.read { opacity: 0.7; }
+  .story-card .check { margin-left: auto; color: var(--ok); font-size: 22px; }
+
+  .story-reader {
+    max-width: 600px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column; flex: 1;
+  }
+  .story-hero {
+    height: 140px;
+    background: linear-gradient(160deg, #d99b6b 0%, #a25a3d 60%, #6b3525 100%);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 80px;
+    margin-bottom: 16px;
+    position: relative; overflow: hidden;
+  }
+  .story-hero::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,220,140,0.4) 0%, transparent 30%),
+      radial-gradient(circle at 80% 80%, rgba(0,0,0,0.2) 0%, transparent 40%);
+  }
+  .story-hero span { position: relative; z-index: 1; }
+  .story-title {
+    font-size: 22px; font-weight: 700; color: var(--red);
+    margin-bottom: 12px;
+  }
+  .story-body {
+    font-size: 17px; line-height: 1.65;
+    flex: 1;
+  }
+  .story-body p { margin: 0 0 14px; }
+  .story-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 14px;
+  }
+  .story-nav .pages { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+  /* ============== SCIENCE ============== */
+  .exp-list, .animal-list, .leaf-list {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    max-width: 520px; width: 100%; margin: 0 auto;
+  }
+  .exp-card-mini, .animal-card, .leaf-card {
+    background: #fff; border-radius: 16px; padding: 14px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    text-align: center;
+    display: flex; flex-direction: column; gap: 6px; align-items: center;
+  }
+  .exp-card-mini:active, .animal-card:active, .leaf-card:active {
+    transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+  }
+  .exp-card-mini .em, .animal-card .em, .leaf-card .em { font-size: 38px; }
+  .exp-card-mini .ttl, .animal-card .ttl, .leaf-card .ttl {
+    font-weight: 700; font-size: 14px; color: var(--sky-d);
+  }
+  .exp-card-mini.done { opacity: 0.7; }
+  .exp-card-mini .check { color: var(--ok); font-size: 18px; }
+
+  .exp-reader, .animal-reader, .leaf-reader {
+    max-width: 560px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .exp-card {
+    background: #fff; border-radius: 18px; padding: 20px;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.06);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .exp-title {
+    font-size: 22px; font-weight: 700; color: var(--sky-d);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .exp-section {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.8px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .exp-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    background: var(--sky); color: #fff;
+    border-radius: 999px; padding: 6px 14px;
+    font-size: 14px; font-weight: 600;
+  }
+  .steps { font-size: 15px; line-height: 1.6; margin: 0; padding-left: 22px; }
+  .steps li { margin-bottom: 6px; }
+  .exp-q {
+    background: #FFF7DD; border-left: 4px solid var(--ochre);
+    border-radius: 8px; padding: 12px 16px;
+    font-size: 14px; font-style: italic; color: var(--ink);
+  }
+
+  /* Animal detail */
+  .animal-detail-card {
+    background: #fff; border-radius: 18px; padding: 24px;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.06);
+    text-align: center;
+  }
+  .animal-detail-card .big-em { font-size: 110px; line-height: 1; }
+  .animal-detail-card .name { font-size: 24px; font-weight: 700; color: var(--sky-d); margin: 6px 0; }
+  .animal-detail-card .class-badge {
+    display: inline-block; background: var(--sky); color: #fff;
+    border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 700;
+    margin: 8px 0;
+  }
+  .animal-detail-card .fact {
+    font-size: 16px; line-height: 1.55; margin-top: 12px; color: var(--ink);
+  }
+
+  /* Leaf detail */
+  .leaf-detail-card {
+    background: #fff; border-radius: 18px; padding: 22px;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.06);
+  }
+  .leaf-svg-wrap {
+    display: flex; justify-content: center; padding: 10px 0;
+  }
+  .leaf-svg-wrap svg { width: 180px; height: 180px; }
+  .leaf-detail-card .name { font-size: 22px; font-weight: 700; color: var(--green); margin-bottom: 6px; text-align: center; }
+  .leaf-detail-card .fact { font-size: 15px; line-height: 1.6; color: var(--ink); margin-top: 12px; }
+  .leaf-list .leaf-card .leaf-mini svg { width: 70px; height: 70px; }
+
+  /* Classification game */
+  .classify-stage {
+    max-width: 560px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 16px;
+    align-items: center;
+  }
+  .classify-card {
+    background: #fff; border-radius: 22px; padding: 24px;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.06);
+    text-align: center;
+  }
+  .classify-card .big-em { font-size: 90px; line-height: 1; }
+  .classify-card .name { font-size: 20px; font-weight: 700; color: var(--sky-d); margin-top: 6px; }
+  .classify-q { font-size: 16px; font-weight: 600; color: var(--muted); }
+  .classify-choices {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;
+  }
+  .classify-choice {
+    background: #fff; border-radius: 14px; padding: 14px;
+    font-weight: 700; font-size: 15px; text-align: center;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+  }
+  .classify-choice.correct { background: var(--green); color: #fff; }
+  .classify-choice.wrong   { background: var(--red); color: #fff; }
+  .classify-feedback {
+    min-height: 44px;
+    font-weight: 700; font-size: 16px;
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: 14px;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .classify-feedback.show { opacity: 1; }
+  .classify-feedback.ok   { background: #d6efd0; color: var(--ok); }
+  .classify-feedback.no   { background: #f5d6d0; color: var(--warn); }
+  .detail-nav {
+    display: flex; justify-content: space-between; gap: 12px;
+    margin-top: 4px;
+  }
+
+  /* Celebration */
+  .celebrate {
+    position: fixed; inset: 0;
+    background: rgba(245, 237, 216, 0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .celebrate.show { opacity: 1; }
+  .celebrate .star {
+    font-size: 100px;
+    animation: starPop 1s ease-out;
+  }
+  @keyframes starPop {
+    0%   { transform: scale(0) rotate(0deg);   opacity: 0; }
+    30%  { transform: scale(1.4) rotate(20deg); opacity: 1; }
+    70%  { transform: scale(1.2) rotate(-10deg); opacity: 1; }
+    100% { transform: scale(2) rotate(0deg);  opacity: 0; }
+  }
+
+  /* ============== WRITING / TRACING ============== */
+  .trace-stage {
+    max-width: 560px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 14px;
+  }
+  .trace-prompt { font-size: 24px; font-weight: 700; color: var(--ink); }
+  .trace-prompt .tp-glyph { color: var(--ochre-d); font-size: 30px; }
+  .trace-prompt .tp-emoji { font-size: 34px; vertical-align: -4px; }
+  .trace-stage.letters .tp-glyph { color: var(--green-d); }
+  .trace-box {
+    position: relative;
+    width: min(78vw, 50vh, 400px);
+    aspect-ratio: 1;
+    flex: 0 0 auto;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+  }
+  .trace-box svg, .trace-box canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+  }
+  #trace-guide .g-stroke {
+    stroke: #DCCFA8; stroke-width: 9; fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
+    transition: opacity 0.4s;
+  }
+  #trace-guide .g-stroke.future { opacity: 0.35; }
+  #trace-guide .g-stroke.done   { stroke: var(--green-l); }
+  #trace-guide .g-stroke.faded  { opacity: 0.12; }
+  #trace-guide .g-baseline { stroke: var(--cream-3); stroke-width: 1.5; }
+  #trace-guide .g-start {
+    fill: var(--green);
+    transform-box: fill-box; transform-origin: center;
+    animation: tracePulse 1.4s ease-in-out infinite;
+  }
+  #trace-guide .g-arrow { fill: var(--green-d); }
+  @keyframes tracePulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.35); }
+  }
+  .trace-feedback {
+    min-height: 26px; font-weight: 700; font-size: 17px;
+    color: var(--muted); text-align: center;
+  }
+  .trace-feedback.ok { color: var(--ok); }
+  .trace-feedback.no { color: var(--warn); animation: shake 0.4s; }
+
+  /* ============== WHICH WAY? ============== */
+  .ww-stage {
+    max-width: 560px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 18px;
+  }
+  .ww-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+    width: min(78vw, 420px);
+  }
+  .ww-card {
+    background: #fff; border-radius: 22px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    aspect-ratio: 1; padding: 14px;
+  }
+  .ww-card svg { width: 100%; height: 100%; }
+  .ww-card.good {
+    box-shadow: 0 0 0 4px var(--ok), 0 4px 0 rgba(0,0,0,0.06);
+    animation: pop 0.4s;
+  }
+  .ww-card.bad {
+    box-shadow: 0 0 0 4px var(--warn), 0 4px 0 rgba(0,0,0,0.06);
+    animation: shake 0.4s;
+  }
+
+  /* ============== MIRROR DRAW ============== */
+  .mirror-stage {
+    max-width: 560px; width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 14px;
+  }
+  .mirror-box {
+    background: #fff; border-radius: 24px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+    width: min(88vw, 52vh, 440px);
+    aspect-ratio: 1;
+    flex: 0 0 auto;
+    touch-action: none;
+    user-select: none; -webkit-user-select: none;
+    overflow: hidden;
+  }
+  #mirror-svg { width: 100%; height: 100%; display: block; }
+  .m-line { stroke: var(--green); stroke-width: 1.4; stroke-dasharray: 4 3; }
+  .m-line.sparkle { animation: mirrorSparkle 0.9s ease-in-out 2; }
+  @keyframes mirrorSparkle {
+    0%, 100% { stroke: var(--green); stroke-width: 1.4; }
+    50%      { stroke: var(--ochre); stroke-width: 3; }
+  }
+  .m-cell { fill: transparent; stroke: var(--cream-3); stroke-width: 0.7; }
+  .m-cell.open { cursor: pointer; }
+  .m-cell.wrong { fill: var(--red-l); }
+  .m-dot { fill: var(--cream-3); }
+  .m-dot.active { fill: var(--muted); }
+  .m-dot-hit { fill: transparent; cursor: pointer; }
+  .m-seg { stroke: var(--ink); stroke-width: 3.2; stroke-linecap: round; pointer-events: none; }
+  .m-seg.ok { stroke: var(--green); }
+  .m-seg.bad { stroke: var(--warn); }
+  .m-seg-hit { stroke: transparent; stroke-width: 12; stroke-linecap: round; cursor: pointer; }
+  .m-preview { stroke: var(--sky); stroke-width: 3; stroke-dasharray: 3 3; stroke-linecap: round; pointer-events: none; }
+  .mirror-footer {
+    display: flex; align-items: center; gap: 18px;
+    min-height: 44px;
+  }
+  .mirror-count { font-size: 14px; font-weight: 700; color: var(--muted); }
+
+  /* ============== SPELL IT (word builder mode) ============== */
+  .spell-bar { display: flex; align-items: center; gap: 12px; }
+  .spell-ghost {
+    font-size: 26px; font-weight: 700; font-style: italic;
+    letter-spacing: 10px; color: var(--muted); opacity: 0.55;
+    min-height: 32px;
+  }
+  .word-display .slot.good { outline: 3px solid var(--ok); }
+  .word-display.spell-shake { animation: shake 0.4s; }
+
+  /* Phone tweaks */
+  @media (max-width: 480px) {
+    .trace-box { width: min(88vw, 46vh, 360px); }
+    .hub-title { font-size: 24px; margin: 8px 0 20px; }
+    .hub-tile { padding: 16px; font-size: 17px; }
+    .hub-tile .em { font-size: 44px; }
+    .math-q { font-size: 38px; padding: 18px 24px; }
+    .numpad { grid-template-columns: repeat(3, 64px); }
+    .num { font-size: 22px; padding: 12px 0; }
+    .ltr { width: 38px; height: 42px; font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <header class="top-bar">
+    <button class="home-btn" id="home-btn" aria-label="Home">⌂</button>
+    <div class="crumb" id="crumb">🌿 Heda's Learning Patch</div>
+    <div class="stars-pill" id="stars-pill">⭐ 0</div>
+  </header>
+
+  <div class="main">
+
+    <!-- ===== HUB ===== -->
+    <section class="view active" id="view-hub">
+      <div class="hub-title">Welcome, Heda!</div>
+      <div class="hub-tiles">
+        <button class="hub-tile t-math" data-go="math">
+          <div class="em">🦘</div>
+          <div>Maths</div>
+        </button>
+        <button class="hub-tile t-words" data-go="words">
+          <div class="em">🐨</div>
+          <div>Words</div>
+        </button>
+        <button class="hub-tile t-history" data-go="history">
+          <div class="em">🪃</div>
+          <div>History</div>
+        </button>
+        <button class="hub-tile t-science" data-go="science">
+          <div class="em">🌳</div>
+          <div>Science</div>
+        </button>
+      </div>
+      <div class="hub-foot">
+        <span id="streak-display">🔥 1-day streak</span>
+        <span id="today-display">📅 Today: 0 done</span>
+      </div>
+    </section>
+
+    <!-- ===== MATH HUB ===== -->
+    <section class="view" id="view-math">
+      <div class="sub-hub-title math">🦘 What shall we practise?</div>
+      <div class="sub-hub-tiles">
+        <button class="sub-tile math" data-go="math-add">
+          <div class="icon">➕</div>
+          <div class="name">Adding</div>
+          <div class="desc">2 + 3 = ?</div>
+        </button>
+        <button class="sub-tile math" data-go="math-sub">
+          <div class="icon">➖</div>
+          <div class="name">Subtracting</div>
+          <div class="desc">7 − 2 = ?</div>
+        </button>
+        <button class="sub-tile math" data-go="math-mul">
+          <div class="icon">✖️</div>
+          <div class="name">Times</div>
+          <div class="desc">2 × 3 = ?</div>
+        </button>
+        <button class="sub-tile math" data-go="math-table">
+          <div class="icon">🔢</div>
+          <div class="name">Times Table</div>
+          <div class="desc">1 to 10</div>
+        </button>
+        <button class="sub-tile math" data-go="math-shapes">
+          <div class="icon">🔷</div>
+          <div class="name">Shapes</div>
+          <div class="desc">Name this shape</div>
+        </button>
+        <button class="sub-tile math" data-go="write-numbers">
+          <div class="icon">✏️</div>
+          <div class="name">Number Writing</div>
+          <div class="desc">Trace 1 2 3</div>
+        </button>
+        <button class="sub-tile math" data-go="which-way">
+          <div class="icon">🔁</div>
+          <div class="name">Which Way?</div>
+          <div class="desc">Spot the real one</div>
+        </button>
+        <button class="sub-tile math" data-go="mirror-draw">
+          <div class="icon">🪞</div>
+          <div class="name">Mirror Draw</div>
+          <div class="desc">Copy the other side</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== MATH FLASHCARD ===== -->
+    <section class="view" id="view-math-flash">
+      <div class="math-stage" id="math-stage">
+        <div class="math-q" id="math-q">
+          <span id="math-q-text">2 + 3 =</span>
+          <span class="ans-slot empty" id="math-slot">?</span>
+        </div>
+        <div class="numpad" id="numpad">
+          <button class="num" data-key="1">1</button>
+          <button class="num" data-key="2">2</button>
+          <button class="num" data-key="3">3</button>
+          <button class="num" data-key="4">4</button>
+          <button class="num" data-key="5">5</button>
+          <button class="num" data-key="6">6</button>
+          <button class="num" data-key="7">7</button>
+          <button class="num" data-key="8">8</button>
+          <button class="num" data-key="9">9</button>
+          <button class="num del"   data-key="del">⌫</button>
+          <button class="num" data-key="0">0</button>
+          <button class="num enter" data-key="enter">✓</button>
+        </div>
+        <div class="math-progress" id="math-progress"></div>
+      </div>
+
+      <div class="session-summary" id="math-summary" style="display:none;">
+        <div class="summary-card">
+          <div class="big" id="summary-count">8 / 10</div>
+          <div class="lbl">questions right</div>
+          <div class="stars-earned" id="summary-stars">⭐ +8 stars</div>
+        </div>
+        <button class="btn ochre" id="play-again">Play again</button>
+        <button class="btn" id="back-to-math">Back to maths</button>
+      </div>
+    </section>
+
+    <!-- ===== TIMES TABLE ===== -->
+    <section class="view" id="view-math-table">
+      <div class="times-wrap">
+        <div class="times-readout" id="times-readout">Hover or tap a cell to see the multiplication</div>
+        <div class="times-table" id="times-table"></div>
+      </div>
+    </section>
+
+    <!-- ===== SHAPES ===== -->
+    <section class="view" id="view-math-shapes">
+      <div class="shapes-stage" id="shapes-stage">
+        <div class="shape-prompt" id="shape-prompt">What shape is this?</div>
+        <div class="shape-box" id="shape-box"></div>
+        <div class="shape-choices" id="shape-choices"></div>
+      </div>
+    </section>
+
+    <!-- ===== WRITING (numbers + letters share this view) ===== -->
+    <section class="view" id="view-writing">
+      <div class="trace-stage" id="trace-stage">
+        <div class="pill-row" id="wr-levels"></div>
+        <div class="trace-prompt" id="trace-prompt">Trace the 3</div>
+        <div class="trace-box" id="trace-box">
+          <svg id="trace-guide" viewBox="0 0 100 100" aria-hidden="true"></svg>
+          <canvas id="trace-canvas" aria-label="Writing area"></canvas>
+        </div>
+        <div class="trace-feedback" id="trace-feedback"></div>
+        <div class="word-actions">
+          <button class="btn" id="wr-clear">⌫ Start again</button>
+          <button class="btn sky" id="wr-skip">Skip →</button>
+        </div>
+        <div class="math-progress" id="wr-progress"></div>
+      </div>
+
+      <div class="session-summary" id="wr-summary" style="display:none;">
+        <div class="summary-card">
+          <div class="big" id="wr-summary-count">6 / 6</div>
+          <div class="lbl">written neatly first go</div>
+          <div class="stars-earned" id="wr-summary-stars">⭐ +6 stars</div>
+        </div>
+        <button class="btn ochre" id="wr-again">Write more</button>
+        <button class="btn" id="wr-back">Back</button>
+      </div>
+    </section>
+
+    <!-- ===== WHICH WAY? ===== -->
+    <section class="view" id="view-which-way">
+      <div class="ww-stage" id="ww-stage">
+        <div class="trace-prompt" id="ww-prompt">Tap the real <span class="tp-glyph">3</span></div>
+        <div class="ww-cards" id="ww-cards"></div>
+        <div class="trace-feedback" id="ww-feedback"></div>
+        <div class="math-progress" id="ww-progress"></div>
+      </div>
+
+      <div class="session-summary" id="ww-summary" style="display:none;">
+        <div class="summary-card">
+          <div class="big" id="ww-summary-count">8 / 10</div>
+          <div class="lbl">spotted first go</div>
+          <div class="stars-earned" id="ww-summary-stars">⭐ +8 stars</div>
+        </div>
+        <button class="btn ochre" id="ww-again">Play again</button>
+        <button class="btn" id="ww-back">Back to maths</button>
+      </div>
+    </section>
+
+    <!-- ===== MIRROR DRAW ===== -->
+    <section class="view" id="view-mirror-draw">
+      <div class="mirror-stage">
+        <div class="pill-row" id="mirror-levels"></div>
+        <div class="trace-prompt" id="mirror-prompt">Finish the picture!</div>
+        <div class="mirror-box">
+          <svg id="mirror-svg" viewBox="0 0 100 100"></svg>
+        </div>
+        <div class="trace-feedback" id="mirror-feedback"></div>
+        <div class="mirror-footer">
+          <span class="mirror-count" id="mirror-count">Puzzle 1 of 10</span>
+          <button class="btn ochre" id="mirror-next" style="display:none;">Next →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WORDS HUB ===== -->
+    <section class="view" id="view-words">
+      <div class="sub-hub-title" style="color: var(--green);">🐨 What shall we do with words?</div>
+      <div class="sub-hub-tiles">
+        <button class="sub-tile words" data-go="word-builder">
+          <div class="icon">🔤</div>
+          <div class="name">Word Builder</div>
+          <div class="desc">Build words with letters</div>
+        </button>
+        <button class="sub-tile words" data-go="write-letters">
+          <div class="icon">✍️</div>
+          <div class="name">Letter Writing</div>
+          <div class="desc">Trace a b c</div>
+        </button>
+        <button class="sub-tile words" data-go="stories">
+          <div class="icon">📖</div>
+          <div class="name">Reading</div>
+          <div class="desc">Phonics stories</div>
+        </button>
+        <button class="sub-tile words" data-go="sound-boxes">
+          <div class="icon">🔊</div>
+          <div class="name">Sound Boxes</div>
+          <div class="desc">Hear each sound</div>
+        </button>
+        <button class="sub-tile words" data-go="record-audio">
+          <div class="icon">🎙</div>
+          <div class="name">Recordings</div>
+          <div class="desc">Record sounds (grown-ups)</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== WORD BUILDER ===== -->
+    <section class="view" id="view-word-builder">
+      <div class="word-stage">
+        <div class="pill-row" id="wb-modes"></div>
+        <div class="spell-bar" id="spell-bar" style="display:none;">
+          <button class="btn green" id="spell-hear">🔊 Hear the word</button>
+        </div>
+        <div class="word-display empty" id="word-display"></div>
+        <div class="spell-ghost" id="spell-ghost" style="display:none;"></div>
+        <div class="letter-group">
+          <div class="lbl">Vowels</div>
+          <div class="letter-row" id="row-vowels"></div>
+        </div>
+        <div class="letter-group">
+          <div class="lbl">Consonants</div>
+          <div class="letter-row" id="row-cons"></div>
+        </div>
+        <div class="word-actions">
+          <button class="btn" id="word-clear">⌫ Clear</button>
+          <button class="btn green" id="word-speak">🔊 Say it!</button>
+          <button class="btn ochre" id="wb-check" style="display:none;">✓ Check</button>
+        </div>
+        <div class="math-progress" id="spell-progress" style="display:none;"></div>
+      </div>
+    </section>
+
+    <!-- ===== SOUND BOXES ===== -->
+    <section class="view" id="view-sound-boxes">
+      <div class="sb-stage">
+        <div class="sb-levels" id="sb-levels"></div>
+        <div class="sb-word" id="sb-word">cat</div>
+        <div class="sb-hint">Tap each box to hear the sound</div>
+        <div class="sb-boxes" id="sb-boxes"></div>
+        <div class="sb-actions">
+          <button class="btn green" id="sb-hear-word">🔊 Hear the whole word</button>
+        </div>
+        <div class="detail-nav" style="width: 100%; max-width: 360px;">
+          <button class="btn" id="sb-prev">◂ Previous</button>
+          <button class="btn green" id="sb-next">Next ▸</button>
+        </div>
+        <div class="sb-key">
+          <span><i class="v"></i> vowel</span>
+          <span><i class="c"></i> consonant</span>
+          <span><i class="d"></i> digraph (one sound)</span>
+        </div>
+        <div class="sb-tip" id="sb-tip" style="display:none;">
+          🎙 No recordings yet — for the best sound, ask a grown-up to record the phonemes from the Recordings tile.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RECORDINGS UI ===== -->
+    <section class="view" id="view-record-audio">
+      <div class="sub-hub-title" style="color: var(--green);">🎙 Voice Recordings</div>
+      <div class="rec-help">
+        Click <b>Record</b>, say the sound or word, click <b>Stop</b>. You'll need to allow microphone access the first time. Recordings live in this browser; if you clear browser data they'll be lost.
+      </div>
+
+      <div style="max-width: 720px; width: 100%; margin: 0 auto;">
+        <div class="rec-section-title">
+          <span>Phonemes</span>
+          <span class="count" id="rec-count-phonemes">0 / 0</span>
+        </div>
+        <div class="rec-grid" id="rec-grid-phonemes"></div>
+
+        <div class="rec-section-title">
+          <span>Words</span>
+          <span class="count" id="rec-count-words">0 / 0</span>
+        </div>
+        <div class="rec-grid" id="rec-grid-words"></div>
+      </div>
+    </section>
+
+    <!-- ===== READING LIST ===== -->
+    <section class="view" id="view-stories">
+      <div class="sub-hub-title" style="color: var(--green);">🐨 Phonics Stories</div>
+      <div class="reading-list" id="reading-list"></div>
+    </section>
+
+    <!-- ===== READING STORY ===== -->
+    <section class="view" id="view-read-story">
+      <div class="reading-page">
+        <div class="reading-hero" id="reading-hero"></div>
+        <div class="reading-title" id="reading-title"></div>
+        <div class="reading-body" id="reading-body"></div>
+        <div class="reading-done-row">
+          <button class="btn green" id="reading-done">I read it! ✓</button>
+        </div>
+        <div class="detail-nav">
+          <button class="btn" id="reading-prev">◂ Previous</button>
+          <button class="btn green" id="reading-next">Next ▸</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== HISTORY LIST ===== -->
+    <section class="view" id="view-history">
+      <div class="sub-hub-title" style="color: var(--red);">🪃 Stories from Long Ago</div>
+      <div class="story-list" id="story-list"></div>
+    </section>
+
+    <!-- ===== HISTORY READER ===== -->
+    <section class="view" id="view-story">
+      <div class="story-reader">
+        <div class="story-hero" id="story-hero"><span></span></div>
+        <div class="story-title" id="story-title"></div>
+        <div class="story-body" id="story-body"></div>
+        <div class="story-nav">
+          <button class="btn" id="story-prev">◂ Back</button>
+          <span class="pages" id="story-pages">Page 1 of 3</span>
+          <button class="btn red" id="story-next">Next ▸</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SCIENCE HUB ===== -->
+    <section class="view" id="view-science">
+      <div class="sub-hub-title science">🌳 What shall we explore?</div>
+      <div class="sub-hub-tiles">
+        <button class="sub-tile sci" data-go="sci-exp">
+          <div class="icon">💧</div>
+          <div class="name">Experiments</div>
+          <div class="desc">Try things at home</div>
+        </button>
+        <button class="sub-tile sci" data-go="sci-animals">
+          <div class="icon">🦘</div>
+          <div class="name">Animals</div>
+          <div class="desc">Aussie creatures</div>
+        </button>
+        <button class="sub-tile sci" data-go="sci-leaves">
+          <div class="icon">🍃</div>
+          <div class="name">Leaves</div>
+          <div class="desc">Plants &amp; trees</div>
+        </button>
+        <button class="sub-tile sci" data-go="sci-classify">
+          <div class="icon">🔬</div>
+          <div class="name">Sort It!</div>
+          <div class="desc">Classify animals</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- Experiments list -->
+    <section class="view" id="view-sci-exp">
+      <div class="sub-hub-title science">💧 Experiments</div>
+      <div class="exp-list" id="exp-list"></div>
+    </section>
+
+    <!-- Experiment detail -->
+    <section class="view" id="view-experiment">
+      <div class="exp-reader">
+        <div class="exp-card" id="exp-card"></div>
+        <button class="btn sky" id="exp-done">I tried it! ✓</button>
+      </div>
+    </section>
+
+    <!-- Animals list -->
+    <section class="view" id="view-sci-animals">
+      <div class="sub-hub-title science">🦘 Aussie Animals</div>
+      <div class="animal-list" id="animal-list"></div>
+    </section>
+
+    <!-- Animal detail -->
+    <section class="view" id="view-animal">
+      <div class="exp-reader">
+        <div class="animal-detail-card" id="animal-detail"></div>
+        <div class="detail-nav">
+          <button class="btn" id="animal-prev">◂ Previous</button>
+          <button class="btn sky" id="animal-next">Next ▸</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Leaves list -->
+    <section class="view" id="view-sci-leaves">
+      <div class="sub-hub-title science">🍃 Leaves &amp; Plants</div>
+      <div class="leaf-list" id="leaf-list"></div>
+    </section>
+
+    <!-- Leaf detail -->
+    <section class="view" id="view-leaf">
+      <div class="exp-reader">
+        <div class="leaf-detail-card" id="leaf-detail"></div>
+        <div class="detail-nav">
+          <button class="btn" id="leaf-prev">◂ Previous</button>
+          <button class="btn green" id="leaf-next">Next ▸</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Classify game -->
+    <section class="view" id="view-sci-classify">
+      <div class="classify-stage" id="classify-stage">
+        <div class="classify-card" id="classify-card"></div>
+        <div class="classify-q">Which group does it belong to?</div>
+        <div class="classify-choices" id="classify-choices"></div>
+        <div class="classify-feedback" id="classify-feedback"></div>
+        <div class="math-progress" id="classify-progress"></div>
+      </div>
+      <div class="session-summary" id="classify-summary" style="display:none;">
+        <div class="summary-card">
+          <div class="big" id="classify-count">0 / 8</div>
+          <div class="lbl">animals sorted</div>
+        </div>
+        <button class="btn sky" id="classify-again">Play again</button>
+        <button class="btn" id="classify-back">Back</button>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="celebrate" id="celebrate"><div class="star">⭐</div></div>
+
+</div>
+
+<script>
+"use strict";
+
+// ============================================================
+// STATE
+// ============================================================
+const STORAGE_KEY = 'heda-dashboard-v1';
+// Local date string — toISOString() is UTC, which rolls the day over at ~10am AEST.
+function localDateStr(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+const TODAY = localDateStr(new Date());
+
+let state = {
+  stars: 0,
+  streak: 1,
+  lastVisit: TODAY,
+  todayCount: 0,
+  todayDate: TODAY,
+  math: { add: {}, sub: {}, mul: {} },
+  storiesRead: {},
+  experimentsDone: {},
+  readStoriesRead: {},
+  soundBoxesLevel: 1,
+  writing: { num: {}, letters: {}, level: 1 },
+  whichWay: { stats: {} },
+  mirror: { level: 1, l1Done: {}, l2Done: {} },
+  spelling: { stats: {} }
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state = Object.assign(state, JSON.parse(raw));
+  } catch (e) {}
+
+  // Saved blobs from older versions lack newer keys (Object.assign is shallow).
+  if (!state.writing)  state.writing  = { num: {}, letters: {}, level: 1 };
+  if (!state.whichWay) state.whichWay = { stats: {} };
+  if (!state.mirror)   state.mirror   = { level: 1, l1Done: {}, l2Done: {} };
+  if (!state.spelling) state.spelling = { stats: {} };
+
+  // streak handling — parse dates as local so the diff isn't off by a timezone
+  if (state.lastVisit !== TODAY) {
+    const asLocal = s => {
+      const [y, m, d] = String(s).split(/[-T]/).map(Number);
+      return new Date(y, (m || 1) - 1, d || 1);
+    };
+    const diff = Math.round((asLocal(TODAY) - asLocal(state.lastVisit)) / 86400000);
+    if (diff === 1) state.streak += 1;
+    else if (diff > 1 || diff < 0 || isNaN(diff)) state.streak = 1;
+    state.lastVisit = TODAY;
+  }
+  if (state.todayDate !== TODAY) {
+    state.todayCount = 0;
+    state.todayDate = TODAY;
+  }
+  saveState();
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function addStars(n) {
+  state.stars += n;
+  saveState();
+  renderTopBar();
+}
+
+function bumpToday() {
+  state.todayCount += 1;
+  saveState();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const viewStack = ['hub'];
+
+const crumbs = {
+  'hub':            { txt: "🌿 Heda's Learning Patch", showHome: false },
+  'math':           { txt: '🦘 Maths',            showHome: true },
+  'math-add':       { txt: '🦘 Adding Up',        showHome: true },
+  'math-sub':       { txt: '🦘 Subtracting',      showHome: true },
+  'math-mul':       { txt: '🦘 Times Tables',     showHome: true },
+  'math-table':     { txt: '🦘 Times Table',      showHome: true },
+  'math-shapes':    { txt: '🦘 Shapes',           showHome: true },
+  'write-numbers':  { txt: '🦘 Number Writing',   showHome: true },
+  'which-way':      { txt: '🦘 Which Way?',       showHome: true },
+  'mirror-draw':    { txt: '🦘 Mirror Draw',      showHome: true },
+  'words':          { txt: '🐨 Words',            showHome: true },
+  'write-letters':  { txt: '🐨 Letter Writing',   showHome: true },
+  'word-builder':   { txt: '🐨 Build a Word',     showHome: true },
+  'stories':        { txt: '🐨 Reading',          showHome: true },
+  'read-story':     { txt: '🐨 Reading',          showHome: true },
+  'sound-boxes':    { txt: '🐨 Sound Boxes',      showHome: true },
+  'record-audio':   { txt: '🐨 Recordings',       showHome: true },
+  'history':        { txt: '🪃 Long Ago',         showHome: true },
+  'story':          { txt: '🪃 Long Ago',         showHome: true },
+  'science':        { txt: '🌳 Science',          showHome: true },
+  'sci-exp':        { txt: '🌳 Experiments',      showHome: true },
+  'experiment':     { txt: '🌳 Experiments',      showHome: true },
+  'sci-animals':    { txt: '🌳 Aussie Animals',   showHome: true },
+  'animal':         { txt: '🌳 Aussie Animals',   showHome: true },
+  'sci-leaves':     { txt: '🌳 Leaves',           showHome: true },
+  'leaf':           { txt: '🌳 Leaves',           showHome: true },
+  'sci-classify':   { txt: '🌳 Sort the Animals', showHome: true }
+};
+
+// math-add/sub/mul map to the same flashcard view
+const viewMap = {
+  'math-add':   'view-math-flash',
+  'math-sub':   'view-math-flash',
+  'math-mul':   'view-math-flash',
+  'write-numbers': 'view-writing',
+  'write-letters': 'view-writing'
+};
+
+function navigate(name) {
+  if (viewStack[viewStack.length - 1] === name) return;
+  viewStack.push(name);
+  showView(name);
+
+  if (name === 'math-add')   startFlashcards('add');
+  if (name === 'math-sub')   startFlashcards('sub');
+  if (name === 'math-mul')   startFlashcards('mul');
+  if (name === 'math-table') buildTimesTable();
+  if (name === 'math-shapes') startShapes();
+  if (name === 'write-numbers') startWriting('num');
+  if (name === 'write-letters') startWriting('letters');
+  if (name === 'which-way')  startWhichWay();
+  if (name === 'mirror-draw') startMirror();
+  if (name === 'word-builder') renderWordBuilder();
+  if (name === 'stories')    renderReadingList();
+  if (name === 'sound-boxes') startSoundBoxes();
+  if (name === 'record-audio') renderRecordingUI();
+  if (name === 'history')    renderStoryList();
+  if (name === 'sci-exp')    renderExpList();
+  if (name === 'sci-animals') renderAnimalList();
+  if (name === 'sci-leaves')  renderLeafList();
+  if (name === 'sci-classify') startClassify();
+}
+
+function goHome() {
+  viewStack.length = 0;
+  viewStack.push('hub');
+  showView('hub');
+  renderTopBar();
+  renderHubFooter();
+}
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const targetId = viewMap[name] || 'view-' + name;
+  const target = document.getElementById(targetId);
+  if (!target) {
+    console.warn('showView: missing element #' + targetId + ' for view "' + name + '"');
+    viewStack.length = 0;
+    viewStack.push('hub');
+    document.getElementById('view-hub').classList.add('active');
+    renderTopBar();
+    renderHubFooter();
+    return;
+  }
+  target.classList.add('active');
+  renderTopBar();
+}
+
+function renderTopBar() {
+  const name = viewStack[viewStack.length - 1];
+  const c = crumbs[name] || crumbs['hub'];
+  const crumbEl = document.getElementById('crumb');
+  crumbEl.textContent = c.txt;
+  crumbEl.classList.toggle('clickable', viewStack.length > 1);
+  document.getElementById('home-btn').classList.toggle('hidden', !c.showHome);
+  document.getElementById('stars-pill').textContent = '⭐ ' + state.stars;
+}
+
+function crumbBack() {
+  if (viewStack.length <= 1) return;
+  viewStack.pop();
+  const parent = viewStack[viewStack.length - 1];
+  showView(parent);
+  if (parent === 'hub') renderHubFooter();
+}
+
+function renderHubFooter() {
+  document.getElementById('streak-display').textContent =
+    '🔥 ' + state.streak + '-day streak';
+  document.getElementById('today-display').textContent =
+    '📅 Today: ' + state.todayCount + ' done';
+}
+
+// ============================================================
+// MATH ENGINE
+// ============================================================
+const SESSION_LENGTH = 10;
+let mathOp = 'add';
+let mathSession = { remaining: 0, correct: 0, wrong: 0, current: null, askedAt: 0, lastId: null, results: [] };
+let mathInput = '';
+
+function generateMathPool(op) {
+  const pool = [];
+  if (op === 'add') {
+    for (let a = 0; a <= 10; a++)
+      for (let b = 0; b <= 10; b++)
+        pool.push({ id: 'add-'+a+'-'+b, a, b, op: '+', answer: a + b });
+  } else if (op === 'sub') {
+    for (let a = 0; a <= 15; a++)
+      for (let b = 0; b <= a && b <= 10; b++)
+        pool.push({ id: 'sub-'+a+'-'+b, a, b, op: '−', answer: a - b });
+  } else if (op === 'mul') {
+    for (let a = 0; a <= 10; a++)
+      for (let b = 0; b <= 10; b++)
+        pool.push({ id: 'mul-'+a+'-'+b, a, b, op: '×', answer: a * b });
+  }
+  return pool;
+}
+
+function questionWeight(q, stats, lastId) {
+  const s = stats[q.id];
+  let w;
+  if (!s || s.seen === 0) {
+    w = 8;
+  } else {
+    const acc = s.correct / s.seen;
+    w = 1 + (1 - acc) * 6;
+    const avgTime = (s.totalTime || 0) / s.seen;
+    w += Math.min(avgTime / 1000, 10) * 0.6;
+  }
+  if (q.id === lastId) w *= 0.05;
+  return w;
+}
+
+function pickQuestion(pool, stats, lastId) {
+  const weighted = pool.map(q => ({ q, w: questionWeight(q, stats, lastId) }));
+  const total = weighted.reduce((s, x) => s + x.w, 0);
+  let r = Math.random() * total;
+  for (const x of weighted) {
+    r -= x.w;
+    if (r <= 0) return x.q;
+  }
+  return weighted[weighted.length - 1].q;
+}
+
+function recordResult(op, q, correct, ms) {
+  const stats = state.math[op];
+  if (!stats[q.id]) stats[q.id] = { seen: 0, correct: 0, totalTime: 0 };
+  stats[q.id].seen += 1;
+  if (correct) stats[q.id].correct += 1;
+  stats[q.id].totalTime += ms;
+  saveState();
+}
+
+function startFlashcards(op) {
+  mathOp = op;
+  mathSession = { remaining: SESSION_LENGTH, correct: 0, wrong: 0, current: null, askedAt: 0, lastId: null, results: [] };
+  mathInput = '';
+  document.getElementById('math-stage').style.display = '';
+  document.getElementById('math-summary').style.display = 'none';
+  renderMathProgress();
+  nextMathQuestion();
+}
+
+function nextMathQuestion() {
+  if (mathSession.remaining === 0) {
+    finishMathSession();
+    return;
+  }
+  const pool = generateMathPool(mathOp);
+  const q = pickQuestion(pool, state.math[mathOp], mathSession.lastId);
+  mathSession.current = q;
+  mathSession.askedAt = Date.now();
+  mathInput = '';
+  const text = q.a + ' ' + q.op + ' ' + q.b + ' =';
+  document.getElementById('math-q-text').textContent = text;
+  const slot = document.getElementById('math-slot');
+  slot.className = 'ans-slot empty';
+  slot.textContent = '?';
+  renderMathProgress();
+}
+
+function renderMathProgress() {
+  const wrap = document.getElementById('math-progress');
+  wrap.innerHTML = '';
+  for (let i = 0; i < SESSION_LENGTH; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    const idx = i;
+    const done = mathSession.results[idx];
+    if (done === true)  dot.classList.add('ok');
+    if (done === false) dot.classList.add('no');
+    if (idx === mathSession.results.length && mathSession.remaining > 0) dot.classList.add('current');
+    wrap.appendChild(dot);
+  }
+}
+
+function onNumpadKey(key) {
+  if (!mathSession.current) return;
+  const slot = document.getElementById('math-slot');
+  if (key === 'enter') {
+    if (mathInput.length === 0) return;
+    submitMathAnswer();
+  } else if (key === 'del') {
+    mathInput = mathInput.slice(0, -1);
+    slot.textContent = mathInput || '?';
+    slot.classList.toggle('empty', mathInput.length === 0);
+  } else {
+    if (mathInput.length < 3) {
+      mathInput += key;
+      slot.textContent = mathInput;
+      slot.classList.remove('empty');
+    }
+  }
+}
+
+function submitMathAnswer() {
+  const q = mathSession.current;
+  const guess = parseInt(mathInput, 10);
+  const ms = Date.now() - mathSession.askedAt;
+  const correct = guess === q.answer;
+  const slot = document.getElementById('math-slot');
+
+  recordResult(mathOp, q, correct, ms);
+  mathSession.results.push(correct);
+  mathSession.lastId = q.id;
+  mathSession.remaining -= 1;
+
+  if (correct) {
+    mathSession.correct += 1;
+    slot.classList.add('correct');
+    addStars(1);
+    bumpToday();
+    setTimeout(nextMathQuestion, 700);
+  } else {
+    mathSession.wrong += 1;
+    slot.classList.add('wrong');
+    slot.textContent = q.answer; // show correct answer
+    setTimeout(nextMathQuestion, 1400);
+  }
+}
+
+function finishMathSession() {
+  document.getElementById('math-stage').style.display = 'none';
+  document.getElementById('math-summary').style.display = 'flex';
+  document.getElementById('summary-count').textContent =
+    mathSession.correct + ' / ' + SESSION_LENGTH;
+  document.getElementById('summary-stars').textContent =
+    '⭐ +' + mathSession.correct + ' stars';
+}
+
+// ============================================================
+// TIMES TABLE
+// ============================================================
+const TIMES_DEFAULT = 'Hover or tap a cell to see the multiplication';
+let timesBuilt = false;
+
+function buildTimesTable() {
+  const wrap = document.getElementById('times-table');
+  if (!timesBuilt) {
+    wrap.innerHTML = '';
+    for (let r = 0; r <= 10; r++) {
+      for (let c = 0; c <= 10; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'tt-cell';
+        if (r === 0 && c === 0) {
+          cell.classList.add('corner');
+          cell.textContent = '×';
+        } else if (r === 0) {
+          cell.classList.add('header');
+          cell.dataset.col = c;
+          cell.textContent = c;
+        } else if (c === 0) {
+          cell.classList.add('header');
+          cell.dataset.row = r;
+          cell.textContent = r;
+        } else {
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.textContent = r * c;
+        }
+        wrap.appendChild(cell);
+      }
+    }
+    wrap.addEventListener('mouseover', e => {
+      const cell = e.target.closest('.tt-cell');
+      if (cell) highlightTimesCell(cell);
+    });
+    wrap.addEventListener('mouseleave', clearTimesHighlight);
+    wrap.addEventListener('click', e => {
+      const cell = e.target.closest('.tt-cell');
+      if (cell) highlightTimesCell(cell);
+    });
+    timesBuilt = true;
+  }
+  clearTimesHighlight();
+}
+
+function highlightTimesCell(cell) {
+  clearTimesHighlightClasses();
+  if (cell.classList.contains('corner')) {
+    document.getElementById('times-readout').textContent = TIMES_DEFAULT;
+    return;
+  }
+  const r = cell.dataset.row ? parseInt(cell.dataset.row, 10) : null;
+  const c = cell.dataset.col ? parseInt(cell.dataset.col, 10) : null;
+  if (r !== null) {
+    document.querySelectorAll('.tt-cell[data-row="' + r + '"]').forEach(el => el.classList.add('row-hi'));
+  }
+  if (c !== null) {
+    document.querySelectorAll('.tt-cell[data-col="' + c + '"]').forEach(el => el.classList.add('col-hi'));
+  }
+  if (r !== null && c !== null && !cell.classList.contains('header')) {
+    cell.classList.add('cell-hi');
+  }
+  const readout = document.getElementById('times-readout');
+  if (cell.classList.contains('header')) {
+    const n = r !== null ? r : c;
+    readout.textContent = 'Counting by ' + n + 's';
+  } else {
+    readout.textContent = r + ' × ' + c + ' = ' + (r * c);
+  }
+}
+
+function clearTimesHighlightClasses() {
+  document.querySelectorAll('.tt-cell').forEach(el => {
+    el.classList.remove('cell-hi', 'row-hi', 'col-hi');
+  });
+}
+function clearTimesHighlight() {
+  clearTimesHighlightClasses();
+  document.getElementById('times-readout').textContent = TIMES_DEFAULT;
+}
+
+// ============================================================
+// SHAPES
+// ============================================================
+const SHAPES = [
+  { name: 'Circle',    draw: drawCircle },
+  { name: 'Square',    draw: drawSquare },
+  { name: 'Triangle',  draw: drawTriangle },
+  { name: 'Rectangle', draw: drawRectangle },
+  { name: 'Pentagon',  draw: drawPentagon },
+  { name: 'Hexagon',   draw: drawHexagon },
+  { name: 'Star',      draw: drawStar },
+  { name: 'Oval',      draw: drawOval }
+];
+
+function svg(content, fill) {
+  return '<svg viewBox="0 0 100 100" width="160" height="160">' +
+    content.replace(/FILL/g, fill || '#C97B3A') + '</svg>';
+}
+function drawCircle()    { return svg('<circle cx="50" cy="50" r="42" fill="FILL"/>'); }
+function drawSquare()    { return svg('<rect x="12" y="12" width="76" height="76" rx="4" fill="FILL"/>'); }
+function drawTriangle()  { return svg('<polygon points="50,8 92,88 8,88" fill="FILL"/>'); }
+function drawRectangle() { return svg('<rect x="6" y="26" width="88" height="48" rx="4" fill="FILL"/>'); }
+function drawPentagon()  { return svg('<polygon points="50,8 92,40 76,88 24,88 8,40" fill="FILL"/>'); }
+function drawHexagon()   { return svg('<polygon points="28,12 72,12 92,50 72,88 28,88 8,50" fill="FILL"/>'); }
+function drawStar()      { return svg('<polygon points="50,6 61,40 96,40 67,60 78,94 50,73 22,94 33,60 4,40 39,40" fill="FILL"/>'); }
+function drawOval()      { return svg('<ellipse cx="50" cy="50" rx="44" ry="30" fill="FILL"/>'); }
+
+let shapeCurrent = null;
+function startShapes() {
+  nextShape();
+}
+function nextShape() {
+  const target = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+  shapeCurrent = target;
+  document.getElementById('shape-box').innerHTML = target.draw();
+  const others = SHAPES.filter(s => s.name !== target.name);
+  shuffle(others);
+  const choices = [target, others[0], others[1], others[2]];
+  shuffle(choices);
+  const wrap = document.getElementById('shape-choices');
+  wrap.innerHTML = '';
+  choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'shape-choice';
+    btn.textContent = c.name;
+    btn.onclick = () => onShapePick(c, btn);
+    wrap.appendChild(btn);
+  });
+}
+function onShapePick(choice, btn) {
+  if (choice.name === shapeCurrent.name) {
+    btn.classList.add('correct');
+    addStars(1); bumpToday();
+    setTimeout(nextShape, 700);
+  } else {
+    btn.classList.add('wrong');
+    setTimeout(() => btn.classList.remove('wrong'), 600);
+  }
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+// ============================================================
+// WORD BUILDER
+// ============================================================
+const VOWELS = ['a','e','i','o','u'];
+const CONSONANTS = ['b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z'];
+let wordBuf = [];
+
+function renderWordBuilder() {
+  const rv = document.getElementById('row-vowels');
+  const rc = document.getElementById('row-cons');
+  rv.innerHTML = ''; rc.innerHTML = '';
+  VOWELS.forEach(l => {
+    const b = document.createElement('button');
+    b.className = 'ltr v'; b.textContent = l;
+    b.onclick = () => appendLetter(l, true);
+    rv.appendChild(b);
+  });
+  CONSONANTS.forEach(l => {
+    const b = document.createElement('button');
+    b.className = 'ltr c'; b.textContent = l;
+    b.onclick = () => appendLetter(l, false);
+    rc.appendChild(b);
+  });
+  wbMode = 'free';   // always land in free play; Spell it is one tap away
+  applyWbMode();
+}
+
+function appendLetter(l, isVowel) {
+  if (wordBuf.length >= 10) return;
+  wordBuf.push({ l, v: isVowel });
+  renderWord();
+}
+
+function renderWord() {
+  const wrap = document.getElementById('word-display');
+  wrap.innerHTML = '';
+  if (wordBuf.length === 0) {
+    wrap.classList.add('empty');
+    return;
+  }
+  wrap.classList.remove('empty');
+  wordBuf.forEach(({l, v}) => {
+    const s = document.createElement('span');
+    s.className = 'slot ' + (v ? 'vowel' : 'cons');
+    s.textContent = l.toUpperCase();
+    wrap.appendChild(s);
+  });
+}
+
+function speakText(text) {
+  if (!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.75;
+  const voices = speechSynthesis.getVoices();
+  const au = voices.find(v => v.lang === 'en-AU')
+          || voices.find(v => v.lang === 'en-GB')
+          || voices.find(v => v.lang && v.lang.startsWith('en'));
+  if (au) u.voice = au;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+// Star only for the first speaking of each distinct word per session,
+// so mashing "Say it!" isn't a star fountain.
+let spokenWordsSession = new Set();
+
+function speakWord() {
+  if (wordBuf.length === 0) return;
+  const word = wordBuf.map(x => x.l).join('');
+  speakText(word);
+  if (!spokenWordsSession.has(word)) {
+    spokenWordsSession.add(word);
+    addStars(1); bumpToday();
+  }
+}
+
+// ---- Spell It mode ----
+// Target words at Heda's UFLI level: the Sound Boxes level-1 words (their
+// whole-word recordings play as the prompt when they exist) plus extra
+// CVC/digraph words from UFLI lessons ~37–48. No blends or silent-e yet.
+const SPELL_SESSION = 6;
+const SPELL_EXTRA = ['shed','chin','moth','bath','wish','rich','dash','math',
+                     'shut','chop','thud','shin','path','mash','whiz'];
+let wbMode = 'free';
+let spell = null;
+
+function spellWordList() {
+  return SOUND_WORDS_L1.map(w => w.word).concat(SPELL_EXTRA);
+}
+
+function applyWbMode() {
+  renderPills('wb-modes',
+    [{ id: 'free', name: 'Free play' }, { id: 'spell', name: 'Spell it' }],
+    wbMode, 'green', id => { wbMode = id; applyWbMode(); });
+  const isSpell = wbMode === 'spell';
+  document.getElementById('spell-bar').style.display = isSpell ? '' : 'none';
+  document.getElementById('wb-check').style.display = isSpell ? '' : 'none';
+  document.getElementById('word-speak').style.display = isSpell ? 'none' : '';
+  document.getElementById('spell-progress').style.display = isSpell ? '' : 'none';
+  hideSpellGhost();
+  wordBuf = [];
+  renderWord();
+  if (isSpell) startSpellRound();
+  else spell = null;
+}
+
+function showSpellGhost(word) {
+  const el = document.getElementById('spell-ghost');
+  el.textContent = word;
+  el.style.display = '';
+}
+function hideSpellGhost() {
+  document.getElementById('spell-ghost').style.display = 'none';
+}
+
+function startSpellRound() {
+  spell = { remaining: SPELL_SESSION, results: [], lastId: null, target: null,
+            askedAt: 0, wrongTries: 0, revealed: false, recorded: false, stars: 0 };
+  nextSpellWord();
+}
+
+function nextSpellWord() {
+  if (!spell) return;
+  if (spell.remaining === 0) { finishSpellRound(); return; }
+  const pool = spellWordList().map(w => ({ id: w }));
+  spell.target = pickQuestion(pool, state.spelling.stats, spell.lastId).id;
+  spell.wrongTries = 0;
+  spell.revealed = false;
+  spell.recorded = false;
+  spell.askedAt = Date.now();
+  wordBuf = [];
+  renderWord();
+  hideSpellGhost();
+  renderProgressDots('spell-progress', spell.results, SPELL_SESSION, spell.remaining);
+  playSpellPrompt();
+}
+
+async function playSpellPrompt() {
+  if (!spell || !spell.target) return;
+  const key = 'word:' + spell.target;
+  if (clipKeySet.has(key)) await playClipByKey(key);   // recorded audio first
+  else speakText(spell.target);
+}
+
+function recordSpellAttempt(ok) {
+  if (spell.recorded) return;
+  spell.recorded = true;
+  const stats = state.spelling.stats;
+  const w = spell.target;
+  if (!stats[w]) stats[w] = { seen: 0, correct: 0, totalTime: 0 };
+  stats[w].seen++;
+  if (ok) stats[w].correct++;
+  stats[w].totalTime += Date.now() - spell.askedAt;
+  saveState();
+}
+
+function checkSpelling() {
+  if (!spell || !spell.target || wordBuf.length === 0) return;
+  const built = wordBuf.map(x => x.l).join('');
+  if (built === spell.target) {
+    recordSpellAttempt(spell.wrongTries === 0 && !spell.revealed);
+    const stars = spell.revealed ? 1 : 2;
+    addStars(stars);
+    bumpToday();
+    spell.stars += stars;
+    spell.results.push(spell.wrongTries === 0 && !spell.revealed);
+    spell.lastId = spell.target;
+    spell.remaining--;
+    document.querySelectorAll('#word-display .slot').forEach(s => s.classList.add('good'));
+    renderProgressDots('spell-progress', spell.results, SPELL_SESSION, spell.remaining);
+    setTimeout(nextSpellWord, 1000);
+  } else {
+    spell.wrongTries++;
+    recordSpellAttempt(false);
+    const disp = document.getElementById('word-display');
+    disp.classList.add('spell-shake');
+    setTimeout(() => disp.classList.remove('spell-shake'), 500);
+    if (spell.wrongTries >= 2 && !spell.revealed) {
+      spell.revealed = true;
+      showSpellGhost(spell.target);   // scaffold: show it faintly, star drops to +1
+    }
+    playSpellPrompt();
+  }
+}
+
+function finishSpellRound() {
+  const el = document.getElementById('spell-ghost');
+  el.textContent = 'All done! ⭐ +' + spell.stars + ' — here come more words…';
+  el.style.display = '';
+  setTimeout(() => { if (spell && wbMode === 'spell') startSpellRound(); }, 2500);
+}
+
+// ============================================================
+// SHARED ACTIVITY HELPERS
+// ============================================================
+// Segmented pill selector (same pattern as the Sound Boxes level picker).
+// items: [{id, name}], accent: 'green' | 'ochre'
+function renderPills(containerId, items, activeId, accent, onPick) {
+  const wrap = document.getElementById(containerId);
+  wrap.innerHTML = '';
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    const active = item.id === activeId;
+    btn.className = 'pill ' + accent + (active ? ' active' : '');
+    btn.textContent = item.name;
+    btn.setAttribute('aria-pressed', active);
+    btn.onclick = () => { if (item.id !== activeId) onPick(item.id); };
+    wrap.appendChild(btn);
+  });
+}
+
+// Session progress dots (same look as the maths flashcards use).
+function renderProgressDots(containerId, results, total, remaining) {
+  const wrap = document.getElementById(containerId);
+  wrap.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    if (results[i] === true)  dot.classList.add('ok');
+    if (results[i] === false) dot.classList.add('no');
+    if (i === results.length && remaining > 0) dot.classList.add('current');
+    wrap.appendChild(dot);
+  }
+}
+
+// Glyphs Heda most often reverses or confuses — get extra practice weight.
+const TROUBLE_GLYPHS = new Set(['3','6','9','b','d','p','q','s','z']);
+
+// Weighted glyph picker on top of the math engine's questionWeight():
+// unseen trouble glyphs start heavy, and recorded reversals keep a glyph hot.
+function pickGlyph(chars, stats, lastId) {
+  const weighted = chars.map(ch => {
+    let w = questionWeight({ id: ch }, stats, lastId);
+    const s = stats[ch];
+    if ((!s || s.seen === 0) && TROUBLE_GLYPHS.has(ch)) w *= 2.5;
+    if (s && s.reversed) w *= 1 + Math.min(s.reversed, 3) * 0.5;
+    return { ch, w };
+  });
+  const total = weighted.reduce((sum, x) => sum + x.w, 0);
+  let r = Math.random() * total;
+  for (const x of weighted) {
+    r -= x.w;
+    if (r <= 0) return x.ch;
+  }
+  return weighted[weighted.length - 1].ch;
+}
+
+// ============================================================
+// WRITING PRACTICE (tracing digits & letters)
+// ============================================================
+// Glyph strokes: ordered polylines in a 100×100 box (y grows downward),
+// following Australian school print formation — start at the top, circles
+// drawn anticlockwise from about 1 o'clock. Digits sit on baseline y=85;
+// letters use baseline y=72 so descenders (g j p q y) fit down to y=98.
+// `sym: true` marks glyphs that mirror onto themselves in this stroke style;
+// they skip reversal detection and are excluded from the Which Way? game.
+const GLYPHS = {
+  '0': { sym: true, strokes: [[[50,15],[40,20],[33,32],[30,50],[33,68],[40,80],[50,85],[60,80],[67,68],[70,50],[67,32],[60,20],[50,15]]] },
+  '1': { strokes: [[[40,26],[52,15],[52,85]]] },
+  '2': { strokes: [[[33,32],[36,23],[44,17],[54,16],[62,20],[66,29],[64,39],[57,50],[47,61],[38,72],[33,82],[68,83]]] },
+  '3': { strokes: [[[35,24],[42,16],[52,15],[61,19],[64,28],[61,37],[53,44],[46,47],[55,50],[63,56],[66,66],[62,77],[52,84],[41,83],[34,76]]] },
+  '4': { strokes: [[[55,15],[30,55],[72,55]], [[58,15],[58,85]]] },
+  '5': { strokes: [[[35,16],[35,45],[45,42],[55,44],[62,50],[65,60],[63,71],[56,80],[45,84],[36,80],[31,73]], [[35,16],[66,16]]] },
+  '6': { strokes: [[[62,18],[53,14],[44,17],[37,26],[32,38],[30,52],[31,64],[36,76],[45,83],[55,83],[63,77],[66,67],[64,57],[57,50],[48,48],[39,52],[33,60]]] },
+  '7': { strokes: [[[32,17],[68,17],[45,85]]] },
+  '8': { sym: true, strokes: [[[58,21],[50,14],[41,18],[36,27],[40,37],[50,44],[60,52],[65,62],[63,74],[54,83],[43,81],[36,71],[37,59],[44,50],[50,44],[57,38],[62,29],[58,21]]] },
+  '9': { strokes: [[[65,33],[60,20],[49,15],[38,20],[33,32],[37,44],[48,50],[59,46],[65,35],[64,55],[62,70],[59,84]]] },
+  // Lowercase letters. Baseline y=72, x-height top y=40 (short letters live in
+  // that band), ascenders reach y=14, descenders reach y≈96. Circle letters
+  // start near 1 o'clock and go anticlockwise; strokes with a retrace (a n m
+  // u b) "bounce back up" along the line just drawn, as taught.
+  // A 2-point micro-stroke (the dots on i and j) means "tap here".
+  'a': { strokes: [[[60,45],[52,40],[43,41],[36,47],[33,56],[35,65],[42,71],[50,72],[58,69],[63,62],[64,54],[64,44],[64,58],[64,72]]] },
+  'b': { strokes: [[[34,14],[34,72]], [[34,46],[42,40],[52,41],[59,47],[61,56],[59,65],[52,71],[42,72],[34,66]]] },
+  'c': { strokes: [[[61,44],[53,40],[44,41],[36,47],[33,56],[35,65],[42,71],[51,72],[59,68],[62,63]]] },
+  'd': { strokes: [[[60,45],[52,40],[43,41],[36,47],[33,56],[35,65],[42,71],[50,72],[58,69],[62,63]], [[64,14],[64,72]]] },
+  'e': { strokes: [[[36,56],[62,56],[61,48],[55,41],[46,40],[38,44],[34,52],[34,62],[39,69],[48,72],[57,70],[62,65]]] },
+  'f': { strokes: [[[58,20],[52,14],[46,16],[43,22],[43,72]], [[34,44],[54,44]]] },
+  'g': { strokes: [[[60,45],[52,40],[43,41],[36,47],[33,56],[35,65],[42,71],[50,72],[58,69],[63,62],[64,54],[64,44],[64,72],[63,84],[58,94],[49,97],[41,93]]] },
+  'h': { strokes: [[[34,14],[34,72]], [[34,50],[38,44],[46,41],[54,44],[58,51],[58,72]]] },
+  'i': { sym: true, strokes: [[[50,40],[50,72]], [[50,28],[50,30]]] },
+  'j': { strokes: [[[54,40],[54,84],[51,94],[43,96],[36,91]], [[54,28],[54,30]]] },
+  'k': { strokes: [[[34,14],[34,72]], [[56,42],[36,58],[58,72]]] },
+  'l': { sym: true, strokes: [[[50,14],[50,72]]] },
+  'm': { sym: true, strokes: [[[32,42],[32,72],[32,52],[35,45],[41,41],[46,44],[48,50],[48,72],[48,52],[51,45],[57,41],[62,44],[64,50],[64,72]]] },
+  'n': { strokes: [[[34,42],[34,72],[34,52],[37,45],[44,41],[52,43],[57,49],[58,56],[58,72]]] },
+  'o': { sym: true, strokes: [[[60,45],[52,40],[43,41],[36,47],[33,56],[35,65],[42,71],[50,72],[58,69],[63,62],[64,54],[62,48],[60,45]]] },
+  'p': { strokes: [[[34,42],[34,96]], [[34,48],[41,41],[51,41],[58,46],[61,55],[58,64],[51,70],[41,71],[34,65]]] },
+  'q': { strokes: [[[60,45],[52,40],[43,41],[36,47],[33,56],[35,65],[42,71],[50,72],[58,69],[63,62]], [[64,42],[64,90],[67,96],[72,93]]] },
+  'r': { strokes: [[[36,42],[36,72]], [[36,52],[41,44],[49,41],[56,43],[60,48]]] },
+  's': { strokes: [[[61,45],[53,40],[44,40],[37,45],[37,51],[43,55],[51,57],[58,60],[61,65],[59,70],[51,72],[42,71],[36,67]]] },
+  't': { sym: true, strokes: [[[50,14],[50,72]], [[38,40],[62,40]]] },
+  'u': { sym: true, strokes: [[[34,42],[34,60],[37,68],[44,72],[52,70],[57,64],[58,56],[58,42],[58,72]]] },
+  'v': { sym: true, strokes: [[[36,42],[50,72],[64,42]]] },
+  'w': { sym: true, strokes: [[[32,42],[41,72],[50,48],[59,72],[68,42]]] },
+  'x': { sym: true, strokes: [[[38,42],[62,72]], [[62,42],[38,72]]] },
+  'y': { strokes: [[[36,42],[50,64]], [[64,42],[50,64],[38,90],[33,93]]] },
+  'z': { strokes: [[[36,42],[62,42],[36,72],[62,72]]] }
+};
+const DIGITS  = ['0','1','2','3','4','5','6','7','8','9'];
+const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+// ---- geometry helpers ----
+function ptDist(a, b) { return Math.hypot(a[0]-b[0], a[1]-b[1]); }
+function pathLength(pts) {
+  let L = 0;
+  for (let i = 1; i < pts.length; i++) L += ptDist(pts[i-1], pts[i]);
+  return L;
+}
+// n points spaced evenly along the polyline's arc length
+function resamplePolyline(pts, n) {
+  const total = pathLength(pts);
+  if (pts.length < 2 || total === 0) return Array.from({ length: n }, () => pts[0].slice());
+  const out = [pts[0].slice()];
+  const step = total / (n - 1);
+  let acc = 0, i = 1, prev = pts[0];
+  while (out.length < n - 1 && i < pts.length) {
+    const seg = ptDist(prev, pts[i]);
+    if (acc + seg >= step) {
+      const t = (step - acc) / seg;
+      const p = [prev[0] + (pts[i][0]-prev[0]) * t, prev[1] + (pts[i][1]-prev[1]) * t];
+      out.push(p); prev = p; acc = 0;
+    } else { acc += seg; prev = pts[i]; i++; }
+  }
+  while (out.length < n) out.push(pts[pts.length-1].slice());
+  return out;
+}
+function bboxOf(pts) {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const [x, y] of pts) {
+    if (x < minX) minX = x; if (x > maxX) maxX = x;
+    if (y < minY) minY = y; if (y > maxY) maxY = y;
+  }
+  return { x: minX, y: minY, w: maxX-minX, h: maxY-minY, cx: (minX+maxX)/2, cy: (minY+maxY)/2 };
+}
+function distToSegment(p, a, b) {
+  const abx = b[0]-a[0], aby = b[1]-a[1];
+  const len2 = abx*abx + aby*aby;
+  let t = len2 ? ((p[0]-a[0])*abx + (p[1]-a[1])*aby) / len2 : 0;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p[0] - (a[0]+abx*t), p[1] - (a[1]+aby*t));
+}
+function distToPolyline(p, pts) {
+  let d = Infinity;
+  for (let i = 1; i < pts.length; i++) d = Math.min(d, distToSegment(p, pts[i-1], pts[i]));
+  return d;
+}
+function nearestIndex(p, pts) {
+  let best = 0, bd = Infinity;
+  for (let i = 0; i < pts.length; i++) {
+    const d = ptDist(p, pts[i]);
+    if (d < bd) { bd = d; best = i; }
+  }
+  return best;
+}
+function minDistToPoints(p, pts) {
+  let d = Infinity;
+  for (const q of pts) d = Math.min(d, ptDist(p, q));
+  return d;
+}
+function centroidOf(pts) {
+  let sx = 0, sy = 0;
+  for (const p of pts) { sx += p[0]; sy += p[1]; }
+  return [sx / pts.length, sy / pts.length];
+}
+// The dots on i and j are stored as 2-point micro-strokes
+function isDotStroke(pts) { return pathLength(pts) < 8; }
+
+// Resampled strokes + mirrored twin + bounding boxes, built once at startup.
+const glyphCache = {};
+function buildGlyphCache() {
+  for (const ch in GLYPHS) {
+    const strokes = GLYPHS[ch].strokes.map(s => resamplePolyline(s, 32));
+    const flat = strokes.flat();
+    glyphCache[ch] = {
+      strokes,
+      mirror: strokes.map(s => s.map(([x, y]) => [100-x, y])),
+      bbox: bboxOf(flat),
+      mirrorBBox: bboxOf(flat.map(([x, y]) => [100-x, y]))
+    };
+  }
+}
+
+// All validation tolerances in one place — deliberately lenient for a
+// 7-year-old finger; tune here after trying on the real tablet.
+const TRACE_TOL = {
+  1: { startTol: 18, coverTol: 12, strayTol: 14, coverMin: 0.80, strayMin: 0.75, dirMin: 0.70, requireStart: true },
+  2: { startTol: 18, coverTol: 12, strayTol: 14, coverMin: 0.78, strayMin: 0.72, dirMin: 0.68, requireStart: true },
+  3: { startTol: 20, coverTol: 14, strayTol: 16, coverMin: 0.65, strayMin: 0.65, dirMin: 0.60, requireStart: false }
+};
+
+// Score one drawn stroke against one template stroke (both in glyph units).
+function scoreStrokeAgainst(userPts, tpl, opts) {
+  if (isDotStroke(tpl)) {
+    // dot template (i/j): accept any small mark near the dot
+    const near = ptDist(centroidOf(userPts), tpl[0]) <= opts.coverTol * 1.2;
+    const pass = near && pathLength(userPts) < 20;
+    return { pass, score: pass ? 1 : 0, coverage: pass ? 1 : 0, startOk: near };
+  }
+  if (userPts.length < 2 || pathLength(userPts) < 8) return { pass: false, score: 0, startOk: false };
+  const u = resamplePolyline(userPts, 48);
+  const startDist = ptDist(u[0], tpl[0]);
+  const startOk = startDist <= opts.startTol;
+  // template coverage: every part of the guide has ink near it
+  let covered = 0;
+  for (const t of tpl) if (minDistToPoints(t, u) <= opts.coverTol) covered++;
+  const coverage = covered / tpl.length;
+  // stray ink: the ink stays near the guide
+  let near = 0;
+  for (const p of u) if (distToPolyline(p, tpl) <= opts.strayTol) near++;
+  const stray = near / u.length;
+  // direction: progress along the template must be mostly forward. A windowed
+  // cursor (rather than global nearest-point matching) copes with closed
+  // curves (0) and self-crossings (8) where the same spot maps to two indices.
+  let cursor = 0, back = 0, counted = 0;
+  const gate = opts.strayTol * 1.5;
+  for (const p of u) {
+    const lo = Math.max(0, cursor - 2);
+    const hi = Math.min(tpl.length - 1, cursor + 6);
+    let best = -1, bd = Infinity;
+    for (let k = lo; k <= hi; k++) {
+      const d = ptDist(p, tpl[k]);
+      if (d < bd) { bd = d; best = k; }
+    }
+    if (bd > gate) continue;   // ink isn't near this part of the template
+    counted++;
+    if (best >= cursor) cursor = best;
+    else if (best < cursor - 1) back++;   // 1-index wobble is free
+  }
+  // fraction of ALL ink that made forward progress — skipped (far-off) points
+  // count against direction, so a backwards stroke that only brushes the
+  // template in places can't score well here
+  const dir = (counted - back) / u.length;
+  const reachedEnd = cursor >= 0.82 * (tpl.length - 1)
+                  || ptDist(u[u.length - 1], tpl[tpl.length - 1]) <= opts.coverTol;
+  const pass = (!opts.requireStart || startOk)
+            && coverage >= opts.coverMin && stray >= opts.strayMin
+            && dir >= opts.dirMin && reachedEnd;
+  const score = 0.35*coverage + 0.25*stray + 0.25*dir
+              + 0.15*(startOk ? 1 : Math.max(0, 1 - startDist/40));
+  return { pass, score, coverage, startOk };
+}
+
+// Level 3: she can write any size, anywhere in the box — uniformly scale and
+// centre her whole drawing onto the template box before scoring.
+function normalisePts(pts, from, to) {
+  // Per-axis scale with bounded aspect distortion: thin glyphs (like 1) get
+  // their width inflated by finger wobble, and a strict uniform scale would
+  // squash them vertically and reject a perfectly good drawing.
+  const sy = to.h / Math.max(from.h, 1);
+  let sx = to.w / Math.max(from.w, 1);
+  sx = Math.max(sy * 0.6, Math.min(sy * 1.67, sx));
+  return pts.map(([x, y]) => [(x - from.cx) * sx + to.cx, (y - from.cy) * sy + to.cy]);
+}
+function scoreGlyphFreeform(userStrokes, tplStrokes, tplBBox, opts) {
+  if (userStrokes.length !== tplStrokes.length) return { pass: false, score: 0 };
+  const ub = bboxOf(userStrokes.flat());
+  if (Math.hypot(ub.w, ub.h) < 14) return { pass: false, score: 0 };  // dot / scribble guard
+  const norm = userStrokes.map(s => normalisePts(s, ub, tplBBox));
+  // match each drawn stroke to the best unused template stroke, preferring
+  // school stroke order but tolerating a swap at this level
+  const used = new Set();
+  let scoreSum = 0, allPass = true, coverageMin = 1;
+  for (let i = 0; i < norm.length; i++) {
+    let bestK = -1, bestR = null, bestBiased = -1;
+    for (let k = 0; k < tplStrokes.length; k++) {
+      if (used.has(k)) continue;
+      const r = scoreStrokeAgainst(norm[i], tplStrokes[k], opts);
+      const biased = r.score + (k === i ? 0.05 : 0);
+      if (biased > bestBiased) { bestBiased = biased; bestR = r; bestK = k; }
+    }
+    used.add(bestK);
+    scoreSum += bestR.score;
+    coverageMin = Math.min(coverageMin, bestR.coverage || 0);
+    if (!bestR.pass) allPass = false;
+  }
+  return { pass: allPass, score: scoreSum / norm.length, coverage: coverageMin };
+}
+
+// ---- writing session ----
+const WR_SESSION = 6;
+const WR_LEVELS = [{ id: 1, name: 'Trace' }, { id: 2, name: 'Fade' }, { id: 3, name: 'Write' }];
+const WR_PRAISE = ['Beautiful!', 'Great writing!', 'Perfect!', 'You did it!'];
+const INK_COLOR = '#3d4a2a';   // --ink
+const INK_DONE  = '#6B8E4E';   // --green
+let wr = null;
+let traceCtx = null, traceBoxRect = null;
+
+function startWriting(mode) {
+  const pool = (mode === 'num' ? DIGITS : LETTERS).filter(ch => GLYPHS[ch]);
+  wr = {
+    mode, pool,
+    level: state.writing.level || 1,
+    remaining: WR_SESSION,
+    results: [], lastId: null,
+    glyph: null, strokeIdx: 0,
+    doneStrokes: [], currentPts: [],
+    drawing: false, glyphDone: false,
+    failedThisGlyph: false, startedAt: 0,
+    starsEarned: 0
+  };
+  const stage = document.getElementById('trace-stage');
+  stage.classList.toggle('letters', mode === 'letters');
+  stage.style.display = '';
+  document.getElementById('wr-summary').style.display = 'none';
+  renderWrLevels();
+  setupTraceCanvas();
+  nextGlyph();
+}
+
+function renderWrLevels() {
+  renderPills('wr-levels', WR_LEVELS, wr.level, wr.mode === 'num' ? 'ochre' : 'green', id => {
+    wr.level = id;
+    state.writing.level = id;
+    saveState();
+    renderWrLevels();
+    resetGlyphAttempt();
+  });
+}
+
+function nextGlyph() {
+  if (wr.remaining === 0) { finishWrSession(); return; }
+  wr.glyph = pickGlyph(wr.pool, state.writing[wr.mode], wr.lastId);
+  resetGlyphAttempt();
+  wr.failedThisGlyph = false;
+  wr.startedAt = 0;
+  renderWrProgress();
+}
+
+function resetGlyphAttempt() {
+  if (!wr || !wr.glyph) return;
+  wr.strokeIdx = 0;
+  wr.doneStrokes = [];
+  wr.currentPts = [];
+  wr.drawing = false;
+  wr.glyphDone = false;
+  setTraceFeedback('', '');
+  renderTracePrompt();
+  renderTraceGuide();
+  redrawInk();
+}
+
+function renderTracePrompt() {
+  const verb = wr.level === 3 ? 'Write' : 'Trace';
+  const what = wr.mode === 'num' ? 'the number' : 'the letter';
+  document.getElementById('trace-prompt').innerHTML =
+    verb + ' ' + what + ' <span class="tp-glyph">' + wr.glyph + '</span>';
+}
+
+function renderTraceGuide(forceShow) {
+  const svgEl = document.getElementById('trace-guide');
+  const cache = glyphCache[wr.glyph];
+  let html = '';
+  if (wr.level === 3 && !forceShow) {
+    const bl = wr.mode === 'num' ? 85 : 72;
+    html = '<line class="g-baseline" x1="8" y1="' + bl + '" x2="92" y2="' + bl + '"/>';
+    svgEl.innerHTML = html;
+    return;
+  }
+  GLYPHS[wr.glyph].strokes.forEach((s, i) => {
+    let cls = 'g-stroke';
+    if (i < wr.strokeIdx) cls += ' done';
+    else if (i > wr.strokeIdx) cls += ' future';
+    html += '<polyline class="' + cls + '" data-idx="' + i + '" points="'
+          + s.map(p => p.join(',')).join(' ') + '"/>';
+  });
+  if (!forceShow && wr.strokeIdx < cache.strokes.length) {
+    const tpl = cache.strokes[wr.strokeIdx];
+    html += '<circle class="g-start" cx="' + tpl[0][0] + '" cy="' + tpl[0][1] + '" r="4.5"/>';
+    if (!isDotStroke(tpl)) {   // no direction arrow on a tap-the-dot stroke
+      const a = tpl[4], b = tpl[7];
+      const ang = Math.atan2(b[1]-a[1], b[0]-a[0]) * 180 / Math.PI;
+      html += '<polygon class="g-arrow" points="-2,-3.4 4.5,0 -2,3.4" transform="translate('
+            + a[0] + ',' + a[1] + ') rotate(' + ang.toFixed(1) + ')"/>';
+    }
+  }
+  svgEl.innerHTML = html;
+}
+
+// Briefly show the correct glyph after a "backwards" attempt at Fade/Write.
+function flashGuide() {
+  if (wr.level === 1) return;
+  renderTraceGuide(true);
+  setTimeout(() => { if (wr && !wr.glyphDone) renderTraceGuide(); }, 1600);
+}
+
+function setupTraceCanvas() {
+  const box = document.getElementById('trace-box');
+  const cv = document.getElementById('trace-canvas');
+  const rect = box.getBoundingClientRect();
+  if (!rect.width) return;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(rect.width * dpr);
+  cv.height = Math.round(rect.height * dpr);
+  traceCtx = cv.getContext('2d');
+  traceCtx.setTransform(cv.width / 100, 0, 0, cv.height / 100, 0, 0);
+  traceCtx.lineCap = 'round';
+  traceCtx.lineJoin = 'round';
+  redrawInk();
+}
+
+function redrawInk() {
+  if (!traceCtx) return;
+  const cv = traceCtx.canvas;
+  traceCtx.save();
+  traceCtx.setTransform(1, 0, 0, 1, 0, 0);
+  traceCtx.clearRect(0, 0, cv.width, cv.height);
+  traceCtx.restore();
+  if (!wr) return;
+  // locked-in strokes: green once accepted (or once the whole glyph passes at Write level)
+  const doneColor = (wr.level === 3 && !wr.glyphDone) ? INK_COLOR : INK_DONE;
+  for (const s of wr.doneStrokes) drawInkStroke(s, doneColor);
+  if (wr.currentPts.length > 1) drawInkStroke(wr.currentPts, INK_COLOR);
+}
+
+function drawInkStroke(pts, color) {
+  traceCtx.strokeStyle = color;
+  traceCtx.lineWidth = 5;
+  traceCtx.beginPath();
+  traceCtx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) traceCtx.lineTo(pts[i][0], pts[i][1]);
+  traceCtx.stroke();
+}
+
+function tracePointerPos(e) {
+  const r = traceBoxRect;
+  return [(e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100];
+}
+
+function onTraceDown(e) {
+  if (!wr || !wr.glyph || wr.glyphDone) return;
+  e.preventDefault();
+  e.currentTarget.setPointerCapture(e.pointerId);
+  traceBoxRect = document.getElementById('trace-box').getBoundingClientRect();
+  wr.drawing = true;
+  if (!wr.startedAt) wr.startedAt = Date.now();
+  wr.currentPts = [tracePointerPos(e)];
+  setTraceFeedback('', '');
+  if (wr.level === 2) {
+    const poly = document.querySelector('#trace-guide polyline[data-idx="' + wr.strokeIdx + '"]');
+    if (poly) poly.classList.add('faded');
+  }
+}
+
+function onTraceMove(e) {
+  if (!wr || !wr.drawing) return;
+  const p = tracePointerPos(e);
+  const last = wr.currentPts[wr.currentPts.length - 1];
+  if (ptDist(p, last) < 0.8) return;
+  wr.currentPts.push(p);
+  traceCtx.strokeStyle = INK_COLOR;
+  traceCtx.lineWidth = 5;
+  traceCtx.beginPath();
+  traceCtx.moveTo(last[0], last[1]);
+  traceCtx.lineTo(p[0], p[1]);
+  traceCtx.stroke();
+}
+
+function onTraceUp() {
+  if (!wr || !wr.drawing) return;
+  wr.drawing = false;
+  evaluateStroke();
+}
+
+function onTraceCancel() {
+  if (!wr) return;
+  wr.drawing = false;
+  wr.currentPts = [];
+  redrawInk();
+}
+
+function evaluateStroke() {
+  const pts = wr.currentPts;
+  wr.currentPts = [];
+  const opts = TRACE_TOL[wr.level];
+  const cache = glyphCache[wr.glyph];
+  const nStrokes = cache.strokes.length;
+  // ignore stray taps — unless this glyph is waiting for a dot (i/j)
+  const expectsDot = wr.level === 3
+    ? cache.strokes.some(isDotStroke)
+    : isDotStroke(cache.strokes[wr.strokeIdx]);
+  if (!expectsDot && (pts.length < 2 || pathLength(pts) < 6)) { redrawInk(); return; }
+
+  if (wr.level === 3) {
+    wr.doneStrokes.push(pts);
+    redrawInk();
+    if (wr.doneStrokes.length >= nStrokes) evaluateGlyphFreeform();
+    return;
+  }
+
+  const tpl = cache.strokes[wr.strokeIdx];
+  const r = scoreStrokeAgainst(pts, tpl, opts);
+  if (r.pass) {
+    wr.doneStrokes.push(pts);
+    wr.strokeIdx++;
+    redrawInk();
+    if (wr.strokeIdx >= nStrokes) glyphSuccess();
+    else renderTraceGuide();
+    return;
+  }
+  wr.failedThisGlyph = true;
+  let msg = '';
+  if (!GLYPHS[wr.glyph].sym) {
+    const m = scoreStrokeAgainst(pts, cache.mirror[wr.strokeIdx], opts);
+    const backwards = (m.score > r.score + 0.12 || (m.pass && m.score > r.score + 0.04))
+                   && m.coverage >= opts.coverMin;
+    if (backwards) {
+      msg = 'Oops — that ' + wr.glyph + ' is backwards! Start at the green dot.';
+      recordReversal();
+    }
+  }
+  if (!msg) msg = r.startOk ? 'Almost! Follow the line all the way.' : 'Start at the green dot!';
+  setTraceFeedback(msg, 'no');
+  redrawInk();
+}
+
+function evaluateGlyphFreeform() {
+  const opts = TRACE_TOL[3];
+  const cache = glyphCache[wr.glyph];
+  const r = scoreGlyphFreeform(wr.doneStrokes, cache.strokes, cache.bbox, opts);
+  // Always compare against the mirror — with lenient tolerances a backwards
+  // glyph with lots of overlap (like a 7) can sneak past the normal template.
+  let m = null;
+  if (!GLYPHS[wr.glyph].sym) {
+    m = scoreGlyphFreeform(wr.doneStrokes, cache.mirror, cache.mirrorBBox, opts);
+  }
+  const backwards = m && ((m.pass && m.score > r.score + 0.06)
+                       || (!r.pass && m.score > r.score + 0.12));
+  if (backwards) {
+    wr.failedThisGlyph = true;
+    recordReversal();
+    flashGuide();
+    setTraceFeedback('Oops — that ' + wr.glyph + ' is backwards! It faces the other way.', 'no');
+    wr.doneStrokes = [];
+    redrawInk();
+    return;
+  }
+  if (r.pass) { glyphSuccess(); return; }
+  wr.failedThisGlyph = true;
+  setTraceFeedback('Hmm, not quite — have another go!', 'no');
+  wr.doneStrokes = [];
+  redrawInk();
+}
+
+function glyphSuccess() {
+  wr.glyphDone = true;
+  const ms = wr.startedAt ? Date.now() - wr.startedAt : 0;
+  recordGlyphResult(wr.glyph, !wr.failedThisGlyph, ms);
+  const stars = wr.level === 3 ? 2 : 1;
+  addStars(stars);
+  bumpToday();
+  wr.starsEarned += stars;
+  wr.results.push(!wr.failedThisGlyph);
+  wr.lastId = wr.glyph;
+  wr.remaining--;
+  setTraceFeedback(WR_PRAISE[Math.floor(Math.random() * WR_PRAISE.length)] + ' ⭐', 'ok');
+  redrawInk();
+  renderWrProgress();
+  setTimeout(() => { if (wr) nextGlyph(); }, 1000);
+}
+
+function recordGlyphResult(ch, correct, ms) {
+  const stats = state.writing[wr.mode];
+  if (!stats[ch]) stats[ch] = { seen: 0, correct: 0, totalTime: 0, reversed: 0 };
+  stats[ch].seen++;
+  if (correct) stats[ch].correct++;
+  stats[ch].totalTime += ms;
+  saveState();
+}
+
+function recordReversal() {
+  const stats = state.writing[wr.mode];
+  if (!stats[wr.glyph]) stats[wr.glyph] = { seen: 0, correct: 0, totalTime: 0, reversed: 0 };
+  stats[wr.glyph].reversed = (stats[wr.glyph].reversed || 0) + 1;
+  saveState();
+}
+
+function wrSkip() {
+  if (!wr || !wr.glyph || wr.glyphDone) return;
+  recordGlyphResult(wr.glyph, false, 0);
+  wr.results.push(false);
+  wr.lastId = wr.glyph;
+  wr.remaining--;
+  nextGlyph();
+}
+
+function renderWrProgress() {
+  renderProgressDots('wr-progress', wr.results, WR_SESSION, wr.remaining);
+}
+
+function setTraceFeedback(msg, cls) {
+  const el = document.getElementById('trace-feedback');
+  el.textContent = msg;
+  el.className = 'trace-feedback' + (cls ? ' ' + cls : '');
+}
+
+function finishWrSession() {
+  document.getElementById('trace-stage').style.display = 'none';
+  document.getElementById('wr-summary').style.display = 'flex';
+  document.getElementById('wr-summary-count').textContent =
+    wr.results.filter(Boolean).length + ' / ' + WR_SESSION;
+  document.getElementById('wr-summary-stars').textContent = '⭐ +' + wr.starsEarned + ' stars';
+}
+
+// ============================================================
+// WHICH WAY? (spot the mirrored glyph)
+// ============================================================
+// Both cards render from the same GLYPHS stroke data — identical weight,
+// caps and geometry — so the ONLY difference is orientation.
+// The prompt must never display the target glyph itself (that would hand her
+// the answer to copy): digits are asked as "the real number" (the mirrored
+// twin isn't a numeral at all), letters via the first letter of an emoji's
+// name. Letters without an unambiguous emoji (like q) stay out of the pool —
+// p-vs-mirrored-p still covers that discrimination from the other side.
+const WW_EMOJI = {
+  a: '🍎', b: '🍌', c: '🐱', d: '🐶', e: '🥚', f: '🐟', g: '🍇', h: '🎩',
+  j: '🪼', k: '🦘', n: '👃', p: '🐷', r: '🌈', s: '🐍', y: '🪀', z: '🦓'
+};
+const WW_SESSION = 10;
+let ww = null;
+
+function wwPool() {
+  return DIGITS.concat(LETTERS).filter(ch =>
+    GLYPHS[ch] && !GLYPHS[ch].sym && (DIGITS.includes(ch) || WW_EMOJI[ch]));
+}
+
+function renderGlyphSVG(ch, mirrored) {
+  let marks = '';
+  GLYPHS[ch].strokes.forEach(s => {
+    if (isDotStroke(s)) {
+      marks += '<circle cx="' + s[0][0] + '" cy="' + s[0][1] + '" r="4.5" fill="var(--ink)"/>';
+    } else {
+      marks += '<polyline points="' + s.map(p => p.join(',')).join(' ')
+             + '" fill="none" stroke="var(--ink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+  });
+  const inner = mirrored ? '<g transform="translate(100,0) scale(-1,1)">' + marks + '</g>' : marks;
+  return '<svg viewBox="0 0 100 100" aria-hidden="true">' + inner + '</svg>';
+}
+
+function startWhichWay() {
+  ww = { remaining: WW_SESSION, correct: 0, results: [], lastId: null,
+         current: null, correctSide: 0, askedAt: 0, locked: false };
+  document.getElementById('ww-stage').style.display = '';
+  document.getElementById('ww-summary').style.display = 'none';
+  nextWW();
+}
+
+function nextWW() {
+  if (!ww) return;
+  if (ww.remaining === 0) { finishWW(); return; }
+  const ch = pickGlyph(wwPool(), state.whichWay.stats, ww.lastId);
+  ww.current = ch;
+  ww.askedAt = Date.now();
+  ww.locked = false;
+  ww.correctSide = Math.random() < 0.5 ? 0 : 1;
+  document.getElementById('ww-prompt').innerHTML = DIGITS.includes(ch)
+    ? 'Tap the real number'
+    : 'Tap the first letter of <span class="tp-emoji">' + WW_EMOJI[ch] + '</span>';
+  const wrap = document.getElementById('ww-cards');
+  wrap.innerHTML = '';
+  [0, 1].forEach(side => {
+    const card = document.createElement('button');
+    card.className = 'ww-card';
+    card.innerHTML = renderGlyphSVG(ch, side !== ww.correctSide);
+    card.setAttribute('aria-label', ch + (side === ww.correctSide ? ' the right way round' : ' back to front'));
+    card.onclick = () => onWWPick(side, card);
+    wrap.appendChild(card);
+  });
+  const fb = document.getElementById('ww-feedback');
+  fb.textContent = '';
+  fb.className = 'trace-feedback';
+  renderProgressDots('ww-progress', ww.results, WW_SESSION, ww.remaining);
+}
+
+function onWWPick(side, card) {
+  if (ww.locked) return;
+  ww.locked = true;
+  const ch = ww.current;
+  const correct = side === ww.correctSide;
+  const stats = state.whichWay.stats;
+  if (!stats[ch]) stats[ch] = { seen: 0, correct: 0, totalTime: 0 };
+  stats[ch].seen++;
+  if (correct) stats[ch].correct++;
+  stats[ch].totalTime += Date.now() - ww.askedAt;
+  saveState();
+  ww.results.push(correct);
+  ww.lastId = ch;
+  ww.remaining--;
+  const fb = document.getElementById('ww-feedback');
+  if (correct) {
+    ww.correct++;
+    card.classList.add('good');
+    addStars(1);
+    bumpToday();
+    fb.textContent = 'Yes! ⭐';
+    fb.className = 'trace-feedback ok';
+    setTimeout(nextWW, 700);
+  } else {
+    card.classList.add('bad');
+    document.querySelectorAll('#ww-cards .ww-card')[ww.correctSide].classList.add('good');
+    fb.textContent = 'That one is back to front — this is the real '
+                   + (DIGITS.includes(ch) ? 'number' : ch) + '.';
+    fb.className = 'trace-feedback no';
+    setTimeout(nextWW, 2000);
+  }
+  renderProgressDots('ww-progress', ww.results, WW_SESSION, ww.remaining);
+}
+
+function finishWW() {
+  document.getElementById('ww-stage').style.display = 'none';
+  document.getElementById('ww-summary').style.display = 'flex';
+  document.getElementById('ww-summary-count').textContent = ww.correct + ' / ' + WW_SESSION;
+  document.getElementById('ww-summary-stars').textContent = '⭐ +' + ww.correct + ' stars';
+}
+
+// ============================================================
+// MIRROR DRAW (symmetry game)
+// ============================================================
+// Coordinates are [colFromMirror, row] — column 0 is nearest the mirror line,
+// so the answer on the right is literally the same coordinates flipped to the
+// other side. Level 1 colours cells; level 2 joins dots with segments
+// (col 0 dots sit ON the mirror line and are shared by both halves).
+const MIRROR_L1 = [
+  { size: 3, color: 'green', cells: [[0,0],[0,1],[1,1]] },
+  { size: 4, color: 'sky',   cells: [[0,1],[0,2],[1,2],[0,3]] },
+  { size: 4, color: 'ochre', cells: [[0,0],[0,1],[1,1],[0,2],[1,2]] },
+  { size: 5, color: 'red',   cells: [[0,1],[0,2],[0,3],[1,2],[2,2]] },
+  { size: 5, color: 'green', cells: [[0,0],[0,1],[1,1],[2,1],[2,2],[0,2]] },
+  { size: 5, color: 'sky',   cells: [[1,1],[2,1],[1,2],[2,2]] },
+  { size: 5, color: 'ochre', cells: [[0,4],[0,3],[1,3],[1,2],[2,2],[2,1],[3,1],[3,0]] },
+  { size: 6, color: 'green', cells: [[0,0],[0,1],[0,2],[1,2],[2,2],[2,3],[1,4],[0,4]] },
+  { size: 6, color: 'red',   cells: [[2,1],[3,1],[3,2],[2,2],[1,3],[2,3],[1,4]] },
+  { size: 6, color: 'sky',   cells: [[0,0],[1,0],[2,0],[0,1],[0,2],[1,2],[0,3],[0,4],[1,4],[2,4]] }
+];
+const MIRROR_L2 = [
+  { dots: 3, segs: [[[0,0],[1,0]],[[1,0],[1,1]],[[1,1],[0,1]]] },
+  { dots: 3, segs: [[[0,1],[1,1]],[[1,1],[1,2]],[[1,2],[0,2]]] },
+  { dots: 4, segs: [[[0,1],[1,1]],[[1,1],[2,1]],[[2,1],[2,2]],[[2,2],[1,2]],[[1,2],[0,2]]] },
+  { dots: 4, segs: [[[0,0],[1,1]],[[1,1],[0,2]]] },
+  { dots: 4, segs: [[[0,0],[1,0]],[[1,0],[2,1]],[[2,1],[2,2]],[[2,2],[1,3]],[[1,3],[0,3]]] },
+  { dots: 5, segs: [[[0,1],[1,1]],[[1,1],[1,0]],[[1,0],[2,0]],[[2,0],[2,1]],[[2,1],[3,2]],[[3,2],[2,3]],[[2,3],[1,3]],[[1,3],[0,3]]] },
+  { dots: 5, segs: [[[0,0],[1,1]],[[1,1],[2,2]],[[2,2],[3,3]],[[3,3],[2,4]],[[2,4],[1,4]],[[1,4],[0,4]]] },
+  { dots: 5, segs: [[[0,0],[1,0]],[[1,0],[2,1]],[[2,1],[1,2]],[[1,2],[2,3]],[[2,3],[1,4]],[[1,4],[0,4]]] }
+];
+const MIRROR_LEVELS = [{ id: 1, name: 'Squares' }, { id: 2, name: 'Join dots' }];
+let mir = null;
+
+function startMirror() {
+  const level = state.mirror.level || 1;
+  renderPills('mirror-levels', MIRROR_LEVELS, level, 'ochre', id => {
+    state.mirror.level = id;
+    saveState();
+    startMirror();
+  });
+  const list = level === 1 ? MIRROR_L1 : MIRROR_L2;
+  const doneMap = level === 1 ? state.mirror.l1Done : state.mirror.l2Done;
+  let idx = -1;
+  for (let i = 0; i < list.length; i++) if (!doneMap[i]) { idx = i; break; }
+  if (idx === -1) {
+    // all solved — clear the flags so she can play the set again
+    if (level === 1) state.mirror.l1Done = {}; else state.mirror.l2Done = {};
+    saveState();
+    idx = 0;
+  }
+  loadMirrorPuzzle(level, idx);
+}
+
+function loadMirrorPuzzle(level, idx) {
+  const list = level === 1 ? MIRROR_L1 : MIRROR_L2;
+  const p = list[idx];
+  mir = { level, idx, puzzle: p, solved: false, dragFrom: null, preview: null,
+          filled: new Set(), drawn: new Set(),
+          target: new Set(level === 1
+            ? p.cells.map(([c, r]) => c + ',' + r)
+            : p.segs.map(([a, b]) => mSegKey(a, b))) };
+  document.getElementById('mirror-prompt').textContent =
+    level === 1 ? 'Tap the squares to finish the picture!' : 'Join the dots to finish the picture!';
+  document.getElementById('mirror-count').textContent = 'Puzzle ' + (idx + 1) + ' of ' + list.length;
+  document.getElementById('mirror-next').style.display = 'none';
+  const fb = document.getElementById('mirror-feedback');
+  fb.textContent = '';
+  fb.className = 'trace-feedback';
+  if (level === 1) renderMirrorL1(p); else renderMirrorL2(p);
+}
+
+function mSegKey(a, b) {
+  const [p, q] = [a, b].slice().sort((u, v) => u[0] - v[0] || u[1] - v[1]);
+  return p[0] + ',' + p[1] + '|' + q[0] + ',' + q[1];
+}
+
+function renderMirrorL1(p) {
+  const svgEl = document.getElementById('mirror-svg');
+  const cell = 44 / p.size;
+  const top = (100 - p.size * cell) / 2;
+  let html = '';
+  for (let r = 0; r < p.size; r++) {
+    for (let c = 0; c < p.size; c++) {
+      const y = top + r * cell;
+      const given = p.cells.some(([pc, pr]) => pc === c && pr === r);
+      html += '<rect class="m-cell" x="' + (50 - (c + 1) * cell) + '" y="' + y
+            + '" width="' + cell + '" height="' + cell + '"'
+            + (given ? ' style="fill:var(--' + p.color + ')"' : '') + '/>';
+      html += '<rect class="m-cell open" data-c="' + c + '" data-r="' + r
+            + '" x="' + (50 + c * cell) + '" y="' + y
+            + '" width="' + cell + '" height="' + cell + '"/>';
+    }
+  }
+  html += '<line class="m-line" x1="50" y1="' + (top - 5) + '" x2="50" y2="' + (top + p.size * cell + 5) + '"/>';
+  svgEl.innerHTML = html;
+}
+
+function onMirrorCellTap(el) {
+  if (!mir || mir.solved) return;
+  const key = el.dataset.c + ',' + el.dataset.r;
+  if (mir.filled.has(key)) return;
+  if (mir.target.has(key)) {
+    mir.filled.add(key);
+    el.style.fill = 'var(--' + mir.puzzle.color + ')';
+    if (mir.filled.size === mir.target.size) mirrorSolved();
+  } else {
+    el.classList.add('wrong');
+    setTimeout(() => el.classList.remove('wrong'), 500);
+  }
+}
+
+// L2 geometry helpers — everything in viewBox units
+function mGeom(p) {
+  const s = 44 / (p.dots - 1);
+  const top = (100 - (p.dots - 1) * s) / 2;
+  return { s, top, rx: c => 50 + c * s, lx: c => 50 - c * s, y: r => top + r * s };
+}
+
+function renderMirrorL2(p) {
+  const svgEl = document.getElementById('mirror-svg');
+  const g = mGeom(p);
+  let html = '<line class="m-line" x1="50" y1="' + (g.top - 6) + '" x2="50" y2="' + (g.y(p.dots - 1) + 6) + '"/>';
+  p.segs.forEach(([a, b]) => {
+    html += '<line class="m-seg" x1="' + g.lx(a[0]) + '" y1="' + g.y(a[1])
+          + '" x2="' + g.lx(b[0]) + '" y2="' + g.y(b[1]) + '"/>';
+  });
+  for (let r = 0; r < p.dots; r++) {
+    for (let c = 0; c < p.dots; c++) {
+      if (c > 0) html += '<circle class="m-dot" cx="' + g.lx(c) + '" cy="' + g.y(r) + '" r="1.6"/>';
+      html += '<circle class="m-dot active" cx="' + g.rx(c) + '" cy="' + g.y(r) + '" r="1.6"/>';
+    }
+  }
+  for (let r = 0; r < p.dots; r++) {
+    for (let c = 0; c < p.dots; c++) {
+      html += '<circle class="m-dot-hit" data-c="' + c + '" data-r="' + r
+            + '" cx="' + g.rx(c) + '" cy="' + g.y(r) + '" r="' + Math.min(g.s * 0.45, 7) + '"/>';
+    }
+  }
+  svgEl.innerHTML = html;
+}
+
+function mirrorSvgPos(e) {
+  const rect = document.getElementById('mirror-svg').getBoundingClientRect();
+  return [(e.clientX - rect.left) / rect.width * 100, (e.clientY - rect.top) / rect.height * 100];
+}
+
+function onMirrorDown(e) {
+  if (!mir || mir.solved || mir.level !== 2) return;
+  const hit = e.target.closest && e.target.closest('.m-dot-hit');
+  if (!hit) return;
+  e.preventDefault();
+  const svgEl = document.getElementById('mirror-svg');
+  svgEl.setPointerCapture(e.pointerId);
+  mir.dragFrom = [+hit.dataset.c, +hit.dataset.r];
+  const g = mGeom(mir.puzzle);
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('class', 'm-preview');
+  line.setAttribute('x1', g.rx(mir.dragFrom[0]));
+  line.setAttribute('y1', g.y(mir.dragFrom[1]));
+  line.setAttribute('x2', g.rx(mir.dragFrom[0]));
+  line.setAttribute('y2', g.y(mir.dragFrom[1]));
+  svgEl.appendChild(line);
+  mir.preview = line;
+}
+
+function onMirrorMove(e) {
+  if (!mir || !mir.dragFrom || !mir.preview) return;
+  const [x, y] = mirrorSvgPos(e);
+  mir.preview.setAttribute('x2', x);
+  mir.preview.setAttribute('y2', y);
+}
+
+function onMirrorUp(e) {
+  if (!mir || !mir.dragFrom) return;
+  const from = mir.dragFrom;
+  mir.dragFrom = null;
+  if (mir.preview) { mir.preview.remove(); mir.preview = null; }
+  const p = mir.puzzle;
+  const g = mGeom(p);
+  const [x, y] = mirrorSvgPos(e);
+  // snap the release point to the nearest dot
+  let to = null, bd = Infinity;
+  for (let r = 0; r < p.dots; r++) {
+    for (let c = 0; c < p.dots; c++) {
+      const d = Math.hypot(x - g.rx(c), y - g.y(r));
+      if (d < bd) { bd = d; to = [c, r]; }
+    }
+  }
+  if (!to || bd > g.s * 0.6) return;                          // released between dots
+  const dc = Math.abs(to[0] - from[0]), dr = Math.abs(to[1] - from[1]);
+  if ((dc === 0 && dr === 0) || dc > 1 || dr > 1) return;     // not an adjacent dot
+  const key = mSegKey(from, to);
+  if (mir.drawn.has(key)) return;
+  const svgEl = document.getElementById('mirror-svg');
+  const mkLine = cls => {
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    l.setAttribute('class', cls);
+    l.setAttribute('x1', g.rx(from[0])); l.setAttribute('y1', g.y(from[1]));
+    l.setAttribute('x2', g.rx(to[0]));   l.setAttribute('y2', g.y(to[1]));
+    svgEl.appendChild(l);
+    return l;
+  };
+  if (mir.target.has(key)) {
+    mkLine('m-seg ok');
+    const hit = mkLine('m-seg-hit');
+    hit.dataset.segKey = key;
+    mir.drawn.add(key);
+    if (mir.drawn.size === mir.target.size) mirrorSolved();
+  } else {
+    const bad = mkLine('m-seg bad');
+    setTimeout(() => bad.remove(), 500);
+  }
+}
+
+function onMirrorCancel() {
+  if (!mir) return;
+  mir.dragFrom = null;
+  if (mir.preview) { mir.preview.remove(); mir.preview = null; }
+}
+
+// tap a drawn segment to rub it out
+function onMirrorSegTap(hitEl) {
+  if (!mir || mir.solved) return;
+  const key = hitEl.dataset.segKey;
+  mir.drawn.delete(key);
+  const svgEl = document.getElementById('mirror-svg');
+  svgEl.querySelectorAll('.m-seg.ok').forEach(l => {
+    if (l.getAttribute('x1') === hitEl.getAttribute('x1') && l.getAttribute('y1') === hitEl.getAttribute('y1')
+     && l.getAttribute('x2') === hitEl.getAttribute('x2') && l.getAttribute('y2') === hitEl.getAttribute('y2')) l.remove();
+  });
+  hitEl.remove();
+}
+
+function mirrorSolved() {
+  mir.solved = true;
+  const doneMap = mir.level === 1 ? state.mirror.l1Done : state.mirror.l2Done;
+  const firstTime = !doneMap[mir.idx];
+  doneMap[mir.idx] = true;
+  saveState();
+  if (firstTime) { addStars(2); bumpToday(); }
+  const fb = document.getElementById('mirror-feedback');
+  fb.textContent = firstTime ? 'Perfect reflection! ⭐⭐' : 'Perfect reflection!';
+  fb.className = 'trace-feedback ok';
+  const line = document.querySelector('#mirror-svg .m-line');
+  if (line) line.classList.add('sparkle');
+  document.getElementById('mirror-next').style.display = '';
+}
+
+// ============================================================
+// SOUND BOXES + RECORDING (phoneme audio)
+// ============================================================
+// Canonical phonemes. `key` is the IndexedDB clip key; `label` is what's
+// shown to the recorder; `category` drives the box colour in Sound Boxes;
+// `example` gives the recorder context ("sh as in ship").
+const PHONEMES = [
+  // short vowels
+  { key: 'a',  label: 'a',  example: 'cat',  category: 'vowel' },
+  { key: 'e',  label: 'e',  example: 'bed',  category: 'vowel' },
+  { key: 'i',  label: 'i',  example: 'pig',  category: 'vowel' },
+  { key: 'o',  label: 'o',  example: 'hop',  category: 'vowel' },
+  { key: 'u',  label: 'u',  example: 'mud',  category: 'vowel' },
+  // long vowels (CVCe / "magic e" — say the letter's name)
+  { key: 'A',  label: 'ā',  example: 'cake (long a)', category: 'vowel-long' },
+  { key: 'I',  label: 'ī',  example: 'bike (long i)', category: 'vowel-long' },
+  { key: 'O',  label: 'ō',  example: 'hope (long o)', category: 'vowel-long' },
+  { key: 'U',  label: 'ū',  example: 'cube (long u)', category: 'vowel-long' },
+  // consonants (one recording per /sound/)
+  { key: 'b',  label: 'b',  example: 'bed',  category: 'consonant' },
+  { key: 'd',  label: 'd',  example: 'dog',  category: 'consonant' },
+  { key: 'f',  label: 'f',  example: 'fish', category: 'consonant' },
+  { key: 'g',  label: 'g',  example: 'gum',  category: 'consonant' },
+  { key: 'h',  label: 'h',  example: 'hat',  category: 'consonant' },
+  { key: 'j',  label: 'j',  example: 'jug',  category: 'consonant' },
+  { key: 'k',  label: 'k',  example: 'kid',  category: 'consonant' },
+  { key: 'l',  label: 'l',  example: 'leg',  category: 'consonant' },
+  { key: 'm',  label: 'm',  example: 'mum',  category: 'consonant' },
+  { key: 'n',  label: 'n',  example: 'net',  category: 'consonant' },
+  { key: 'p',  label: 'p',  example: 'pig',  category: 'consonant' },
+  { key: 'r',  label: 'r',  example: 'red',  category: 'consonant' },
+  { key: 's',  label: 's',  example: 'sun',  category: 'consonant' },
+  { key: 't',  label: 't',  example: 'top',  category: 'consonant' },
+  { key: 'w',  label: 'w',  example: 'wig',  category: 'consonant' },
+  // digraphs (two letters, one sound)
+  { key: 'sh', label: 'sh', example: 'ship', category: 'digraph' },
+  { key: 'ch', label: 'ch', example: 'chip', category: 'digraph' },
+  { key: 'th', label: 'th', example: 'thin', category: 'digraph' },
+  { key: 'wh', label: 'wh', example: 'when', category: 'digraph' },
+  { key: 'ng', label: 'ng', example: 'king', category: 'digraph' },
+  { key: 'nk', label: 'nk', example: 'bank', category: 'digraph' },
+  // misc
+  { key: 'qu', label: 'qu', example: 'quick', category: 'qu' }
+];
+
+// Each word: segments (what shows in boxes) and sounds (which clip to play).
+// Note: c/ck/k all share the /k/ sound clip; segments preserve real spelling.
+const SOUND_WORDS_L1 = [
+  { word: 'cat',  segments: ['c', 'a', 't'],   sounds: ['k', 'a', 't'],    cats: ['consonant','vowel','consonant'] },
+  { word: 'pig',  segments: ['p', 'i', 'g'],   sounds: ['p', 'i', 'g'],    cats: ['consonant','vowel','consonant'] },
+  { word: 'hop',  segments: ['h', 'o', 'p'],   sounds: ['h', 'o', 'p'],    cats: ['consonant','vowel','consonant'] },
+  { word: 'mud',  segments: ['m', 'u', 'd'],   sounds: ['m', 'u', 'd'],    cats: ['consonant','vowel','consonant'] },
+  { word: 'bed',  segments: ['b', 'e', 'd'],   sounds: ['b', 'e', 'd'],    cats: ['consonant','vowel','consonant'] },
+  { word: 'fan',  segments: ['f', 'a', 'n'],   sounds: ['f', 'a', 'n'],    cats: ['consonant','vowel','consonant'] },
+  { word: 'sun',  segments: ['s', 'u', 'n'],   sounds: ['s', 'u', 'n'],    cats: ['consonant','vowel','consonant'] },
+  { word: 'jug',  segments: ['j', 'u', 'g'],   sounds: ['j', 'u', 'g'],    cats: ['consonant','vowel','consonant'] },
+  { word: 'ship', segments: ['sh', 'i', 'p'],  sounds: ['sh', 'i', 'p'],   cats: ['digraph','vowel','consonant'] },
+  { word: 'fish', segments: ['f', 'i', 'sh'],  sounds: ['f', 'i', 'sh'],   cats: ['consonant','vowel','digraph'] },
+  { word: 'shop', segments: ['sh', 'o', 'p'],  sounds: ['sh', 'o', 'p'],   cats: ['digraph','vowel','consonant'] },
+  { word: 'chip', segments: ['ch', 'i', 'p'],  sounds: ['ch', 'i', 'p'],   cats: ['digraph','vowel','consonant'] },
+  { word: 'chat', segments: ['ch', 'a', 't'],  sounds: ['ch', 'a', 't'],   cats: ['digraph','vowel','consonant'] },
+  { word: 'much', segments: ['m', 'u', 'ch'],  sounds: ['m', 'u', 'ch'],   cats: ['consonant','vowel','digraph'] },
+  { word: 'thin', segments: ['th', 'i', 'n'],  sounds: ['th', 'i', 'n'],   cats: ['digraph','vowel','consonant'] },
+  { word: 'that', segments: ['th', 'a', 't'],  sounds: ['th', 'a', 't'],   cats: ['digraph','vowel','consonant'] },
+  { word: 'with', segments: ['w', 'i', 'th'],  sounds: ['w', 'i', 'th'],   cats: ['consonant','vowel','digraph'] },
+  { word: 'when', segments: ['wh', 'e', 'n'],  sounds: ['wh', 'e', 'n'],   cats: ['digraph','vowel','consonant'] },
+  { word: 'whip', segments: ['wh', 'i', 'p'],  sounds: ['wh', 'i', 'p'],   cats: ['digraph','vowel','consonant'] },
+  { word: 'king', segments: ['k', 'i', 'ng'],  sounds: ['k', 'i', 'ng'],   cats: ['consonant','vowel','digraph'] },
+  { word: 'ring', segments: ['r', 'i', 'ng'],  sounds: ['r', 'i', 'ng'],   cats: ['consonant','vowel','digraph'] },
+  { word: 'song', segments: ['s', 'o', 'ng'],  sounds: ['s', 'o', 'ng'],   cats: ['consonant','vowel','digraph'] },
+  { word: 'bank', segments: ['b', 'a', 'nk'],  sounds: ['b', 'a', 'nk'],   cats: ['consonant','vowel','digraph'] },
+  { word: 'sink', segments: ['s', 'i', 'nk'],  sounds: ['s', 'i', 'nk'],   cats: ['consonant','vowel','digraph'] },
+  { word: 'junk', segments: ['j', 'u', 'nk'],  sounds: ['j', 'u', 'nk'],   cats: ['consonant','vowel','digraph'] },
+  { word: 'duck', segments: ['d', 'u', 'ck'],  sounds: ['d', 'u', 'k'],    cats: ['consonant','vowel','digraph'] },
+  { word: 'sock', segments: ['s', 'o', 'ck'],  sounds: ['s', 'o', 'k'],    cats: ['consonant','vowel','digraph'] },
+  { word: 'luck', segments: ['l', 'u', 'ck'],  sounds: ['l', 'u', 'k'],    cats: ['consonant','vowel','digraph'] },
+  { word: 'quick', segments: ['qu', 'i', 'ck'], sounds: ['qu', 'i', 'k'],  cats: ['qu','vowel','digraph'] }
+];
+
+// Level 2: consonant blends. 4-phoneme words where each consonant in
+// the blend keeps its own sound (contrast with digraphs which are
+// two letters = one sound). No new phoneme recordings needed —
+// blends reuse existing single-consonant clips.
+const SOUND_WORDS_L2 = [
+  // Initial blends, single short vowel
+  { word: 'stop',  segments: ['s','t','o','p'],   sounds: ['s','t','o','p'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'spin',  segments: ['s','p','i','n'],   sounds: ['s','p','i','n'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'swim',  segments: ['s','w','i','m'],   sounds: ['s','w','i','m'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'snap',  segments: ['s','n','a','p'],   sounds: ['s','n','a','p'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'step',  segments: ['s','t','e','p'],   sounds: ['s','t','e','p'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'clap',  segments: ['c','l','a','p'],   sounds: ['k','l','a','p'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'crab',  segments: ['c','r','a','b'],   sounds: ['k','r','a','b'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'flag',  segments: ['f','l','a','g'],   sounds: ['f','l','a','g'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'frog',  segments: ['f','r','o','g'],   sounds: ['f','r','o','g'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'glad',  segments: ['g','l','a','d'],   sounds: ['g','l','a','d'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'grab',  segments: ['g','r','a','b'],   sounds: ['g','r','a','b'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'plum',  segments: ['p','l','u','m'],   sounds: ['p','l','u','m'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'drip',  segments: ['d','r','i','p'],   sounds: ['d','r','i','p'], cats: ['consonant','consonant','vowel','consonant'] },
+  { word: 'trip',  segments: ['t','r','i','p'],   sounds: ['t','r','i','p'], cats: ['consonant','consonant','vowel','consonant'] },
+  // Initial blend + final ck (still 4 phonemes)
+  { word: 'stick', segments: ['s','t','i','ck'],  sounds: ['s','t','i','k'], cats: ['consonant','consonant','vowel','digraph'] },
+  { word: 'truck', segments: ['t','r','u','ck'],  sounds: ['t','r','u','k'], cats: ['consonant','consonant','vowel','digraph'] },
+  { word: 'brick', segments: ['b','r','i','ck'],  sounds: ['b','r','i','k'], cats: ['consonant','consonant','vowel','digraph'] },
+  { word: 'block', segments: ['b','l','o','ck'],  sounds: ['b','l','o','k'], cats: ['consonant','consonant','vowel','digraph'] },
+  // Final blends
+  { word: 'jump',  segments: ['j','u','m','p'],   sounds: ['j','u','m','p'], cats: ['consonant','vowel','consonant','consonant'] },
+  { word: 'lamp',  segments: ['l','a','m','p'],   sounds: ['l','a','m','p'], cats: ['consonant','vowel','consonant','consonant'] },
+  { word: 'hand',  segments: ['h','a','n','d'],   sounds: ['h','a','n','d'], cats: ['consonant','vowel','consonant','consonant'] },
+  { word: 'bend',  segments: ['b','e','n','d'],   sounds: ['b','e','n','d'], cats: ['consonant','vowel','consonant','consonant'] },
+  { word: 'fast',  segments: ['f','a','s','t'],   sounds: ['f','a','s','t'], cats: ['consonant','vowel','consonant','consonant'] },
+  { word: 'nest',  segments: ['n','e','s','t'],   sounds: ['n','e','s','t'], cats: ['consonant','vowel','consonant','consonant'] },
+  { word: 'milk',  segments: ['m','i','l','k'],   sounds: ['m','i','l','k'], cats: ['consonant','vowel','consonant','consonant'] },
+  { word: 'mask',  segments: ['m','a','s','k'],   sounds: ['m','a','s','k'], cats: ['consonant','vowel','consonant','consonant'] },
+  { word: 'gift',  segments: ['g','i','f','t'],   sounds: ['g','i','f','t'], cats: ['consonant','vowel','consonant','consonant'] }
+];
+
+// Level 3: CVCe / silent-e ("magic e"). 4 letters, 3 phonemes:
+// the trailing `e` is silent (no sound to play) but it changes the
+// preceding vowel from short to long. Long-vowel sound keys are
+// capitalised (A, I, O, U) to distinguish them from short vowels.
+const SOUND_WORDS_L3 = [
+  // long a-e
+  { word: 'make', segments: ['m','a','k','e'], sounds: ['m','A','k','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'cake', segments: ['c','a','k','e'], sounds: ['k','A','k','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'gate', segments: ['g','a','t','e'], sounds: ['g','A','t','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'name', segments: ['n','a','m','e'], sounds: ['n','A','m','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'safe', segments: ['s','a','f','e'], sounds: ['s','A','f','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'lake', segments: ['l','a','k','e'], sounds: ['l','A','k','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  // long i-e
+  { word: 'bike', segments: ['b','i','k','e'], sounds: ['b','I','k','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'ride', segments: ['r','i','d','e'], sounds: ['r','I','d','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'time', segments: ['t','i','m','e'], sounds: ['t','I','m','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'line', segments: ['l','i','n','e'], sounds: ['l','I','n','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'kite', segments: ['k','i','t','e'], sounds: ['k','I','t','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'fine', segments: ['f','i','n','e'], sounds: ['f','I','n','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'hide', segments: ['h','i','d','e'], sounds: ['h','I','d','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  // long o-e
+  { word: 'hope', segments: ['h','o','p','e'], sounds: ['h','O','p','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'home', segments: ['h','o','m','e'], sounds: ['h','O','m','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'bone', segments: ['b','o','n','e'], sounds: ['b','O','n','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'rope', segments: ['r','o','p','e'], sounds: ['r','O','p','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'joke', segments: ['j','o','k','e'], sounds: ['j','O','k','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'nose', segments: ['n','o','s','e'], sounds: ['n','O','s','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'note', segments: ['n','o','t','e'], sounds: ['n','O','t','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  // long u-e
+  { word: 'cute', segments: ['c','u','t','e'], sounds: ['k','U','t','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'cube', segments: ['c','u','b','e'], sounds: ['k','U','b','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'tube', segments: ['t','u','b','e'], sounds: ['t','U','b','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'mute', segments: ['m','u','t','e'], sounds: ['m','U','t','silent'], cats: ['consonant','vowel-long','consonant','silent'] },
+  { word: 'June', segments: ['j','u','n','e'], sounds: ['j','U','n','silent'], cats: ['consonant','vowel-long','consonant','silent'] }
+];
+
+const SOUND_LEVELS = [
+  { id: 1, name: 'Level 1', words: SOUND_WORDS_L1 },
+  { id: 2, name: 'Level 2', words: SOUND_WORDS_L2 },
+  { id: 3, name: 'Level 3', words: SOUND_WORDS_L3 }
+];
+function currentLevel() {
+  return SOUND_LEVELS.find(l => l.id === sbLevelId) || SOUND_LEVELS[0];
+}
+
+// ----- IndexedDB store for recorded audio -----
+const AUDIO_DB = 'heda-audio';
+const AUDIO_STORE = 'clips';
+
+function openAudioDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(AUDIO_DB, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(AUDIO_STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function dbReq(mode, fn) {
+  return openAudioDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(AUDIO_STORE, mode);
+    const store = tx.objectStore(AUDIO_STORE);
+    const req = fn(store);
+    tx.oncomplete = () => resolve(req && req.result);
+    tx.onerror = () => reject(tx.error);
+    if (req) req.onsuccess = () => {};
+  }));
+}
+const saveClip   = (key, blob) => dbReq('readwrite', s => s.put(blob, key));
+const getClip    = (key)       => dbReq('readonly',  s => s.get(key));
+const deleteClip = (key)       => dbReq('readwrite', s => s.delete(key));
+const getAllClipKeys = ()      => dbReq('readonly',  s => s.getAllKeys());
+
+// Cache of which clips exist (so we don't hit IDB on every render).
+let clipKeySet = new Set();
+async function refreshClipKeys() {
+  try {
+    const keys = await getAllClipKeys();
+    clipKeySet = new Set(keys || []);
+  } catch (e) { clipKeySet = new Set(); }
+}
+
+// ----- Recording (MediaRecorder) -----
+let micStream = null;
+let activeRecorder = null;
+let activeRecorderKey = null;
+let activeChunks = [];
+
+async function ensureMic() {
+  if (micStream) return micStream;
+  micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  return micStream;
+}
+
+async function startRecord(key) {
+  if (activeRecorder) return;
+  const stream = await ensureMic();
+  activeRecorder = new MediaRecorder(stream);
+  activeRecorderKey = key;
+  activeChunks = [];
+  activeRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) activeChunks.push(e.data); };
+  activeRecorder.onstop = async () => {
+    const mime = activeRecorder.mimeType || 'audio/webm';
+    const blob = new Blob(activeChunks, { type: mime });
+    const finishedKey = activeRecorderKey;
+    activeRecorder = null;
+    activeRecorderKey = null;
+    activeChunks = [];
+    if (blob.size > 0) {
+      await saveClip(finishedKey, blob);
+      clipKeySet.add(finishedKey);
+    }
+    renderRecordingUI();
+  };
+  activeRecorder.start();
+  renderRecordingUI();
+}
+function stopRecord() {
+  if (activeRecorder) activeRecorder.stop();
+}
+
+// ----- Playback -----
+// playClipByKey returns a Promise that resolves when the clip *ends*
+// (or is cancelled by a subsequent call). This lets playSequence
+// chain phonemes back-to-back without the previous one getting
+// chopped off mid-playback.
+let currentAudio = null;
+function playClipByKey(key) {
+  return new Promise(async resolve => {
+    // Silent-e and other silent boxes resolve immediately with no audio.
+    if (!key || key === 'silent') { resolve(); return; }
+    if (currentAudio) { try { currentAudio.pause(); } catch (e) {} }
+    const blob = await getClip(key);
+    if (!blob) {
+      // Fallback: speech synthesis with the phoneme letters.
+      if (!('speechSynthesis' in window)) return resolve();
+      const u = new SpeechSynthesisUtterance(key);
+      u.rate = 0.75;
+      const voices = speechSynthesis.getVoices();
+      const v = voices.find(x => x.lang === 'en-AU') || voices.find(x => x.lang && x.lang.startsWith('en'));
+      if (v) u.voice = v;
+      u.onend = () => resolve();
+      u.onerror = () => resolve();
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    currentAudio = audio;
+    let resolved = false;
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      URL.revokeObjectURL(url);
+      resolve();
+    };
+    audio.onended = finish;
+    audio.onerror = finish;
+    // If a later play() replaces currentAudio, this one gets paused —
+    // resolve so the caller (e.g. a single-tap handler) doesn't hang.
+    audio.onpause = () => { if (audio !== currentAudio) finish(); };
+    audio.play().catch(finish);
+  });
+}
+
+// Play a sequence of clip keys with small gaps (used for "hear the whole word").
+// A monotonically-increasing seq id lets a newer call cancel a running one.
+let playSeqId = 0;
+async function playSequence(keys, gapMs = 220) {
+  const mySeq = ++playSeqId;
+  for (let i = 0; i < keys.length; i++) {
+    if (mySeq !== playSeqId) return;
+    await playClipByKey(keys[i]);
+    if (mySeq !== playSeqId) return;
+    if (i < keys.length - 1) await new Promise(r => setTimeout(r, gapMs));
+  }
+}
+
+// ----- Sound Boxes activity -----
+let sbIdx = 0;
+let sbLevelId = 1;
+let sbPlayedSet = new Set();
+
+async function startSoundBoxes() {
+  await refreshClipKeys();
+  sbLevelId = state.soundBoxesLevel || 1;
+  sbIdx = 0;
+  renderSoundBoxLevels();
+  renderSoundBox();
+}
+
+function renderSoundBoxLevels() {
+  const wrap = document.getElementById('sb-levels');
+  wrap.innerHTML = '';
+  SOUND_LEVELS.forEach(lvl => {
+    const btn = document.createElement('button');
+    btn.className = 'sb-level' + (lvl.id === sbLevelId ? ' active' : '');
+    btn.textContent = lvl.name;
+    btn.setAttribute('aria-pressed', lvl.id === sbLevelId);
+    btn.onclick = () => {
+      if (sbLevelId === lvl.id) return;
+      sbLevelId = lvl.id;
+      state.soundBoxesLevel = lvl.id;
+      saveState();
+      sbIdx = 0;
+      renderSoundBoxLevels();
+      renderSoundBox();
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function renderSoundBox() {
+  const words = currentLevel().words;
+  const w = words[sbIdx];
+  document.getElementById('sb-word').textContent = w.word;
+  const wrap = document.getElementById('sb-boxes');
+  wrap.innerHTML = '';
+  sbPlayedSet = new Set();
+  w.segments.forEach((seg, i) => {
+    const box = document.createElement('button');
+    box.className = 'sb-box ' + w.cats[i];
+    box.textContent = seg;
+    box.setAttribute('aria-label', w.sounds[i] === 'silent' ? 'Silent letter ' + seg : 'Hear the sound ' + seg);
+    box.onclick = async () => {
+      if (w.sounds[i] === 'silent') {
+        // Silent letter — show a brief shake instead of audio.
+        box.classList.add('tapped');
+        setTimeout(() => box.classList.remove('tapped'), 400);
+        return;
+      }
+      await playClipByKey(w.sounds[i]);
+      box.classList.add('played');
+      sbPlayedSet.add(i);
+    };
+    wrap.appendChild(box);
+  });
+  // Show tip if no recordings exist yet for any phoneme in this word
+  const missingAny = w.sounds.some(s => !clipKeySet.has(s));
+  document.getElementById('sb-tip').style.display = missingAny ? 'block' : 'none';
+}
+
+async function sbHearWord() {
+  const w = currentLevel().words[sbIdx];
+  const wordKey = 'word:' + w.word;
+  if (clipKeySet.has(wordKey)) {
+    await playClipByKey(wordKey);
+  } else {
+    // No whole-word recording yet — blend the phoneme clips as a fallback.
+    await playSequence(w.sounds);
+  }
+}
+function sbShift(delta) {
+  const words = currentLevel().words;
+  sbIdx = (sbIdx + delta + words.length) % words.length;
+  renderSoundBox();
+}
+
+// ----- Recording UI -----
+async function renderRecordingUI() {
+  if (clipKeySet.size === 0) await refreshClipKeys();
+  const pGrid = document.getElementById('rec-grid-phonemes');
+  const wGrid = document.getElementById('rec-grid-words');
+  pGrid.innerHTML = '';
+  wGrid.innerHTML = '';
+
+  let pDone = 0, wDone = 0;
+  PHONEMES.forEach(p => {
+    const has = clipKeySet.has(p.key);
+    if (has) pDone++;
+    pGrid.appendChild(buildRecCard(p.key, p.label, 'as in ' + p.example, has));
+  });
+  const allWords = SOUND_LEVELS.flatMap(l => l.words);
+  allWords.forEach(w => {
+    const key = 'word:' + w.word;
+    const has = clipKeySet.has(key);
+    if (has) wDone++;
+    wGrid.appendChild(buildRecCard(key, w.word, 'whole word', has));
+  });
+  document.getElementById('rec-count-phonemes').textContent = pDone + ' / ' + PHONEMES.length;
+  document.getElementById('rec-count-words').textContent    = wDone + ' / ' + allWords.length;
+}
+
+function buildRecCard(key, label, sub, hasClip) {
+  const card = document.createElement('div');
+  const isRecording = activeRecorderKey === key;
+  card.className = 'rec-card' + (hasClip ? ' has-clip' : '') + (isRecording ? ' recording' : '');
+  card.innerHTML =
+    '<div class="dot"></div>' +
+    '<div class="label">' + label + '</div>' +
+    '<div class="ex">' + sub + '</div>' +
+    '<div class="rec-btn-row">' +
+      (isRecording
+         ? '<button class="rec-btn stop" data-act="stop">⏹ Stop</button>'
+         : '<button class="rec-btn rec" data-act="rec">⏺ ' + (hasClip ? 'Re-rec' : 'Rec') + '</button>') +
+      '<button class="rec-btn play' + (hasClip ? '' : ' disabled') + '" data-act="play">▶</button>' +
+    '</div>';
+  card.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    if (act === 'rec') {
+      // If something else is recording, stop it first.
+      if (activeRecorder) stopRecord();
+      try { await startRecord(key); }
+      catch (err) {
+        alert('Could not access the microphone:\n' + err.message);
+      }
+    } else if (act === 'stop') {
+      stopRecord();
+    } else if (act === 'play') {
+      playClipByKey(key);
+    }
+  });
+  return card;
+}
+
+// ============================================================
+// READING (phonics stories)
+// ============================================================
+const READING_STORIES = [
+  { id: 'r01', em: '🎩', title: "Jax's Bag", focus: 'short a',
+    paragraphs: [
+      "Jax has a big bag. The bag has hats and caps in it. Six hats and ten caps fit in the bag.",
+      "\"Can I have a hat?\" asks Gab. \"Yes, you can have a hat,\" said Jax. \"Can I have a cap?\" asks Kat. \"Yes, you can have a cap,\" said Jax. Gab and Kat are glad to have the hat and cap."
+    ] },
+  { id: 'r02', em: '🐷', title: "Gil and His Pig", focus: 'short i',
+    paragraphs: [
+      "Gil has a big pig. His pig is in its big pen. A mud pit is in the pen. The pig can swim in the mud pit. The pig can dig in the mud pit. The pig has a lot of fun in the mud pit. Gil grins at his pig. The pig grins at Gil."
+    ] },
+  { id: 'r03', em: '🌞', title: "It's Hot!", focus: 'short o',
+    paragraphs: [
+      "Mum and Dad went for a jog. Mum and Dad got hot. Is the fan on? The fan is not on. The fan is in the box.",
+      "Mum set the fan on top of the box. Dad taps the fan on. The fan is on. It's not hot!"
+    ] },
+  { id: 'r04', em: '🐻', title: "Cub and Pup", focus: 'short u',
+    paragraphs: [
+      "Cub and Pup are buds. Cub and Pup have lots of fun. Cub runs in the sun. Pup digs in the mud.",
+      "Cub and Pup are hot and wet. The fun must stop. Cub and Pup must get in the tub. The buds have fun in the suds. The fun did not stop!"
+    ] },
+  { id: 'r05', em: '🐔', title: "The Pet Hen", focus: 'short e',
+    paragraphs: [
+      "Dex has a pet hen. The hen is big and red. Dex let his hen run. But the hen ran into a pig pen.",
+      "The hen has a big welt. Dex must tend to his red hen. He gets the hen in its bed. \"You must rest,\" Dex said."
+    ] },
+  { id: 'r06', em: '🦊', title: "The Fox and the Red Hen", focus: 'CVC review',
+    paragraphs: [
+      "The fox can not get up. He is in a pit. The red hen looks at the fox. \"Oh no! You are in the pit.\" \"Yes, I am in the pit. Can you help me?\" asks the fox. \"Yes, I can help, but do not jump on me!\" said the red hen.",
+      "The red hen helps the fox. The fox did not jump on the red hen. The red hen and the fox are glad the fox is not in the pit."
+    ] },
+  { id: 'r07', em: '🥛', title: "Buzz Sells Milk", focus: 'FLSZ doubling',
+    paragraphs: [
+      "Buzz has a fun job. His job is to sell jugs of milk at the mill. Buzz runs up to the top of the hill to get the milk. He huffs and puffs at the top of the hill. Buzz fills six jugs with milk. Not a drop spills.",
+      "Next, Buzz runs the milk jugs to the mill. Buzz sees Tiff, Will, and Russ at the mill. \"Do you want milk?\" asks Buzz. \"Yes!\" yell the pals. The pals get the jugs. The boss gets the bill. Buzz did a swell job."
+    ] },
+  { id: 'r08', em: '⛳', title: "Let's Golf", focus: 'double l',
+    paragraphs: [
+      "Ross and his mum went to the small stall. Ross got golf clubs and golf balls. The golf balls are small. The man from the stall said Ross can hit the balls in the hall.",
+      "Ross taps the ball with the club. The ball rolls up the hall and hits the tall wall. \"Look at me!\" Ross calls to Mum from the hall. He did not want to stop but Mum said he had to go. It was fun to hit all the golf balls!"
+    ] },
+  { id: 'r09', em: '🚚', title: "Mack and Rick", focus: 'ck',
+    paragraphs: [
+      "Mack and Rick are at the mud track. The pals see lots of trucks. The big truck gets stuck in the mud. The small truck goes fast on the track. Mack and Rick clap.",
+      "Mack goes to the snack stand to grab a pack of gum. At the snack stand, he sees his pals, Beck and Nick. Rick sees the pack at the snack stand and yells, \"Get back, quick!\".",
+      "The pals run back to the track. A truck ran into a stack of bricks! The pack yells and jumps. \"The mud track is the best,\" says Mack."
+    ] },
+  { id: 'r10', em: '⛵', title: "On the Ship", focus: 'sh',
+    paragraphs: [
+      "Look at the ship. Trish and Josh jump on the ship deck. Trish has a net to get fish. Josh has a bag to get shells.",
+      "Trish jumps off the ship with the net. She swims to get fish. Josh jumps off the ship with his bag. He swims to get shells.",
+      "Trish and Josh get back on the ship. \"Look at the fish in my net,\" said Trish. \"Look at the shells in my bag,\" said Josh. We had fun on the ship."
+    ] },
+  { id: 'r11', em: '👒', title: "This and That", focus: 'voiced th',
+    paragraphs: [
+      "Jack and Finn want to go to the pond. Finn picks this red hat. Jack picks that black hat. Finn picks this big bag. Jack picks that small bag.",
+      "Finn and Jack jog to Liz. Liz will go with them to the pond. Finn, Jack, and Liz jump off the rocks and splash in the pond. Finn, Jack, and Liz had a ball at the pond."
+    ] },
+  { id: 'r12', em: '🪨', title: "Thump! Thump! Thud!", focus: 'unvoiced th',
+    paragraphs: [
+      "Thad and Cath go on a jog to camp. They have six tracks to pick from. They pick the fifth track.",
+      "Thump! Thump! Thud! \"What was that?\" asks Cath. Thad looks and sees a big rock on the track. \"This rock fell from that hill. That was the thud,\" says Thad. \"We were in luck that we did not get hit!\" says Cath. \"Let's go on the sixth track back to camp,\" says Thad.",
+      "Thad and Cath jog back to camp. At camp they grab a wet cloth. \"That was a fun jog,\" says Thad."
+    ] },
+  { id: 'r13', em: '🍟', title: "Chips and Dip", focus: 'ch',
+    paragraphs: [
+      "Chuck and Rich are at lunch. Chuck has chips in his lunchbox but no dip. Rich has dip in his lunchbox but no chips. Chuck looks at Rich. Rich looks at Chuck. What can they do?",
+      "Chuck dumps his chips on a dish. \"Rich, do you want chips?\" Chuck asks. \"Yes I do!\" said Rich. Rich slid his dip next to the dish. \"Chuck, do you want dip?\" Rich asks. \"Yes I do!\" said Chuck. They chill and chat and munch on chips and dip. Yum! Yum! Yum!"
+    ] },
+  { id: 'r14', em: '🐥', title: "Beth's Pets", focus: 'sh / th review',
+    paragraphs: [
+      "Beth has a lot of pets. She has ten small chicks and six big sloths. She grabs a big bag of snacks and drags it to the pet pens.",
+      "The ten small chicks run to Beth. \"Do you chicks want a snack?\" Beth asks. \"Cluck, cluck, cluck,\" go the chicks. The chicks peck at their snacks. Beth looks up at the sloths. \"Do you sloths want a snack?\" The sloths nod. Beth hands the sloths their dish of snacks. Munch, munch, munch go the sloths.",
+      "Beth grabs a snack from the bag. \"I will have this snack,\" Beth says. Beth sits and snacks with the pets."
+    ] },
+  { id: 'r15', em: '🥘', title: "On a Whim", focus: 'wh',
+    paragraphs: [
+      "Phil and Whit went on a walk. On a whim, they went to see Steph. She could whip them up a snack. She was a whiz with a whisk.",
+      "\"Which snack do you want to munch on?\" said Steph. Whit would want a big snack, but Phil would want a small snack. \"Let me have a whack at this dish,\" said Steph. She whips up a dish to munch on.",
+      "Phil and Whit got a whiff of the dish. \"Yum!\" said Whit. The pals were glad they went to see Steph on a whim!"
+    ] },
+  { id: 'r16', em: '🎵', title: "King and Ash Sing", focus: '-ng',
+    paragraphs: [
+      "King and Ash are best pals. To have fun, King and Ash sing songs. King brings Ash a book of songs. \"Which song should we sing?\" asks King. \"Let's pick a quick song and then a long song,\" said Ash. King and Ash sing their songs.",
+      "King's mum just got back from the shop. \"Will you sing me a song?\" she asks. \"Yes!\" yell Ash and King. They grab the book of songs. \"We have to pick the best song for your mum,\" said Ash. King looks in the book. He sees the best song. \"This is it,\" he says. King and Ash sing. King's mum claps and says, \"I am so glad you sang that song.\""
+    ] },
+  { id: 'r17', em: '🦨', title: "Stink in the Bank", focus: '-nk',
+    paragraphs: [
+      "Hank has a job at the bank. When Hank gets to the bank, he sniffs a bad smell. \"What is that smell?\" Hank thinks. \"Is it a skunk?\" He sniffs his desk. \"No, it's not that.\" He checks the fish tank. \"No, this is not what stinks.\" He walks to the back of the bank. When he gets to the back, he sees the small bin.",
+      "\"Oh no!\" Hank yells, \"I left all the stuff in the bin.\" Hank sniffs the bin. \"Yuck!\" he yells, \"that's what stinks!\" Hank brings the small bin to the big bin and slams the lid shut. Hank is glad he got rid of the stink."
+    ] },
+  { id: 'r18', em: '🚢', title: "The Red Ship", focus: 'review',
+    paragraphs: [
+      "Quin goes to the dock with Jax. They sit on the dock and look at the ships. Jax looks up and sees a big clock. \"What is that clock for?\" he asks. Quin says, \"There is a bell in the clock. When the bell rings, the ships can go to the dock.\"",
+      "Quin and Jax look for ships that could go to the dock. \"I think that tall black ship will go to the dock,\" said Quin. \"I think this big pink ship will go to the dock,\" said Jax.",
+      "The bell rings. Ding dong. Ding dong. Which ship will go to the dock? The tall black ship did not go to the dock. The big pink ship did not go to the dock. \"Look!\" said Quin. Jax sees a small red ship. The small red ship stops at the dock. \"We should have said the red ship!\""
+    ] }
+];
+
+let readingIdx = 0;
+
+function renderReadingList() {
+  const wrap = document.getElementById('reading-list');
+  wrap.innerHTML = '';
+  READING_STORIES.forEach((s, i) => {
+    const btn = document.createElement('button');
+    const done = state.readStoriesRead[s.id];
+    btn.className = 'reading-card' + (done ? ' read' : '');
+    btn.innerHTML =
+      '<span class="em">' + s.em + '</span>' +
+      '<div class="info">' +
+        '<div class="num">' + (i + 1) + ' · ' + s.focus + '</div>' +
+        '<div class="ttl">' + s.title + '</div>' +
+      '</div>' +
+      (done ? '<span class="check">✓</span>' : '');
+    btn.onclick = () => openReading(s.id);
+    wrap.appendChild(btn);
+  });
+}
+
+function openReading(id) {
+  const i = READING_STORIES.findIndex(s => s.id === id);
+  readingIdx = i >= 0 ? i : 0;
+  viewStack.push('read-story');
+  showView('read-story');
+  renderReading();
+}
+
+function renderReading() {
+  const s = READING_STORIES[readingIdx];
+  document.getElementById('reading-hero').textContent = s.em;
+  document.getElementById('reading-title').textContent = s.title;
+  document.getElementById('reading-body').innerHTML =
+    s.paragraphs.map(p => '<p>' + p + '</p>').join('');
+  const doneBtn = document.getElementById('reading-done');
+  if (state.readStoriesRead[s.id]) {
+    doneBtn.textContent = '✓ You read this!';
+    doneBtn.classList.remove('green');
+  } else {
+    doneBtn.textContent = 'I read it! ✓';
+    doneBtn.classList.add('green');
+  }
+}
+
+function shiftReading(delta) {
+  readingIdx = (readingIdx + delta + READING_STORIES.length) % READING_STORIES.length;
+  renderReading();
+}
+
+function markReadingDone() {
+  const s = READING_STORIES[readingIdx];
+  if (!state.readStoriesRead[s.id]) {
+    state.readStoriesRead[s.id] = true;
+    addStars(2); bumpToday();
+    renderReading();
+  }
+}
+
+// ============================================================
+// HISTORY CONTENT
+// ============================================================
+const STORIES = [
+  {
+    id: 's1',
+    title: 'The First Australians',
+    hero: '🏜️',
+    sub: 'Tens of thousands of years ago',
+    pages: [
+      "Long, long ago — long before the houses we live in were built — the very first people came to this land. They walked, sailed, and crossed the seas, and made their homes here.",
+      "These first people are called Aboriginal Australians. They lived all across the land — in the hot red desert, by the cool rivers, in the green forests, and along the wide blue sea.",
+      "They learned the names of every plant and animal. They knew which fruits were good to eat, and which leaves could be used as medicine. They told stories about how the world began."
+    ]
+  },
+  {
+    id: 's2',
+    title: 'The Rainbow Serpent',
+    hero: '🌈',
+    sub: 'A Dreamtime story',
+    pages: [
+      "In the time called the Dreaming, the world was flat and grey. The Rainbow Serpent slept deep under the ground, curled up tight.",
+      "One day she woke and pushed her great body up. Where she crawled, rivers and lakes appeared. Where she climbed, hills and mountains rose up tall.",
+      "She called out to the frogs to wake up. When they hopped out, water spilled from their bellies and filled the rivers. Soon plants grew, animals came, and the land was full of life."
+    ]
+  },
+  {
+    id: 's3',
+    title: 'Captain Cook',
+    hero: '⛵',
+    sub: 'The year 1770',
+    pages: [
+      "Many, many years later, big wooden ships started to come to Australia from far across the sea. One of them was led by a man called Captain James Cook.",
+      "Captain Cook landed at a place he called Botany Bay, near where Sydney is today. He had never seen kangaroos before — he thought they were very strange and wonderful.",
+      "The Aboriginal people had been living here for tens of thousands of years already. They watched the big ships come, and the world began to change."
+    ]
+  },
+  {
+    id: 's4',
+    title: 'The First Fleet',
+    hero: '🚢',
+    sub: 'The year 1788',
+    pages: [
+      "Eighteen years after Captain Cook, eleven ships sailed all the way from England to Australia. We call them the First Fleet.",
+      "On board were soldiers, sailors, and people who had been sent away from England as prisoners. The journey took eight whole months across the sea!",
+      "When they arrived at Sydney Cove they had to build everything from scratch — houses, gardens, fences. It was very hard. Many of them had never grown food before."
+    ]
+  },
+  {
+    id: 's5',
+    title: 'Eddie Mabo',
+    hero: '🌊',
+    sub: 'A more recent hero',
+    pages: [
+      "Eddie Mabo was a man from a small Australian island called Mer. He loved his island deeply — it was his family's home for many, many generations.",
+      "But the government said that, long ago, the land did not really belong to Aboriginal and Torres Strait Islander people. Eddie said: 'That's not true! We were always here.'",
+      "He fought in court for ten years. Finally, the highest judges agreed with him. After that, the law changed, and First Nations people's connection to the land was recognised."
+    ]
+  }
+];
+
+function renderStoryList() {
+  const wrap = document.getElementById('story-list');
+  wrap.innerHTML = '';
+  STORIES.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'story-card' + (state.storiesRead[s.id] ? ' read' : '');
+    btn.innerHTML =
+      '<span class="em">' + s.hero + '</span>' +
+      '<div><div class="ttl">' + s.title + '</div><div class="sub">' + s.sub + '</div></div>' +
+      (state.storiesRead[s.id] ? '<span class="check">✓</span>' : '');
+    btn.onclick = () => openStory(s.id);
+    wrap.appendChild(btn);
+  });
+}
+
+let storyCurrent = null;
+let storyPage = 0;
+function openStory(id) {
+  storyCurrent = STORIES.find(s => s.id === id);
+  storyPage = 0;
+  viewStack.push('story');
+  showView('story');
+  renderStoryPage();
+}
+function renderStoryPage() {
+  document.getElementById('story-hero').querySelector('span').textContent = storyCurrent.hero;
+  document.getElementById('story-title').textContent = storyCurrent.title;
+  document.getElementById('story-body').innerHTML = '<p>' + storyCurrent.pages[storyPage] + '</p>';
+  document.getElementById('story-pages').textContent =
+    'Page ' + (storyPage + 1) + ' of ' + storyCurrent.pages.length;
+  const next = document.getElementById('story-next');
+  const prev = document.getElementById('story-prev');
+  prev.style.visibility = storyPage === 0 ? 'hidden' : 'visible';
+  next.textContent = (storyPage === storyCurrent.pages.length - 1) ? 'The End ✓' : 'Next ▸';
+}
+function storyAdvance(delta) {
+  if (delta > 0 && storyPage === storyCurrent.pages.length - 1) {
+    // finish
+    if (!state.storiesRead[storyCurrent.id]) {
+      state.storiesRead[storyCurrent.id] = true;
+      addStars(2); bumpToday();
+    }
+    viewStack.pop();
+    showView('history');
+    renderStoryList();
+    return;
+  }
+  storyPage += delta;
+  if (storyPage < 0) storyPage = 0;
+  renderStoryPage();
+}
+
+// ============================================================
+// SCIENCE — EXPERIMENTS
+// ============================================================
+const EXPERIMENTS = [
+  {
+    id: 'e1', em: '💧', title: 'Ice and Sunshine',
+    needs: ['2 ice cubes', '2 small bowls', 'a sunny window'],
+    steps: [
+      'Put one ice cube in a bowl on the sunny windowsill.',
+      'Put the other in a bowl in a shady, cool spot.',
+      'Set a timer and check on them every few minutes.'
+    ],
+    question: 'Which one melts faster? Why do you think the sun makes things warm?'
+  },
+  {
+    id: 'e2', em: '🍬', title: 'Sugar in Hot and Cold',
+    needs: ['2 clear glasses', 'cold water', 'warm water (from the tap)', '2 spoons of sugar'],
+    steps: [
+      'Fill one glass with cold water and one with warm tap water.',
+      'Drop a spoonful of sugar into each.',
+      'Stir each glass the same number of times.'
+    ],
+    question: 'Which glass dissolved the sugar faster? Why does warm water do that?'
+  },
+  {
+    id: 'e3', em: '🎈', title: 'Hot Air Balloon',
+    needs: ['an empty plastic bottle', 'a balloon', 'a bowl of warm water'],
+    steps: [
+      'Stretch the balloon over the top of the empty bottle.',
+      'Stand the bottle in the bowl of warm water for 2 minutes.',
+      'Watch the balloon!'
+    ],
+    question: 'What happens to the balloon? Air gets bigger when it warms up — can you feel why?'
+  },
+  {
+    id: 'e4', em: '🌈', title: 'Rainbow in a Glass',
+    needs: ['a tall clear glass', 'water', 'food colouring', 'sugar'],
+    steps: [
+      'Make four little glasses of coloured water with different amounts of sugar (none, 1 spoon, 2 spoons, 3 spoons).',
+      'Very carefully, pour each colour into the tall glass — most sugar first, then less, then less.',
+      'Watch the colours stack up like a rainbow!'
+    ],
+    question: 'Why do the colours stay in layers? It’s because of how heavy the sugar makes the water.'
+  },
+  {
+    id: 'e5', em: '🧊', title: 'Frozen Treasures',
+    needs: ['small toys or shells', 'a plastic container', 'water', 'a freezer'],
+    steps: [
+      'Put the little toys in the container and cover them with water.',
+      'Put the container in the freezer overnight.',
+      'In the morning, tip out the ice block and try to free the treasures!'
+    ],
+    question: 'Can you melt the ice with warm water? With your hands? In the sun?'
+  }
+];
+
+function renderExpList() {
+  const wrap = document.getElementById('exp-list');
+  wrap.innerHTML = '';
+  EXPERIMENTS.forEach(e => {
+    const btn = document.createElement('button');
+    btn.className = 'exp-card-mini' + (state.experimentsDone[e.id] ? ' done' : '');
+    btn.innerHTML =
+      '<div class="em">' + e.em + '</div>' +
+      '<div class="ttl">' + e.title + '</div>' +
+      (state.experimentsDone[e.id] ? '<div class="check">✓</div>' : '');
+    btn.onclick = () => openExperiment(e.id);
+    wrap.appendChild(btn);
+  });
+}
+
+let expCurrent = null;
+function openExperiment(id) {
+  expCurrent = EXPERIMENTS.find(e => e.id === id);
+  viewStack.push('experiment');
+  showView('experiment');
+  const card = document.getElementById('exp-card');
+  card.innerHTML =
+    '<div class="exp-title">' + expCurrent.em + ' ' + expCurrent.title + '</div>' +
+    '<div><div class="exp-section">You need</div><div class="exp-items">' +
+      expCurrent.needs.map(n => '<span class="chip">' + n + '</span>').join('') +
+    '</div></div>' +
+    '<div><div class="exp-section">What to do</div><ol class="steps">' +
+      expCurrent.steps.map(s => '<li>' + s + '</li>').join('') +
+    '</ol></div>' +
+    '<div class="exp-q">🤔 ' + expCurrent.question + '</div>';
+  const btn = document.getElementById('exp-done');
+  btn.textContent = state.experimentsDone[expCurrent.id] ? '✓ You tried this!' : 'I tried it! ✓';
+}
+
+function markExperimentDone() {
+  if (!expCurrent) return;
+  if (!state.experimentsDone[expCurrent.id]) {
+    state.experimentsDone[expCurrent.id] = true;
+    addStars(3); bumpToday();
+  }
+  viewStack.pop();
+  showView('sci-exp');
+  renderExpList();
+}
+
+// ============================================================
+// SCIENCE — ANIMALS
+// ============================================================
+const ANIMALS = [
+  { id:'kangaroo', em:'🦘', name:'Kangaroo', group:'Marsupial', fact:"Kangaroos carry their babies (called joeys) in a pouch. They hop on their two big back legs — they can't walk backwards!" },
+  { id:'koala',    em:'🐨', name:'Koala',    group:'Marsupial', fact:"Koalas sleep up to 20 hours a day! They eat only eucalyptus leaves, which most other animals can't digest." },
+  { id:'wombat',   em:'🦡', name:'Wombat',   group:'Marsupial', fact:"Wombats dig huge underground tunnels. Their poo is shaped like little cubes — yes, really!" },
+  { id:'platypus', em:'🦫', name:'Platypus', group:'Monotreme', fact:"Platypuses have a duck-like bill, beaver-like tail, and lay eggs. They're one of only two mammals in the world that lay eggs!" },
+  { id:'echidna',  em:'🦔', name:'Echidna',  group:'Monotreme', fact:"Echidnas are covered in spikes and also lay eggs. They use their long sticky tongue to catch ants." },
+  { id:'emu',      em:'🦤', name:'Emu',      group:'Bird',      fact:"Emus are huge — almost two metres tall! They can't fly, but they can run very fast." },
+  { id:'kookaburra', em:'🦜', name:'Kookaburra', group:'Bird',   fact:"Kookaburras have a laughing call that sounds like a person giggling. You can hear them in the bush at sunrise." },
+  { id:'cockatoo', em:'🦩', name:'Cockatoo', group:'Bird',      fact:"Cockatoos are very smart parrots with bright crests on their heads. They can live for over 70 years!" },
+  { id:'crocodile', em:'🐊', name:'Crocodile', group:'Reptile', fact:"Saltwater crocodiles live in the warm northern parts of Australia. They are the largest reptiles in the world." },
+  { id:'snake',    em:'🐍', name:'Snake',    group:'Reptile',   fact:"Australia has many kinds of snakes. They flick their tongue to 'smell' the air around them." }
+];
+
+function renderAnimalList() {
+  const wrap = document.getElementById('animal-list');
+  wrap.innerHTML = '';
+  ANIMALS.forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'animal-card';
+    btn.innerHTML = '<div class="em">' + a.em + '</div><div class="ttl">' + a.name + '</div>';
+    btn.onclick = () => openAnimal(a.id);
+    wrap.appendChild(btn);
+  });
+}
+let animalIdx = 0;
+function openAnimal(id) {
+  const i = ANIMALS.findIndex(x => x.id === id);
+  animalIdx = i >= 0 ? i : 0;
+  viewStack.push('animal');
+  showView('animal');
+  renderAnimal();
+}
+function renderAnimal() {
+  const a = ANIMALS[animalIdx];
+  document.getElementById('animal-detail').innerHTML =
+    '<div class="big-em">' + a.em + '</div>' +
+    '<div class="name">' + a.name + '</div>' +
+    '<div class="class-badge">' + a.group + '</div>' +
+    '<div class="fact">' + a.fact + '</div>';
+}
+function shiftAnimal(delta) {
+  animalIdx = (animalIdx + delta + ANIMALS.length) % ANIMALS.length;
+  renderAnimal();
+}
+
+// ============================================================
+// SCIENCE — LEAVES (SVG illustrations)
+// ============================================================
+const LEAVES = [
+  {
+    id:'gum', name:'Eucalyptus (Gum)', color:'#6B8E4E',
+    fact:"Gum tree leaves are long, thin, and curved like a sickle. They have a strong oily smell and are koalas' favourite food.",
+    svg: function(size) {
+      const s = size || 180;
+      return '<svg viewBox="0 0 100 100" width="'+s+'" height="'+s+'">' +
+        '<path d="M50,8 C 30,28 24,68 36,92 C 48,90 56,86 64,76 C 72,64 76,40 60,18 Z" fill="#6B8E4E" stroke="#4f6b39" stroke-width="1"/>' +
+        '<path d="M50,12 C 48,40 48,68 46,90" stroke="#4f6b39" stroke-width="1.2" fill="none"/>' +
+        '</svg>';
+    }
+  },
+  {
+    id:'banksia', name:'Banksia', color:'#C97B3A',
+    fact:"Banksia leaves are tough with jagged edges — they look like a saw. The plant has bright cone-shaped flowers full of nectar.",
+    svg: function(size) {
+      const s = size || 180;
+      return '<svg viewBox="0 0 100 100" width="'+s+'" height="'+s+'">' +
+        '<path d="M50,10 L 30,18 L 36,28 L 28,36 L 38,44 L 30,52 L 40,60 L 32,70 L 44,80 L 50,92 L 56,80 L 68,70 L 60,60 L 70,52 L 62,44 L 72,36 L 64,28 L 70,18 Z" fill="#7B9655" stroke="#4f6b39" stroke-width="1"/>' +
+        '<line x1="50" y1="10" x2="50" y2="92" stroke="#4f6b39" stroke-width="1.2"/>' +
+        '</svg>';
+    }
+  },
+  {
+    id:'wattle', name:'Wattle (Acacia)', color:'#D4A14A',
+    fact:"Wattle has tiny feathery leaves and bright yellow puffball flowers. Golden wattle is Australia's national flower!",
+    svg: function(size) {
+      const s = size || 180;
+      return '<svg viewBox="0 0 100 100" width="'+s+'" height="'+s+'">' +
+        '<line x1="50" y1="14" x2="50" y2="86" stroke="#6b5b32" stroke-width="1.5"/>' +
+        Array.from({length: 8}, (_, i) => {
+          const y = 22 + i * 8;
+          return '<ellipse cx="38" cy="'+y+'" rx="10" ry="3" fill="#9BAE6C"/>' +
+                 '<ellipse cx="62" cy="'+y+'" rx="10" ry="3" fill="#9BAE6C"/>';
+        }).join('') +
+        '<circle cx="50" cy="22" r="5" fill="#F2C84B"/>' +
+        '<circle cx="58" cy="32" r="5" fill="#F2C84B"/>' +
+        '<circle cx="40" cy="44" r="5" fill="#F2C84B"/>' +
+        '</svg>';
+    }
+  },
+  {
+    id:'bottlebrush', name:'Bottlebrush', color:'#B5453A',
+    fact:"The flowers really do look like a bottle brush — bright red and full of sweet nectar that birds love to drink.",
+    svg: function(size) {
+      const s = size || 180;
+      return '<svg viewBox="0 0 100 100" width="'+s+'" height="'+s+'">' +
+        '<line x1="20" y1="50" x2="84" y2="50" stroke="#4f3a2a" stroke-width="2"/>' +
+        Array.from({length: 18}, (_, i) => {
+          const x = 22 + i * 3.4;
+          return '<line x1="'+x+'" y1="34" x2="'+x+'" y2="66" stroke="#B5453A" stroke-width="2"/>' +
+                 '<circle cx="'+x+'" cy="34" r="1.4" fill="#F2C84B"/>' +
+                 '<circle cx="'+x+'" cy="66" r="1.4" fill="#F2C84B"/>';
+        }).join('') +
+        '<ellipse cx="14" cy="50" rx="6" ry="4" fill="#6B8E4E"/>' +
+        '<ellipse cx="92" cy="50" rx="6" ry="4" fill="#6B8E4E"/>' +
+        '</svg>';
+    }
+  },
+  {
+    id:'fern', name:'Tree Fern', color:'#4f6b39',
+    fact:"Tree ferns live in cool, damp forests. Their leaves are called fronds — they unroll from a little curl, like a tiny harp.",
+    svg: function(size) {
+      const s = size || 180;
+      return '<svg viewBox="0 0 100 100" width="'+s+'" height="'+s+'">' +
+        '<line x1="50" y1="92" x2="50" y2="14" stroke="#4f6b39" stroke-width="1.5"/>' +
+        Array.from({length: 11}, (_, i) => {
+          const y = 18 + i * 7;
+          const w = 4 + i * 2.5;
+          return '<ellipse cx="'+(50-w)+'" cy="'+y+'" rx="'+w+'" ry="3" fill="#7B9655"/>' +
+                 '<ellipse cx="'+(50+w)+'" cy="'+y+'" rx="'+w+'" ry="3" fill="#7B9655"/>';
+        }).join('') +
+        '<path d="M50,14 Q 56,10 56,16 Q 56,20 52,18" fill="none" stroke="#4f6b39" stroke-width="2"/>' +
+        '</svg>';
+    }
+  },
+  {
+    id:'paperbark', name:'Paperbark', color:'#A2602B',
+    fact:"Paperbark trees have soft, papery bark that you can peel off in thin layers — but you should leave it on the tree to protect it!",
+    svg: function(size) {
+      const s = size || 180;
+      return '<svg viewBox="0 0 100 100" width="'+s+'" height="'+s+'">' +
+        '<ellipse cx="50" cy="50" rx="20" ry="40" fill="#A8C588" stroke="#4f6b39" stroke-width="1"/>' +
+        '<path d="M50,10 L 50,90" stroke="#4f6b39" stroke-width="1"/>' +
+        '<path d="M50,20 Q 40,30 44,45 Q 48,60 42,75" fill="none" stroke="#4f6b39" stroke-width="0.8"/>' +
+        '<path d="M50,20 Q 60,30 56,45 Q 52,60 58,75" fill="none" stroke="#4f6b39" stroke-width="0.8"/>' +
+        '</svg>';
+    }
+  }
+];
+
+function renderLeafList() {
+  const wrap = document.getElementById('leaf-list');
+  wrap.innerHTML = '';
+  LEAVES.forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'leaf-card';
+    btn.innerHTML = '<div class="leaf-mini">' + l.svg(70) + '</div><div class="ttl" style="color:'+l.color+'">' + l.name + '</div>';
+    btn.onclick = () => openLeaf(l.id);
+    wrap.appendChild(btn);
+  });
+}
+let leafIdx = 0;
+function openLeaf(id) {
+  const i = LEAVES.findIndex(x => x.id === id);
+  leafIdx = i >= 0 ? i : 0;
+  viewStack.push('leaf');
+  showView('leaf');
+  renderLeaf();
+}
+function renderLeaf() {
+  const l = LEAVES[leafIdx];
+  document.getElementById('leaf-detail').innerHTML =
+    '<div class="name" style="color:'+l.color+'">' + l.name + '</div>' +
+    '<div class="leaf-svg-wrap">' + l.svg(180) + '</div>' +
+    '<div class="fact">' + l.fact + '</div>';
+}
+function shiftLeaf(delta) {
+  leafIdx = (leafIdx + delta + LEAVES.length) % LEAVES.length;
+  renderLeaf();
+}
+
+// ============================================================
+// SCIENCE — CLASSIFICATION GAME
+// ============================================================
+const CLASS_GROUPS = ['Marsupial', 'Monotreme', 'Bird', 'Reptile'];
+let classifySession = { queue: [], current: null, correct: 0, total: 8, results: [] };
+
+function startClassify() {
+  document.getElementById('classify-stage').style.display = '';
+  document.getElementById('classify-summary').style.display = 'none';
+  const all = ANIMALS.slice();
+  shuffle(all);
+  classifySession = { queue: all.slice(0, 8), current: null, correct: 0, total: 8, results: [] };
+  nextClassify();
+}
+function nextClassify() {
+  const fb = document.getElementById('classify-feedback');
+  fb.className = 'classify-feedback';
+  fb.textContent = '';
+  if (classifySession.queue.length === 0) {
+    finishClassify();
+    return;
+  }
+  classifySession.current = classifySession.queue.shift();
+  const a = classifySession.current;
+  document.getElementById('classify-card').innerHTML =
+    '<div class="big-em">' + a.em + '</div>' +
+    '<div class="name">' + a.name + '</div>';
+  const wrap = document.getElementById('classify-choices');
+  wrap.innerHTML = '';
+  CLASS_GROUPS.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'classify-choice';
+    btn.textContent = g;
+    btn.onclick = () => onClassifyPick(g, btn);
+    wrap.appendChild(btn);
+  });
+  renderClassifyProgress();
+}
+function onClassifyPick(group, btn) {
+  // Disable further picks for this question
+  document.querySelectorAll('#classify-choices .classify-choice').forEach(b => {
+    b.disabled = true;
+    b.style.pointerEvents = 'none';
+  });
+  const correct = group === classifySession.current.group;
+  const a = classifySession.current;
+  const fb = document.getElementById('classify-feedback');
+  if (correct) {
+    btn.classList.add('correct');
+    fb.className = 'classify-feedback show ok';
+    fb.textContent = "✓ Yes! That's a " + a.group + ".";
+    classifySession.correct += 1;
+    classifySession.results.push(true);
+    addStars(1); bumpToday();
+    setTimeout(nextClassify, 1200);
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'classify-feedback show no';
+    fb.textContent = "✗ Not quite — a " + a.name.toLowerCase() + " is a " + a.group + ".";
+    classifySession.results.push(false);
+    document.querySelectorAll('#classify-choices .classify-choice').forEach(b => {
+      if (b.textContent === a.group) b.classList.add('correct');
+    });
+    setTimeout(nextClassify, 2400);
+  }
+}
+function renderClassifyProgress() {
+  const wrap = document.getElementById('classify-progress');
+  wrap.innerHTML = '';
+  for (let i = 0; i < classifySession.total; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    const done = classifySession.results[i];
+    if (done === true)  dot.classList.add('ok');
+    if (done === false) dot.classList.add('no');
+    if (i === classifySession.results.length) dot.classList.add('current');
+    wrap.appendChild(dot);
+  }
+}
+function finishClassify() {
+  document.getElementById('classify-stage').style.display = 'none';
+  document.getElementById('classify-summary').style.display = 'flex';
+  document.getElementById('classify-count').textContent =
+    classifySession.correct + ' / ' + classifySession.total;
+}
+
+// ============================================================
+// EVENT WIRING
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  renderTopBar();
+  renderHubFooter();
+
+  // hub tiles
+  document.querySelectorAll('[data-go]').forEach(el => {
+    el.addEventListener('click', () => navigate(el.getAttribute('data-go')));
+  });
+
+  // home button
+  document.getElementById('home-btn').addEventListener('click', goHome);
+
+  // crumb click = back one level
+  document.getElementById('crumb').addEventListener('click', crumbBack);
+
+  // numpad
+  document.getElementById('numpad').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-key]');
+    if (btn) onNumpadKey(btn.getAttribute('data-key'));
+  });
+
+  // math summary
+  document.getElementById('play-again').addEventListener('click', () => startFlashcards(mathOp));
+  document.getElementById('back-to-math').addEventListener('click', () => {
+    viewStack.pop();
+    showView('math');
+  });
+
+  // word builder
+  document.getElementById('word-clear').addEventListener('click', () => {
+    wordBuf = []; renderWord();
+  });
+  document.getElementById('word-speak').addEventListener('click', speakWord);
+  document.getElementById('wb-check').addEventListener('click', checkSpelling);
+  document.getElementById('spell-hear').addEventListener('click', playSpellPrompt);
+
+  // writing practice
+  buildGlyphCache();
+  const traceCanvas = document.getElementById('trace-canvas');
+  traceCanvas.addEventListener('pointerdown', onTraceDown);
+  traceCanvas.addEventListener('pointermove', onTraceMove);
+  traceCanvas.addEventListener('pointerup', onTraceUp);
+  traceCanvas.addEventListener('pointercancel', onTraceCancel);
+  new ResizeObserver(() => setupTraceCanvas()).observe(document.getElementById('trace-box'));
+  document.getElementById('wr-clear').addEventListener('click', resetGlyphAttempt);
+  document.getElementById('wr-skip').addEventListener('click', wrSkip);
+  document.getElementById('wr-again').addEventListener('click', () => startWriting(wr.mode));
+  document.getElementById('wr-back').addEventListener('click', () => {
+    viewStack.pop();
+    showView(wr && wr.mode === 'letters' ? 'words' : 'math');
+  });
+
+  // which way?
+  document.getElementById('ww-again').addEventListener('click', startWhichWay);
+  document.getElementById('ww-back').addEventListener('click', () => {
+    viewStack.pop();
+    showView('math');
+  });
+
+  // mirror draw
+  const mirrorSvg = document.getElementById('mirror-svg');
+  mirrorSvg.addEventListener('pointerdown', onMirrorDown);
+  mirrorSvg.addEventListener('pointermove', onMirrorMove);
+  mirrorSvg.addEventListener('pointerup', onMirrorUp);
+  mirrorSvg.addEventListener('pointercancel', onMirrorCancel);
+  mirrorSvg.addEventListener('click', (e) => {
+    const cell = e.target.closest && e.target.closest('.m-cell.open');
+    if (cell) { onMirrorCellTap(cell); return; }
+    const segHit = e.target.closest && e.target.closest('.m-seg-hit');
+    if (segHit) onMirrorSegTap(segHit);
+  });
+  document.getElementById('mirror-next').addEventListener('click', startMirror);
+
+  // story
+  document.getElementById('story-next').addEventListener('click', () => storyAdvance(1));
+  document.getElementById('story-prev').addEventListener('click', () => storyAdvance(-1));
+
+  // experiment
+  document.getElementById('exp-done').addEventListener('click', markExperimentDone);
+
+  // leaf nav
+  document.getElementById('leaf-prev').addEventListener('click', () => shiftLeaf(-1));
+  document.getElementById('leaf-next').addEventListener('click', () => shiftLeaf(1));
+
+  // animal nav
+  document.getElementById('animal-prev').addEventListener('click', () => shiftAnimal(-1));
+  document.getElementById('animal-next').addEventListener('click', () => shiftAnimal(1));
+
+  // reading
+  document.getElementById('reading-prev').addEventListener('click', () => shiftReading(-1));
+  document.getElementById('reading-next').addEventListener('click', () => shiftReading(1));
+  document.getElementById('reading-done').addEventListener('click', markReadingDone);
+
+  // sound boxes
+  document.getElementById('sb-prev').addEventListener('click', () => sbShift(-1));
+  document.getElementById('sb-next').addEventListener('click', () => sbShift(1));
+  document.getElementById('sb-hear-word').addEventListener('click', sbHearWord);
+
+  // recordings — refresh clip cache on load (best-effort)
+  refreshClipKeys();
+
+  // classify
+  document.getElementById('classify-again').addEventListener('click', startClassify);
+  document.getElementById('classify-back').addEventListener('click', () => {
+    viewStack.pop();
+    showView('science');
+  });
+
+  // keyboard support for numpad
+  document.addEventListener('keydown', (e) => {
+    const flashActive = document.getElementById('view-math-flash').classList.contains('active');
+    if (!flashActive) return;
+    if (e.key >= '0' && e.key <= '9') onNumpadKey(e.key);
+    else if (e.key === 'Backspace') onNumpadKey('del');
+    else if (e.key === 'Enter') onNumpadKey('enter');
+  });
+
+  // preload voices (Chrome quirk)
+  if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+  }
+});
+</script>
+
+</body>
+</html>

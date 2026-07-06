@@ -219,6 +219,10 @@ defaults:
       path: "assets"
     values:
       sitemap: false
+  - scope:
+      path: "heda.html"
+    values:
+      sitemap: false
 
 sass:
   style: compressed
