@@ -32,9 +32,15 @@ $grey-900: #212529;
 $white-color: #ffffff !default;
 $black-color: #000000 !default;
 
+// Site accent: "spectral teal" (light mode) and "fringe teal" (dark mode)
+$accent-color: #0b6b62 !default;
+$accent-color-hover: #084f49 !default;
+$accent-color-bright: #4fc3b3 !default;
+$accent-color-bright-hover: #74d2c5 !default;
+
 // Theme colors
 
-$code-bg-color-light: rgba($purple-color, 0.05);
+$code-bg-color-light: rgba($accent-color, 0.05);
 $code-bg-color-dark: #2c3237 !default;
 
 // Font awesome location

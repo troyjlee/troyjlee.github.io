@@ -1,0 +1,34 @@
+/*******************************************************************************
+ * Site-specific design overrides.
+ *
+ * Display type: "STIX Two Text" — the typeface designed for mathematical
+ * journals — carries the headings; body text stays in the system sans.
+ ******************************************************************************/
+
+$display-font: "STIX Two Text", "STIX Two Math", Georgia, "Times New Roman", serif;
+
+// Journal-style headings site-wide (navbar keeps the sans for contrast)
+h1,
+h2,
+h3,
+.post-title,
+.publications h2.year {
+  font-family: $display-font;
+  letter-spacing: -0.01em;
+}
+
+// Homepage hero
+.post-header .post-title {
+  font-size: 3.1rem;
+  font-weight: 600;
+
+  @media (max-width: 576px) {
+    font-size: 2.3rem;
+  }
+}
+
+.post-header .desc {
+  color: var(--global-text-color-light);
+  font-size: 1.05rem;
+  max-width: 42em;
+}
