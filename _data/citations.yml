@@ -1,3 +1,991 @@
 metadata:
-  last_updated: "2026-07-06"
-papers: {}
+  last_updated: '2026-07-17'
+papers:
+  iSjOah4AAAAJ:-95Q15plzcUC:
+    citations: 0
+    title: EXPERIMENTAL STUDY ON PHASE DISTRIBUTION IN INCLINED SUBCOOLED BOILING ANNULUS
+    year: '2000'
+  iSjOah4AAAAJ:0EnyYjriUFMC:
+    citations: 45
+    title: Composition theorems in communication complexity
+    year: '2010'
+  iSjOah4AAAAJ:1In3SbHwanAC:
+    citations: 8
+    title: Quadratically tight relations for randomized query complexity
+    year: '2020'
+  iSjOah4AAAAJ:1KpZK2B-YNUC:
+    citations: 0
+    title: Combined treatment modalities
+    year: '1994'
+  iSjOah4AAAAJ:1tvASLRm6poC:
+    citations: 0
+    title: Development of safeguards technology for lab-scale advanced fuel cycle facility at KAERI
+    year: '2006'
+  iSjOah4AAAAJ:1xqo9R7SDZkC:
+    citations: 1
+    title: Quadratically tight relations for randomized query complexity
+    year: '2017'
+  iSjOah4AAAAJ:1yWc8FF-_SYC:
+    citations: 0
+    title: 'The alpha (6) integrin as a novel anti-angiogenic target: Blocking of alpha (6) integrin inhibits angiogenesis induced by VEGF and tumor growth in vivo.'
+    year: '2003'
+  iSjOah4AAAAJ:1yhUMift6wIC:
+    citations: 0
+    title: Effect of EHS matrix on expression of transgenes in HC11 cells
+    year: '1997'
+  iSjOah4AAAAJ:27qsyVibG6YC:
+    citations: 3
+    title: 'Astro2020 Science White Paper: The Next Decade of Astroinformatics and Astrostatistics'
+    year: '2019'
+  iSjOah4AAAAJ:2osOgNQ5qMEC:
+    citations: 116
+    title: How information-mapping patterns determine foraging behaviour of a honey bee colony
+    year: '2002'
+  iSjOah4AAAAJ:2ywjKiB__4kC:
+    citations: 0
+    title: 'Familial cutaneous melanoma and two-mutational-event modeling: 160'
+    year: '1993'
+  iSjOah4AAAAJ:35N4QoGY0k4C:
+    citations: 12
+    title: The cover number of a matrix and its algorithmic applications
+    year: '2014'
+  iSjOah4AAAAJ:3utUx_xxzcoC:
+    citations: 0
+    title: 'Post-biopsy arterio-venous fistula: Echo-Color Doppler evaluation of its incidence and evolution.'
+    year: '1998'
+  iSjOah4AAAAJ:3yMDF_cvnR8C:
+    citations: 0
+    title: Preliminary Performance Test of ACP Safeguards Neutron Counter
+    year: '2006'
+  iSjOah4AAAAJ:41wR57jXX04C:
+    citations: 0
+    title: tNP-041
+    year: '2005'
+  iSjOah4AAAAJ:4IpgxnMJogoC:
+    citations: 17
+    title: On the cut dimension of a graph
+    year: '2020'
+  iSjOah4AAAAJ:4JMBOYKVnBMC:
+    citations: 94
+    title: 'The approximate rank of a matrix and its algorithmic applications: approximate rank'
+    year: '2013'
+  iSjOah4AAAAJ:4UtermoNRQAC:
+    citations: 3
+    title: A sublinear query quantum algorithm for st minimum cut on dense simple graphs
+    year: '2021'
+  iSjOah4AAAAJ:4b-LE5UluQcC:
+    citations: 0
+    title: Communication Complexity, Linear Optimization, and lower bounds for the nonnegative rank of matrices (Dagstuhl Seminar 13082)
+    year: '2013'
+  iSjOah4AAAAJ:4fKUyHm3Qg0C:
+    citations: 0
+    title: The Catalytic Behavior of Zeolite-HX,-NaX and-KX in CO Reduction and Carburization of WO~ 3 to Manufacture Tungsten Carbide
+    year: '2004'
+  iSjOah4AAAAJ:4xDN1ZYqzskC:
+    citations: 22
+    title: On the sum-of-squares degree of symmetric quadratic functions
+    year: '2016'
+  iSjOah4AAAAJ:5FkVrPDuTQgC:
+    citations: 0
+    title: DECLINING MORTALITY DUE TO MALIGNANT HYPERTENSION IN NEW-YORK-CITY (1958-74)
+    year: '1977'
+  iSjOah4AAAAJ:5Ul4iDaHHb8C:
+    citations: 0
+    title: A study on the enhancement of public confidence to nuclear safety charter
+    year: '2002'
+  iSjOah4AAAAJ:5XSfyxoPzb8C:
+    citations: 2
+    title: Is multiplication harder than addition? arithmetical definability over finite structures
+    year: '2001'
+  iSjOah4AAAAJ:5nxA0vEk-isC:
+    citations: 24
+    title: Quantum algorithm for k-distinctness with prior knowledge on the input
+    year: '2011'
+  iSjOah4AAAAJ:5qu0sgD3nvwC:
+    citations: 0
+    title: 'Crescentic glomerulonephritis: A review of 24 cases.'
+    year: '1998'
+  iSjOah4AAAAJ:6E5OHDUOeTQC:
+    citations: 12
+    title: On the query complexity of connectivity with global queries
+    year: '2021'
+  iSjOah4AAAAJ:6G1OFF11MdUC:
+    citations: 311
+    title: Quantum attacks on Bitcoin, and how to protect against them
+    year: '2017'
+  iSjOah4AAAAJ:7cqQt8SKcR0C:
+    citations: 0
+    title: Overexpression of DD genotype in type 2 diabetic end stage renal failure in Korea
+    year: '2005'
+  iSjOah4AAAAJ:84dCbUURXyIC:
+    citations: 0
+    title: The indicators for practicing oral cancer self-examination
+    year: '2002'
+  iSjOah4AAAAJ:8k81kl-MbHgC:
+    citations: 12
+    title: All Schatten spaces endowed with the Schur product are Q-algebras
+    year: '2012'
+  iSjOah4AAAAJ:9N3KX2BFTccC:
+    citations: 0
+    title: 'Congenital concealed penis: a new technique for correction in children'
+    year: '2004'
+  iSjOah4AAAAJ:9i1gB6tY3MIC:
+    citations: 0
+    title: Effect of carbonization in bias-enhanced nucleation step during highly-oriented growth of diamond films on 6H-SiC (0001) substrate
+    year: '2004'
+  iSjOah4AAAAJ:9xDRhSErrBIC:
+    citations: 1
+    title: Arithmetical definability over finite structures
+    year: '2002'
+  iSjOah4AAAAJ:9yKSN-GCB0IC:
+    citations: 120
+    title: A direct product theorem for discrepancy
+    year: '2008'
+  iSjOah4AAAAJ:A8cqit5AE6sC:
+    citations: 0
+    title: A proof-of-concept study of oral DA-9102 in adult patients with mild to moderate atopic dermatitis
+    year: '2007'
+  iSjOah4AAAAJ:A_xf8jiGkywC:
+    citations: 0
+    title: Supercritical CO {sub 2} Brayton Cycle Energy Conversion System Coupled with SFR
+    year: '2008'
+  iSjOah4AAAAJ:Bg7qf7VwUHIC:
+    citations: 0
+    title: Integration and reliability of a manufacturable 130nm dual damascene Cu/low-k process
+    year: '2004'
+  iSjOah4AAAAJ:C-GuzCveMkwC:
+    citations: 0
+    title: Mumetal Growing Temperature Effect on the Exchange Coupling of Cu/mumetal/Al Oxide/Co/Cu Multilayers
+    year: '2002'
+  iSjOah4AAAAJ:C33y2ycGS3YC:
+    citations: 1
+    title: STUDIES ON A MELANOCYTE-STIMULATING HORMONE-SENSITIVE ADENYL-CYCLASE OF MOUSE MELANOMA
+    year: '1974'
+  iSjOah4AAAAJ:CREiCvMVTUAC:
+    citations: 0
+    title: 'Isolated C3 mesangial proliferative glomerulonephritis: A case of rapid progression to chronic renal failure.'
+    year: '1997'
+  iSjOah4AAAAJ:CrVLTnlDqZQC:
+    citations: 2
+    title: Novel Effect of Thiourea/Urea Additives on the Nucleophilic Aromatic Substitution of 2, 4-Dimethoxynitrobenzene
+    year: '2019'
+  iSjOah4AAAAJ:Cv-mv52rCCkC:
+    citations: 1
+    title: Optimal composition theorem for randomized query complexity
+    year: '2023'
+  iSjOah4AAAAJ:D8wXzuvKacYC:
+    citations: 0
+    title: Development of a combined therapy with holmium-166 and dendritic cells for mouse malignant melanoma
+    year: '2003'
+  iSjOah4AAAAJ:D_tqNUsBuKoC:
+    citations: 0
+    title: Effect of beta-msh on the tyrosinase activity and the rate of melanin accumulation of melanoma cells in vitro.
+    year: '1977'
+  iSjOah4AAAAJ:Dem6FJhTUoYC:
+    citations: 0
+    title: Emergent stent-assisted recanalization for wake-up stroke
+    year: '2015'
+  iSjOah4AAAAJ:ECJ25tEN_EwC:
+    citations: 0
+    title: 'Acute instent thrombosis during stenting of intracranial artery stenosis: Rescue therapeutic method with intraarterial administration of glycoprotein IIb/IIIa inhibitor'
+    year: '2004'
+  iSjOah4AAAAJ:EYYDruWGBe4C:
+    citations: 0
+    title: "\uACF5\uC5C5\uD654\uD559 \uCD09\uB9E4/\uBC18\uC751\uACF5\uD559/Microemulsion \uC744 \uC774\uC6A9\uD55C \uC2E0\uADDC \uCD09\uB9E4 \uC81C\uC870\uBC95\uC5D0\uC11C\uC758 Pd/ZrO2 \uCD09\uB9E4\uC758 Pd \uC785\uC790\uACBD \uC81C\uC5B4"
+    year: '2000'
+  iSjOah4AAAAJ:EbDKHhGulSgC:
+    citations: 0
+    title: The effect of electrical annealing for the uniform emission pattern from double-walled carbon nanotube emitters
+    year: '2004'
+  iSjOah4AAAAJ:EupYgYwc-6gC:
+    citations: 0
+    title: "\uC804\uC2E0 \uC9C8\uD658 \uBC0F \uACBD\uAD6C \uCCA0\uBD84 \uC81C\uC7AC\uC640 \uC5F0\uAD00\uB41C \uC2ED\uC774\uC9C0\uC7A5 \uAC00\uC131\uD751\uC0C9\uC99D 2 \uC608"
+    year: '2009'
+  iSjOah4AAAAJ:FSl0EHHYj-kC:
+    citations: 12
+    title: Quantum complexity of minimum cut
+    year: '2020'
+  iSjOah4AAAAJ:FXgMSCUEOHUC:
+    citations: 0
+    title: 'Withaferin A sensitizes human renal cancer cells to TRAIL-mediated apoptosis through DR5 up-regulation and down-regulation of c-FLIP: PP7C-40'
+    year: '2008'
+  iSjOah4AAAAJ:FuNQ1RLggQIC:
+    citations: 1
+    title: Sequential Anaerobic/Aerobic Degradation of Tetrachloroethylene in a Soil Enrichment Culture
+    year: '1999'
+  iSjOah4AAAAJ:Fx7lCCP36QIC:
+    citations: 0
+    title: On the sum-of-squares degree of symmetric quadratic functions
+    year: '2016'
+  iSjOah4AAAAJ:GdooyxxgJVwC:
+    citations: 20
+    title: A composition theorem for randomized query complexity
+    year: '2017'
+  iSjOah4AAAAJ:GnPB-g6toBAC:
+    citations: 34
+    title: Some upper and lower bounds on PSD-rank
+    year: '2017'
+  iSjOah4AAAAJ:H1aCVKaixnMC:
+    citations: 6
+    title: On the randomised query complexity of composition
+    year: '2018'
+  iSjOah4AAAAJ:HGTzPopzzJcC:
+    citations: 0
+    title: Development of optimal guideline for effective dendritic cell immunotherapy in mouse melanoma
+    year: '2007'
+  iSjOah4AAAAJ:HZAC7m4lW-wC:
+    citations: 0
+    title: Synthesis of aligned self-joint carbon nanotubes
+    year: '2004'
+  iSjOah4AAAAJ:HbR8gkJAVGIC:
+    citations: 115
+    title: Separations in query complexity based on pointer functions
+    year: '2017'
+  iSjOah4AAAAJ:HhcuHIWmDEUC:
+    citations: 0
+    title: Fabrication and electrical characterization of FETs using CNTs and nanowires by proton irradiation and ion doping
+    year: '2007'
+  iSjOah4AAAAJ:HtS1dXgVpQUC:
+    citations: 0
+    title: Aboanber, AE, 347 Alan, K.-I., 277 Atalay, MA, 253 Avogadri, P., 237
+    year: Unknown Year
+  iSjOah4AAAAJ:ILCMxgzxjrQC:
+    citations: 1
+    title: Evaluation of Step Feeding Strategy in One-Stage Simultaneous Partial Nitritation, Anammox and Denitrification (SPNAD) Process
+    year: '2020'
+  iSjOah4AAAAJ:IjCSPb-OGe4C:
+    citations: 20
+    title: Arithmetical definability over finite structures
+    year: '2003'
+  iSjOah4AAAAJ:JTqpx9DYBaYC:
+    citations: 0
+    title: "Development of Artificial Inserr \uB530 lation Techniques with a Minimum Numbers of Insemination Spermatozoa using Laparoscopy"
+    year: '2004'
+  iSjOah4AAAAJ:JV2RwH3_ST0C:
+    citations: 24
+    title: Information-theoretic approximations of the nonnegative rank
+    year: '2017'
+  iSjOah4AAAAJ:Jxy3h8XkNu0C:
+    citations: 0
+    title: SO {sub 2} reduction using coal gas over SnO {sub 2}-ZrO {sub 2} catalysts for hot gas cleaning
+    year: '2005'
+  iSjOah4AAAAJ:KbBQZpvPDL4C:
+    citations: 0
+    title: Synthesis of Oredered Type Macro-porous Alumina for Micro-Channel Catalytic Reactor
+    year: Unknown Year
+  iSjOah4AAAAJ:L8oS6_awjPoC:
+    citations: 0
+    title: Prediction of Removal Efficiency in UV/TiO~ 2/H~ 2O~ 2 System using Error Back-propagation Neural Network
+    year: '2001'
+  iSjOah4AAAAJ:LGA7_l5-FVwC:
+    citations: 0
+    title: Magnetic Anisotropy Energy Distribution and Magnetization of CoPt Nanoparticles Encaged in Protein Shell
+    year: '2017'
+  iSjOah4AAAAJ:LPtt_HFRSbwC:
+    citations: 0
+    title: Effect of in situ plasma treatment on high-k films after high-k removal with plasma etching from the S/D region
+    year: '2007'
+  iSjOah4AAAAJ:LWUVeqegjeYC:
+    citations: 0
+    title: GENERATION OF LEUKOTRIENES BY HUMAN-MONOCYTES IN RESPONSE TO A CHEMOTACTIC PEPTIDE
+    year: '1986'
+  iSjOah4AAAAJ:L_at8tGC9oEC:
+    citations: 6
+    title: Bounding quantum-classical separations for classes of nonlocal games
+    year: '2018'
+  iSjOah4AAAAJ:L_l9e5I586QC:
+    citations: 0
+    title: Studies on a melanocyte-stimulating hormone-sensitive adenyl cyclase of mouse melanoma. Abstr.
+    year: '1974'
+  iSjOah4AAAAJ:LkGwnXOMwfcC:
+    citations: 14
+    title: Kolmogorov complexity and formula size lower bounds
+    year: '2005'
+  iSjOah4AAAAJ:LvS0yHEg1QsC:
+    citations: 0
+    title: Wegener's granulomatosis. Unusual features.
+    year: '1969'
+  iSjOah4AAAAJ:M05iB0D1s5AC:
+    citations: 17
+    title: Query complexity in expectation
+    year: '2015'
+  iSjOah4AAAAJ:M6kHaddf_34C:
+    citations: 0
+    title: Language Compression and Pseudorandom Generators
+    year: '2004'
+  iSjOah4AAAAJ:MKvDIwB-zewC:
+    citations: 0
+    title: Factors contributing to the outcome in patients with idiopathic membranous glomerulonephritis-Single center study in Korea.
+    year: '1997'
+  iSjOah4AAAAJ:MOUuoOoUJb4C:
+    citations: 0
+    title: A Design Study for a New Neutron Counter Based on an Annular Tube-Type 3He Detector through a Monte Carlo Simulation
+    year: '2009'
+  iSjOah4AAAAJ:N3SpgoQaeaUC:
+    citations: 0
+    title: Identification, prediction and evaluation-Practical approach to parameter estimation for ASM3+ bio-P module applied to five-stage step-feed ESPR process
+    year: '2006'
+  iSjOah4AAAAJ:NDuN12AVoxsC:
+    citations: 0
+    title: Comparative measurements of bubble velocity by LDV and two-conductivity probe
+    year: '1999'
+  iSjOah4AAAAJ:NMxIlDl6LWMC:
+    citations: 3
+    title: The spectrum of small de Morgan formulas
+    year: '2012'
+  iSjOah4AAAAJ:Ncwx4PHgTB8C:
+    citations: 0
+    title: Development of distributed real-time platform for the information processing system for the Korean next generation reactor
+    year: '1999'
+  iSjOah4AAAAJ:NhqRSupF_l8C:
+    citations: 0
+    title: Radial Electron Beam Irradiator for Industrial Applications
+    year: '2004'
+  iSjOah4AAAAJ:NzUpm4bhSXQC:
+    citations: 0
+    title: ' effects in Chern-Simons QED with a four-Fermi interaction'
+    year: '1992'
+  iSjOah4AAAAJ:P9oYG7HA76QC:
+    citations: 5
+    title: 2011 IEEE 52nd Annual Symposium on Foundations of Computer Science
+    year: '2011'
+  iSjOah4AAAAJ:PNc4OtJD23oC:
+    citations: 16
+    title: A composition theorem for randomized query complexity via max conflict complexity
+    year: '2018'
+  iSjOah4AAAAJ:PyEswDtIyv0C:
+    citations: 27
+    title: Separations in communication complexity using cheat sheets and information complexity
+    year: '2016'
+  iSjOah4AAAAJ:Q7hiZQKJ-pAC:
+    citations: 3
+    title: On the noise stability of small Demorgan formulas
+    year: '2012'
+  iSjOah4AAAAJ:QUKcMBy53xEC:
+    citations: 43
+    title: Two new results about quantum exact learning
+    year: '2021'
+  iSjOah4AAAAJ:QUYzkoTeugQC:
+    citations: 0
+    title: 'Acute instent thrombosis during stenting of intracranial artery stenosis: Rescue therapeutic method with intra-arterial administration of glycoprotein IIb/IIIa inhibitor.'
+    year: '2004'
+  iSjOah4AAAAJ:QlYoQ0azr6kC:
+    citations: 1
+    title: Uncertainty Components for Two Approaches to Spent Fuel Assay
+    year: Unknown Year
+  iSjOah4AAAAJ:Qo9Q-PfIzZ0C:
+    citations: 0
+    title: A scale-dependent cosmology for the inhomogeneous Universe
+    year: '1995'
+  iSjOah4AAAAJ:R3JqVFXIqpYC:
+    citations: 0
+    title: 'Analysis of fecal microbiota and effectiveness of a probiotic, VSL# 3 in patients with functional constipation: A Korean multicenter study'
+    year: '2012'
+  iSjOah4AAAAJ:R3hNpaxXUhUC:
+    citations: 0
+    title: Approximation norms and duality for communication complexity lower bounds
+    year: '2008'
+  iSjOah4AAAAJ:RELVpAr6_7wC:
+    citations: 0
+    title: CATALYTIC REDUCTION OF SO2 UNDER REGENERATOR OFF-GAS CONTAINING OXYGEN OVER Cu-Sn-Zr BASED OXIDES FOR HOT COAL GAS DESULFURIZATION PROCESS
+    year: Unknown Year
+  iSjOah4AAAAJ:RGp4dj-Wy-oC:
+    citations: 1
+    title: Research for the supercritical carbon dioxide Brayton cycle energy conversion system related with Gen-IV SFR
+    year: '2009'
+  iSjOah4AAAAJ:RHpTSmoSYBkC:
+    citations: 1
+    title: 'Dagstuhl Report 13082: Communication Complexity, Linear Optimization, and lower bounds for the nonnegative rank of matrices'
+    year: '2013'
+  iSjOah4AAAAJ:RJOyoaXV5v8C:
+    citations: 0
+    title: THE INVITRO ESTABLISHMENT OF OSTEOPETROTIC (OP/OP) STROMA IN DEFINING OSTEOCLAST PROGENITOR DIFFERENTIATION-EVIDENCE FOR A DISTINCT OSTEOCLAST LINEAGE
+    year: '1993'
+  iSjOah4AAAAJ:RVsengBWOnMC:
+    citations: 0
+    title: 'Diffusion-Weighted Imaging Findings After Endovascular Stent Employment in Cerebral Artery Stenosis: P260'
+    year: '2006'
+  iSjOah4AAAAJ:SAguW2jnL4UC:
+    citations: 0
+    title: LIPIcs, Volume 93, FSTTCS'17, Complete Volume
+    year: '2018'
+  iSjOah4AAAAJ:Se3iqnhoufwC:
+    citations: 19
+    title: Kolmogorov complexity with error
+    year: '2006'
+  iSjOah4AAAAJ:SeFeTyx0c_EC:
+    citations: 10
+    title: Fooling-sets and rank
+    year: '2015'
+  iSjOah4AAAAJ:TFP_iSt0sucC:
+    citations: 0
+    title: CCC 2013
+    year: Unknown Year
+  iSjOah4AAAAJ:TQgYirikUcIC:
+    citations: 45
+    title: Multipartite entanglement in XOR games.
+    year: '2013'
+  iSjOah4AAAAJ:TlpoogIpr_IC:
+    citations: 0
+    title: Gravity, space and locality in perspective of child language
+    year: '2004'
+  iSjOah4AAAAJ:TlqgXrSKREMC:
+    citations: 0
+    title: Initial antibiotic treatment of hemodialysis catheter-related sepsis without catheter removal.
+    year: '1997'
+  iSjOah4AAAAJ:Tyk-4Ss8FVUC:
+    citations: 18
+    title: Tight adversary bounds for composite functions
+    year: '2005'
+  iSjOah4AAAAJ:UBSsHvkqiq4C:
+    citations: 1
+    title: Ia-172 is an antigenic determinant on DRw3
+    year: '1980'
+  iSjOah4AAAAJ:UTh8PbecGs4C:
+    citations: 0
+    title: 37th IARCS Annual Conference on Foundations of Software Technology and Theoretical Computer Science (FSTTCS 2017)
+    year: '2018'
+  iSjOah4AAAAJ:UZk6qv0A6XIC:
+    citations: 1
+    title: Development of a Safeguards Approach for a Pyroprocessing Plant by IAEA Member State Support Program
+    year: '2012'
+  iSjOah4AAAAJ:UeHWp8X0CEIC:
+    citations: 172
+    title: Lower bounds in communication complexity
+    year: '2009'
+  iSjOah4AAAAJ:UuaQgmrAG1sC:
+    citations: 0
+    title: Can Bitcoin Survive Quantum Computers? Crypto Briefing
+    year: '2018'
+  iSjOah4AAAAJ:VN7nJs4JPk0C:
+    citations: 0
+    title: Proton irradiation and ion-doping effects on the electrical properties of nanodevices
+    year: '2008'
+  iSjOah4AAAAJ:VfMbra648c4C:
+    citations: 0
+    title: In vitro Activities and in vivo Efficacies of DA-074 a New Cephalosporin
+    year: '2000'
+  iSjOah4AAAAJ:W6h41lW4BooC:
+    citations: 0
+    title: Design and Flow Analysis for the Supercritical CO {sub 2} Turbomachinery
+    year: '2007'
+  iSjOah4AAAAJ:W7OEmFMy1HYC:
+    citations: 16
+    title: A new rank technique for formula size lower bounds
+    year: '2007'
+  iSjOah4AAAAJ:WF5omc3nYNoC:
+    citations: 7
+    title: Product theorems via semidefinite programming
+    year: '2008'
+  iSjOah4AAAAJ:WMsFzbFqK_QC:
+    citations: 0
+    title: Molecular structure of solvated molecules measured using an ultrafast laboratory-based x-ray source.
+    year: '2002'
+  iSjOah4AAAAJ:Xl6nMSl579sC:
+    citations: 0
+    title: E-007 Urgent recanalization with stent for severe intracranial stenosis in patients with transient ischemic attack or minor stroke
+    year: '2012'
+  iSjOah4AAAAJ:Y0pCki6q_DkC:
+    citations: 24
+    title: Optimal quantum adversary lower bounds for ordered search
+    year: '2008'
+  iSjOah4AAAAJ:YClPFpxzHmwC:
+    citations: 0
+    title: Dynamic Simulation of Startup in PGSFR
+    year: Unknown Year
+  iSjOah4AAAAJ:YFjsv_pBGBYC:
+    citations: 15
+    title: A quadratically tight partition bound for classical communication complexity and query complexity
+    year: '2014'
+  iSjOah4AAAAJ:Yo42cslQ7-cC:
+    citations: 0
+    title: 340 CORE TEMPERATURE OF END-STAGE OSTEOARTHRITIC KNEE
+    year: '2009'
+  iSjOah4AAAAJ:YohjEiUPhakC:
+    citations: 10
+    title: 'Limitations of convex programming: lower bounds on extended formulations and factorization ranks (Dagstuhl Seminar 15082)'
+    year: '2015'
+  iSjOah4AAAAJ:YpRCXavlr0AC:
+    citations: 0
+    title: "Cerebral Perfusion Changes After Endovascular Stenting in Symptomatic Carotid and MCA Stenosis Using Statistical Parametric Mapping and Statistical Probabilistic Anatomic Map \u2026"
+    year: '2005'
+  iSjOah4AAAAJ:YsMSGLbcyi4C:
+    citations: 25
+    title: Lower bounds on quantum multiparty communication complexity
+    year: '2009'
+  iSjOah4AAAAJ:Z8CpXElfgm4C:
+    citations: 0
+    title: 'PRELIMINARY CALIBRATION OF THE ACP SAFEGUARDS NEUTRON COUNTER: MONTE CARLO SIMULATION'
+    year: Unknown Year
+  iSjOah4AAAAJ:ZeXyd9-uunAC:
+    citations: 20
+    title: New bounds on the classical and quantum communication complexity of some graph properties
+    year: '2012'
+  iSjOah4AAAAJ:_FxGoFyzp5QC:
+    citations: 50
+    title: An approximation algorithm for approximation rank
+    year: '2009'
+  iSjOah4AAAAJ:_Qo2XoVZTnwC:
+    citations: 0
+    title: The Quantum Adversary Method and Classical Formula Size Lower Bounds
+    year: Unknown Year
+  iSjOah4AAAAJ:__bU50VfleQC:
+    citations: 0
+    title: Development of a novel botanical drug (DA-9701), as a new prokinetic agent
+    year: '2011'
+  iSjOah4AAAAJ:_axFR9aDTf0C:
+    citations: 71
+    title: Improved quantum query algorithms for triangle detection and associativity testing
+    year: '2017'
+  iSjOah4AAAAJ:_kc_bZDykSQC:
+    citations: 35
+    title: A strong direct product theorem for quantum query complexity
+    year: '2013'
+  iSjOah4AAAAJ:_r6PDwDh8pAC:
+    citations: 9
+    title: 46th International Colloquium on Automata, Languages, and Programming (ICALP 2019)
+    year: '2019'
+  iSjOah4AAAAJ:aKos2Y7kUz0C:
+    citations: 0
+    title: SO {sub 2} emission control with coal gas over SnO {sub 2}-ZrO {sub 2} catalysts for DSRP in IGCC power system
+    year: '2005'
+  iSjOah4AAAAJ:aar0OkpPRdAC:
+    citations: 0
+    title: AMT and MT Survey at the Mid-mountain Area of Jeju Island, Korea
+    year: '2005'
+  iSjOah4AAAAJ:b0M2c_1WBrUC:
+    citations: 0
+    title: A Preliminary Study of Carbon Nanotubes as an High Quality E-Beam Souce for the Advanced Accelerators, FELs and Low Energy E-beam Irradiator
+    year: '2004'
+  iSjOah4AAAAJ:bJZ_LSxkz4EC:
+    citations: 0
+    title: Is the reflux characteristic to provoke heartburn, chest pain and cough different? The study using multichannel impedance-pH monitoring in patient with positive symptom index
+    year: '2012'
+  iSjOah4AAAAJ:bgW0xdllhO4C:
+    citations: 0
+    title: Synthesis and Structure of aligned Carbon nanotubes
+    year: '2003'
+  iSjOah4AAAAJ:brChLMnLtjYC:
+    citations: 0
+    title: Anaerobic treatment for strong nitrogen removal-Activity of sulphate reducing bacteria according to COD/SO42-ratio of acrylonitrile wastewater containing high sulphate
+    year: '2004'
+  iSjOah4AAAAJ:c2351ekuFcIC:
+    citations: 0
+    title: Absence of bile on endoscopy as a predictive factor for suppurative cholangitis in acute calculous cholangitis
+    year: '2017'
+  iSjOah4AAAAJ:ce2CqMG-AY4C:
+    citations: 0
+    title: Supercritical carbon dioxide Brayton cycle energy conversion system
+    year: '2008'
+  iSjOah4AAAAJ:cnT3a81PI4sC:
+    citations: 0
+    title: X-ray absorption spectroscopy of solvated iron pentacarbonyl measured with an ultrafast laser-driven X-ray source.
+    year: '2004'
+  iSjOah4AAAAJ:d7BmB2BcYiwC:
+    citations: 8
+    title: Around the log-rank conjecture
+    year: '2023'
+  iSjOah4AAAAJ:d9ydBXnamCkC:
+    citations: 0
+    title: PART 3-Section 12-Welding and Joining Technology-Fatigue Durability Analysis Based on FE Modeling Support System for Arc-Welded Members in Automobile Suspension Module
+    year: '2007'
+  iSjOah4AAAAJ:dJuzUO4sCEAC:
+    citations: 0
+    title: Ia-715 is an antigenic determinant on DRw2
+    year: '1980'
+  iSjOah4AAAAJ:dTyEYWd-f8wC:
+    citations: 0
+    title: Liver zinc and copper in pre-hibernating, hibernating, post-hibernating male and female golden mantled ground squirrels (Spermophilus lateralis).
+    year: '2001'
+  iSjOah4AAAAJ:dX-nQPao9noC:
+    citations: 3
+    title: Validation of a Design Code for Sodium-to-Sodium Heat Exchangers by Utilizing Computational Fluid Dynamics
+    year: '2016'
+  iSjOah4AAAAJ:de6HPdfwrHoC:
+    citations: 0
+    title: Supercritical CO2 Brayton Cycle Energy Conversion System Coupled with SFR
+    year: '2008'
+  iSjOah4AAAAJ:dhFuZR0502QC:
+    citations: 1
+    title: Lower Bounds for Sizes of Semidefinite Formulations for Some Combinatorial Optimization Problems.
+    year: '2012'
+  iSjOah4AAAAJ:dnWPDgH667kC:
+    citations: 0
+    title: A effective purification procedures of single-walled and double-walled carbon nanotubes
+    year: '2003'
+  iSjOah4AAAAJ:dtdq7L-L3iMC:
+    citations: 0
+    title: Field emission from carbon nanotubes prepared on the Ti/Si substrate using spray technique
+    year: '2003'
+  iSjOah4AAAAJ:e5wmG9Sq2KIC:
+    citations: 0
+    title: The formula size of PARITY
+    year: Unknown Year
+  iSjOah4AAAAJ:e_rmSamDkqQC:
+    citations: 0
+    title: Synthesis and field emission of double-walled carbon nanotubes
+    year: '2005'
+  iSjOah4AAAAJ:eb1hsBXB1ukC:
+    citations: 0
+    title: "MA Schear1, MT Swinhoe1, LW Cambell5, JR Cheatham6, S. Croft1, ML Fensin1, CR Freeman1, CJ Gesh5, A. Hunt7, WE Koehler1, 8, BA Ludewigt9, V. Mozin1, 9, 10, JG Richard1, 11, NP \u2026"
+    year: Unknown Year
+  iSjOah4AAAAJ:eflP2zaiRacC:
+    citations: 0
+    title: Acute oral toxicity of Bisphenol A Di Glycidyl Ether
+    year: '2005'
+  iSjOah4AAAAJ:f8T_-ThkUo0C:
+    citations: 6
+    title: Support based bounds for positive semidefinite rank
+    year: '2012'
+  iSjOah4AAAAJ:fFSKOagxvKUC:
+    citations: 0
+    title: The Preparation of metallic tungsten and flower-like structure tungsten materials with Using CO/CO2 Mixtures
+    year: '2004'
+  iSjOah4AAAAJ:fQNAKQ3IYiAC:
+    citations: 0
+    title: 'Mithramycin A sensitizes trail-mediated apoptosis by down-regulation of XIAP gene promoter through Sp1 sites in renal cancer cells: PP-164'
+    year: '2006'
+  iSjOah4AAAAJ:fh7vmlWxvT0C:
+    citations: 0
+    title: 'Phase II study of adjuvant chemotherapy following concurrent chemoradiation using paclitaxel and carboplatin in cervical cancer: A preliminary report'
+    year: '2011'
+  iSjOah4AAAAJ:foJkpVhfThEC:
+    citations: 0
+    title: Body position and breathing pattern can affect the results of high resolution manometry in healthy adults
+    year: '2010'
+  iSjOah4AAAAJ:gDB6RRZydyMC:
+    citations: 0
+    title: A Preliminary Study of the Cognitive Sequelae and Lateralized Effects of Carotid Artery Stenosis
+    year: '2012'
+  iSjOah4AAAAJ:gXFvZ3BI3UoC:
+    citations: 0
+    title: On-line hemodiafiltration-A safe and efficient way to increase beta (2)-microglobulin removal.
+    year: '1998'
+  iSjOah4AAAAJ:gmhHX4scLhsC:
+    citations: 0
+    title: Leukotrienes and Prostanoids in Health and Disease
+    year: '1990'
+  iSjOah4AAAAJ:gqMmJtG4vxUC:
+    citations: 0
+    title: Anticancer effect of novel CpG oligodeoxynucleotide, KSK-13, via innate immune modulation
+    year: '2003'
+  iSjOah4AAAAJ:gsN89kCJA0AC:
+    citations: 0
+    title: Effect of angle-dependent Gilbert damping due to spin pumping on the magnetization dynamics induced by spin current
+    year: '2006'
+  iSjOah4AAAAJ:h4edN3iSU_gC:
+    citations: 0
+    title: Negative weights make adversaries stronger
+    year: Unknown Year
+  iSjOah4AAAAJ:hC7cP41nSMkC:
+    citations: 3
+    title: Hellinger volume and number-on-the-forehead communication complexity
+    year: '2016'
+  iSjOah4AAAAJ:hMod-77fHWUC:
+    citations: 37
+    title: Matrix completion from any given set of observations
+    year: '2013'
+  iSjOah4AAAAJ:hUq98zRk74IC:
+    citations: 0
+    title: Impaired recruitment and proliferation of osteoclast progenitors in M-CSF deficient osteopetrotic bone marrow in vivo.
+    year: '1996'
+  iSjOah4AAAAJ:iKmOvsfbmGkC:
+    citations: 4
+    title: Characteristics of nitrogen removal and microbial distribution by application of spent sulfidic caustic in pilot scale wastewater treatment plant
+    year: '2010'
+  iSjOah4AAAAJ:io2GbE6LpKQC:
+    citations: 0
+    title: Chapter 3-Epitaxial Growth-3.3 Heteroepitaxy-Effect of Carbonization in Bias-Enhanced Nucleation Step during Highly-Oriented Growth of Diamond Films on 6H-SiC (0001) Substrate
+    year: '2004'
+  iSjOah4AAAAJ:j3f4tGmQtD8C:
+    citations: 13
+    title: Communication complexity, linear optimization, and lower bounds for the nonnegative rank of matrices (Dagstuhl Seminar 13082)
+    year: '2013'
+  iSjOah4AAAAJ:j7_hQOaDUrUC:
+    citations: 0
+    title: INTERFACTICAL CHARACTERISTICS OF Al/Cu COMPOSITE MATERIALS DURING SOLID-STATE DEFORMATION PROCESS
+    year: Unknown Year
+  iSjOah4AAAAJ:jE2MZjpN3IcC:
+    citations: 0
+    title: "HVDC \uD3F4\uB9AC\uBA38 \uC560\uC790\uC758 Grade Ring \uACFC \uC808\uC5F0 \uD2B9\uC131\uC5D0 \uAD00\uD55C \uC5F0\uAD6C"
+    year: '2012'
+  iSjOah4AAAAJ:jFemdcug13IC:
+    citations: 0
+    title: Apparatus and method for detecting forgery/falsification of homepage
+    year: '2016'
+  iSjOah4AAAAJ:jSAVyFp_754C:
+    citations: 0
+    title: State of the Art Laser Induced Breakdown Spectroscopy
+    year: '2004'
+  iSjOah4AAAAJ:jU7OWUQzBzMC:
+    citations: 0
+    title: A contrast enhanced cine CT scanning method for cerebral perfusion measurement
+    year: '1997'
+  iSjOah4AAAAJ:jgBuDB5drN8C:
+    citations: 0
+    title: Compressive strength of FRP for insulator
+    year: '2004'
+  iSjOah4AAAAJ:joW6AvqysxAC:
+    citations: 0
+    title: www. quantumbitcoinmining. com
+    year: '2018'
+  iSjOah4AAAAJ:kJDgFkosVoMC:
+    citations: 0
+    title: Analysis of a Fission Neutron Distribution for a measurement of Mixed Nuclear material Composition
+    year: '2010'
+  iSjOah4AAAAJ:kNdYIx-mwKoC:
+    citations: 29
+    title: A note on the sign degree of formulas
+    year: '2009'
+  iSjOah4AAAAJ:kWvqk_afx_IC:
+    citations: 0
+    title: An experimental study of two-phase flow in inclined subcooled boiling annulus
+    year: '1998'
+  iSjOah4AAAAJ:kz9GbA2Ns4gC:
+    citations: 0
+    title: A Quadratically Tight Partition Bound for Classical Communication and Query Complexity
+    year: Unknown Year
+  iSjOah4AAAAJ:lIaPce-xyHYC:
+    citations: 11
+    title: Practical approach to parameter estimation for ASM3+ bio-P module applied to five-stage step-feed EBPR process
+    year: '2006'
+  iSjOah4AAAAJ:lX_RDcPAamoC:
+    citations: 0
+    title: The direct synthesis of dimethyl ether using syngas over Cu-Zn-Al based catalysts
+    year: '2005'
+  iSjOah4AAAAJ:ldfaerwXgEUC:
+    citations: 8
+    title: The square root rank of the correlation polytope is exponential
+    year: '2014'
+  iSjOah4AAAAJ:lo0OIn9KAZgC:
+    citations: 0
+    title: 'Deleted in Cancer 1 (DICE1) Controls Cristae Morphology: Electron Tomographic and Ultrastructural Analysis of the Mitochondria in C. elegans.'
+    year: '2007'
+  iSjOah4AAAAJ:lw-us_wcTJgC:
+    citations: 0
+    title: 'Structure of solvated Fe (Co) 5: FTIR measurements, X-ray absorption measurements, and density functional theory calculations.'
+    year: '2003'
+  iSjOah4AAAAJ:mSXQG6lSlFkC:
+    citations: 18
+    title: Strategies for quantum races
+    year: '2019'
+  iSjOah4AAAAJ:mUJArPsKIAAC:
+    citations: 0
+    title: Effects of flaking processing of grains on growth performance and nutrient digestibilities for growing Korean native cattle
+    year: '1994'
+  iSjOah4AAAAJ:mVmsd5A6BfQC:
+    citations: 209
+    title: Quantum query complexity of state conversion
+    year: '2011'
+  iSjOah4AAAAJ:mWEH9CqjF64C:
+    citations: 0
+    title: Canonical quantization of (2+ 1)-dimensional gravity coupled to spinning particles
+    year: '1997'
+  iSjOah4AAAAJ:mYLs_rVKHI4C:
+    citations: 0
+    title: Activity of sulphate reducing bacteria according to COD/SO
+    year: Unknown Year
+  iSjOah4AAAAJ:maZDTaKrznsC:
+    citations: 2
+    title: Rank and fooling set size
+    year: '2013'
+  iSjOah4AAAAJ:nRpfm8aw39MC:
+    citations: 0
+    title: New techniques for intracranial stent navigation
+    year: '2004'
+  iSjOah4AAAAJ:nYc7v9NCwtsC:
+    citations: 0
+    title: INCREASED PRODUCTION OF OSTEOCLAST PROGENITORS AND CELL-DEATH IN LONG-TERM BONE-MARROW CULTURES SUPPORTED BY OP/OP MARROW STROMAL CELLS
+    year: '1993'
+  iSjOah4AAAAJ:nZgPvcLaoyMC:
+    citations: 0
+    title: Rabat, Morocco
+    year: '1985'
+  iSjOah4AAAAJ:nZtlP1Cc3DIC:
+    citations: 0
+    title: Finding the KT partition of a weighted graph in near-linear time
+    year: '2021'
+  iSjOah4AAAAJ:noJvBAPgP0YC:
+    citations: 0
+    title: Quantum speedups for graph sparsification, graph cut problems and Laplacian solving
+    year: Unknown Year
+  iSjOah4AAAAJ:owLR8QvbtFgC:
+    citations: 0
+    title: 'CT perfusion: Normal values and reproducibility in man'
+    year: '2000'
+  iSjOah4AAAAJ:pqgf-8x9CmQC:
+    citations: 0
+    title: Microbial degradation of organochlorine compounds
+    year: '1999'
+  iSjOah4AAAAJ:qE25ZKhNtbAC:
+    citations: 9
+    title: Separating quantum communication and approximate rank
+    year: '2016'
+  iSjOah4AAAAJ:qE4H1tSSYIIC:
+    citations: 0
+    title: FAMILIAL MELANOMA AND 2-MUTATIONAL-EVENT MODELING
+    year: '1992'
+  iSjOah4AAAAJ:qjMakFHDy7sC:
+    citations: 113
+    title: Disjointness is hard in the multiparty number-on-the-forehead model
+    year: '2009'
+  iSjOah4AAAAJ:qu5FZ_za5owC:
+    citations: 0
+    title: The cover number of a matrix and its algorithmic applications
+    year: '2014'
+  iSjOah4AAAAJ:qxGx9raSUrEC:
+    citations: 0
+    title: Reduction behavior of ZnO-based sorbents for hot gas desulphurization
+    year: '2005'
+  iSjOah4AAAAJ:qxL8FJ1GzNcC:
+    citations: 37
+    title: A learning graph based quantum query algorithm for finding constant-size subgraphs
+    year: '2011'
+  iSjOah4AAAAJ:r0BpntZqJG4C:
+    citations: 13
+    title: Support-based lower bounds for the positive semidefinite rank of a nonnegative matrix
+    year: '2012'
+  iSjOah4AAAAJ:rPbfW60zdgkC:
+    citations: 1
+    title: EFFECTS OF THE PLATELET ACTIVATING FACTOR (PAF) ANTAGONIST BN52063 ON THE CLINICAL AND HISTOLOGICAL RESPONSES TO PAF IN ATOPIC SKIN
+    year: '1989'
+  iSjOah4AAAAJ:rTD5ala9j4wC:
+    citations: 0
+    title: Thermodynamics of non-Abelian Chern-Simons particles
+    year: '1993'
+  iSjOah4AAAAJ:rblf-tZpB2YC:
+    citations: 0
+    title: 'Ultrafast lasers and x-ray absorption spectroscopy: Investigating molecular structure and dynamics of solvated molecules.'
+    year: '2002'
+  iSjOah4AAAAJ:rn2Io16i3IwC:
+    citations: 31
+    title: Quantum algorithms for graph problems with cut queries
+    year: '2021'
+  iSjOah4AAAAJ:roLk4NBRz8UC:
+    citations: 27
+    title: Resource bounded symmetry of information revisited
+    year: '2005'
+  iSjOah4AAAAJ:sAujV351FBYC:
+    citations: 0
+    title: Effects of post-annealing on magnetic properties and microstructure of CoCrPt-SiO2 perpendicular magnetic recording media
+    year: '2006'
+  iSjOah4AAAAJ:sEK1m4D7fbcC:
+    citations: 0
+    title: Oxidative Decomposition of CFC-113 on Various Acidic Catalysis
+    year: '1996'
+  iSjOah4AAAAJ:sNmaIFBj_lkC:
+    citations: 0
+    title: MECHANISMS OF ISOTOPIC EQUILIBRATION DURING METAMORPHISM OF TILLITES FROM THE OGCHEON BELT, SOUTH-KOREA
+    year: '1984'
+  iSjOah4AAAAJ:sWz8iI0ruhYC:
+    citations: 0
+    title: Usefulness of HCL-Induced Magnetic Resonance Cholangiopancreatography
+    year: '2009'
+  iSjOah4AAAAJ:sYWh8IhQ1GMC:
+    citations: 0
+    title: Two new results about exact quantum learning
+    year: '2019'
+  iSjOah4AAAAJ:seU1ZbiIO-YC:
+    citations: 0
+    title: 'Reactive oxygen species due to expression level of mitochondrial protein reorganizes mitochondrial cristae/inner membrane structure: PP4C-7'
+    year: '2008'
+  iSjOah4AAAAJ:sq_mVe84DbIC:
+    citations: 5
+    title: D. Zazulina V. Paz-Ares L
+    year: '2016'
+  iSjOah4AAAAJ:sszUF3NjhM4C:
+    citations: 0
+    title: E-004 Safety and efficacy of transluminal balloon angioplasty using a compliant balloon for severe cerebral vasospasm after an aneurysmal subarachnoid hemorrhage
+    year: '2011'
+  iSjOah4AAAAJ:t1niNHmIXQYC:
+    citations: 0
+    title: Supragastric belching induce re-reflux during reflux period are frequent phenomenon in GERD patients with belching
+    year: '2019'
+  iSjOah4AAAAJ:t6hKUfryX1MC:
+    citations: 17
+    title: On the quantum time complexity of divide and conquer
+    year: '2023'
+  iSjOah4AAAAJ:tS2w5q8j5-wC:
+    citations: 0
+    title: Synthesis of vertically aligned carbon nanotubes on a large area using thermal chemical vapor deposition
+    year: '2001'
+  iSjOah4AAAAJ:tzM49s52ZIMC:
+    citations: 0
+    title: Estimation of the Composition of HgCdTe/CdZnTe grown by Molecular Beam Epitaxy
+    year: '1996'
+  iSjOah4AAAAJ:tzPJaSocouwC:
+    citations: 3
+    title: "EVALUATION OF VITAMIN E ADDED ULTRA HIGH MOLECULAR WEIGHT POLYETHYLENE IN TOTAL KNEE ARTHROPLASTY\u2013JOINT FLUID CONCENTRATIONS OF TOCOPHEROL AND MATRIX METALLOPROTEINASE 9"
+    year: '2010'
+  iSjOah4AAAAJ:u-x6o8ySG0sC:
+    citations: 84
+    title: The quantum adversary method and classical formula size lower bounds
+    year: '2006'
+  iSjOah4AAAAJ:u5HHmVD_uO8C:
+    citations: 251
+    title: Negative weights make adversaries stronger
+    year: '2007'
+  iSjOah4AAAAJ:uLbwQdceFCQC:
+    citations: 0
+    title: Long-term outcome of renal transplant recipients in children (< 20yrs) with focal segmental glomerulosclerosis.
+    year: '2005'
+  iSjOah4AAAAJ:uWFADo6cQ7YC:
+    citations: 36
+    title: Cut query algorithms with star contraction
+    year: '2022'
+  iSjOah4AAAAJ:uXirmJe02n4C:
+    citations: 0
+    title: Tumor Angiogenesis in Uterine Cervical Neoplasia and Relation of Angiogenesis to Neoadjuvant Chemotherapy
+    year: '2001'
+  iSjOah4AAAAJ:uYElc5AnwZoC:
+    citations: 5
+    title: The quantum query complexity of composition with a relation
+    year: '2020'
+  iSjOah4AAAAJ:vDZJ-YLwNdEC:
+    citations: 0
+    title: Preliminary Design of a Compressor for the Supercritical CO2 Brayton Cycle coupled to KALIMER
+    year: '2007'
+  iSjOah4AAAAJ:wE-fMHVdjMkC:
+    citations: 0
+    title: A Monte Carlo Simulation for a New Neutron Counter Based on an Annular Tube Type He-3 Detector
+    year: '2008'
+  iSjOah4AAAAJ:wNvz2w4be3AC:
+    citations: 0
+    title: 'Insufficient Rome III criteria to diagnose pure functional abdominal pain: the need of ruling out chronic abdominal wall pain'
+    year: '2014'
+  iSjOah4AAAAJ:wvYxNZNCP7wC:
+    citations: 0
+    title: 'COST-EFFECTIVENESS ANALYSIS OF ANTI-PSYCHOTICS BY ROUTE IN SCHIZOPHRENIA: PMH41'
+    year: '2009'
+  iSjOah4AAAAJ:xwIxJehhd2UC:
+    citations: 0
+    title: Recanalization with Wingspan stent for Secondary division of Middle Cerebral Artery Occlusion in Failure or Contraindication to Intravenous Thrombolysis
+    year: '2014'
+  iSjOah4AAAAJ:yFpZgd9WRDkC:
+    citations: 0
+    title: 31st Conference on Computational Complexity (CCC 2016)
+    year: '2016'
+  iSjOah4AAAAJ:yGgOC45Jz5YC:
+    citations: 0
+    title: Analysis of magnetic anisotropy in epitaxially grown Fe film on GaAs (001)
+    year: '2007'
+  iSjOah4AAAAJ:yifHVNw3tWEC:
+    citations: 0
+    title: Query Complexity
+    year: '2022'
+  iSjOah4AAAAJ:yxmsSjX2EkcC:
+    citations: 0
+    title: "\u4FE1\u53F7\u8F6C\u5BFC\u8C03\u63A7\u4E0E\u518D\u72ED\u7A84\u5206\u5B50\u673A\u5236\u7814\u7A76"
+    year: '1995'
+  iSjOah4AAAAJ:zDMysJqCCKgC:
+    citations: 0
+    title: 'Structure of solvated Fe (CO) 5: FTIR/X-ray absorption measurements and their correlation with density functional theory calculations.'
+    year: '2003'
+  iSjOah4AAAAJ:zPkyA21Y468C:
+    citations: 0
+    title: E-070 Endovascular treatment of the vertebral artery origin stenosis by using the closed-cell, self-expandable carotid wallstent
+    year: '2020'
+  iSjOah4AAAAJ:zYLM7Y9cAGgC:
+    citations: 31
+    title: Language compression and pseudorandom generators
+    year: '2005'
