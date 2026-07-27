@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-07-17'
+  last_updated: '2026-07-27'
 papers:
   iSjOah4AAAAJ:-95Q15plzcUC:
     citations: 0
@@ -64,9 +64,9 @@ papers:
   iSjOah4AAAAJ:4IpgxnMJogoC:
     citations: 17
     title: On the cut dimension of a graph
-    year: '2020'
+    year: '2021'
   iSjOah4AAAAJ:4JMBOYKVnBMC:
-    citations: 94
+    citations: 93
     title: 'The approximate rank of a matrix and its algorithmic applications: approximate rank'
     year: '2013'
   iSjOah4AAAAJ:4UtermoNRQAC:
@@ -110,9 +110,9 @@ papers:
     title: On the query complexity of connectivity with global queries
     year: '2021'
   iSjOah4AAAAJ:6G1OFF11MdUC:
-    citations: 311
+    citations: 315
     title: Quantum attacks on Bitcoin, and how to protect against them
-    year: '2017'
+    year: '2018'
   iSjOah4AAAAJ:7cqQt8SKcR0C:
     citations: 0
     title: Overexpression of DD genotype in type 2 diabetic end stage renal failure in Korea
@@ -202,9 +202,9 @@ papers:
     title: "\uC804\uC2E0 \uC9C8\uD658 \uBC0F \uACBD\uAD6C \uCCA0\uBD84 \uC81C\uC7AC\uC640 \uC5F0\uAD00\uB41C \uC2ED\uC774\uC9C0\uC7A5 \uAC00\uC131\uD751\uC0C9\uC99D 2 \uC608"
     year: '2009'
   iSjOah4AAAAJ:FSl0EHHYj-kC:
-    citations: 12
+    citations: 13
     title: Quantum complexity of minimum cut
-    year: '2020'
+    year: '2021'
   iSjOah4AAAAJ:FXgMSCUEOHUC:
     citations: 0
     title: 'Withaferin A sensitizes human renal cancer cells to TRAIL-mediated apoptosis through DR5 up-regulation and down-regulation of c-FLIP: PP7C-40'
@@ -240,7 +240,7 @@ papers:
   iSjOah4AAAAJ:HbR8gkJAVGIC:
     citations: 115
     title: Separations in query complexity based on pointer functions
-    year: '2017'
+    year: '2016'
   iSjOah4AAAAJ:HhcuHIWmDEUC:
     citations: 0
     title: Fabrication and electrical characterization of FETs using CNTs and nanowires by proton irradiation and ion doping
@@ -292,7 +292,7 @@ papers:
   iSjOah4AAAAJ:L_at8tGC9oEC:
     citations: 6
     title: Bounding quantum-classical separations for classes of nonlocal games
-    year: '2018'
+    year: '2019'
   iSjOah4AAAAJ:L_l9e5I586QC:
     citations: 0
     title: Studies on a melanocyte-stimulating hormone-sensitive adenyl cyclase of mouse melanoma. Abstr.
@@ -362,7 +362,7 @@ papers:
     title: On the noise stability of small Demorgan formulas
     year: '2012'
   iSjOah4AAAAJ:QUKcMBy53xEC:
-    citations: 43
+    citations: 44
     title: Two new results about quantum exact learning
     year: '2021'
   iSjOah4AAAAJ:QUYzkoTeugQC:
@@ -488,7 +488,7 @@ papers:
   iSjOah4AAAAJ:Y0pCki6q_DkC:
     citations: 24
     title: Optimal quantum adversary lower bounds for ordered search
-    year: '2008'
+    year: '2007'
   iSjOah4AAAAJ:YClPFpxzHmwC:
     citations: 0
     title: Dynamic Simulation of Startup in PGSFR
@@ -510,7 +510,7 @@ papers:
     title: "Cerebral Perfusion Changes After Endovascular Stenting in Symptomatic Carotid and MCA Stenosis Using Statistical Parametric Mapping and Statistical Probabilistic Anatomic Map \u2026"
     year: '2005'
   iSjOah4AAAAJ:YsMSGLbcyi4C:
-    citations: 25
+    citations: 26
     title: Lower bounds on quantum multiparty communication complexity
     year: '2009'
   iSjOah4AAAAJ:Z8CpXElfgm4C:
@@ -540,9 +540,9 @@ papers:
   iSjOah4AAAAJ:_kc_bZDykSQC:
     citations: 35
     title: A strong direct product theorem for quantum query complexity
-    year: '2013'
+    year: '2011'
   iSjOah4AAAAJ:_r6PDwDh8pAC:
-    citations: 9
+    citations: 7
     title: 46th International Colloquium on Automata, Languages, and Programming (ICALP 2019)
     year: '2019'
   iSjOah4AAAAJ:aKos2Y7kUz0C:
@@ -776,7 +776,7 @@ papers:
   iSjOah4AAAAJ:mVmsd5A6BfQC:
     citations: 209
     title: Quantum query complexity of state conversion
-    year: '2011'
+    year: '2010'
   iSjOah4AAAAJ:mWEH9CqjF64C:
     citations: 0
     title: Canonical quantization of (2+ 1)-dimensional gravity coupled to spinning particles
@@ -804,7 +804,7 @@ papers:
   iSjOah4AAAAJ:nZtlP1Cc3DIC:
     citations: 0
     title: Finding the KT partition of a weighted graph in near-linear time
-    year: '2021'
+    year: '2022'
   iSjOah4AAAAJ:noJvBAPgP0YC:
     citations: 0
     title: Quantum speedups for graph sparsification, graph cut problems and Laplacian solving
@@ -840,7 +840,7 @@ papers:
   iSjOah4AAAAJ:qxL8FJ1GzNcC:
     citations: 37
     title: A learning graph based quantum query algorithm for finding constant-size subgraphs
-    year: '2011'
+    year: '2012'
   iSjOah4AAAAJ:r0BpntZqJG4C:
     citations: 13
     title: Support-based lower bounds for the positive semidefinite rank of a nonnegative matrix
@@ -920,9 +920,9 @@ papers:
   iSjOah4AAAAJ:u-x6o8ySG0sC:
     citations: 84
     title: The quantum adversary method and classical formula size lower bounds
-    year: '2006'
+    year: '2005'
   iSjOah4AAAAJ:u5HHmVD_uO8C:
-    citations: 251
+    citations: 250
     title: Negative weights make adversaries stronger
     year: '2007'
   iSjOah4AAAAJ:uLbwQdceFCQC:
@@ -930,7 +930,7 @@ papers:
     title: Long-term outcome of renal transplant recipients in children (< 20yrs) with focal segmental glomerulosclerosis.
     year: '2005'
   iSjOah4AAAAJ:uWFADo6cQ7YC:
-    citations: 36
+    citations: 39
     title: Cut query algorithms with star contraction
     year: '2022'
   iSjOah4AAAAJ:uXirmJe02n4C:
