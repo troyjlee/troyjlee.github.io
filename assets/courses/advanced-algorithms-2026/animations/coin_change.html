@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coin Change — fewest coins DP</title>
+<style>
+  :root {
+    --bg: #f1ece1; --paper: #fbf7ed; --ink: #1c1c1c; --muted: #6e6a5f; --rule: #d8d0bf;
+    --idle-fill: #fbf7ed; --idle-stroke: #2a2a2a;
+    --queued-fill: #cad9ee; --queued-stroke: #2e588f; --queued-text: #1d3c66;
+    --active-fill: #f1c79f; --active-stroke: #b85a26; --active-text: #6e3416;
+    --done-fill: #c5d6c2; --done-stroke: #4d7349; --done-text: #2c4329;
+    --best-fill: #b5cdb0; --best-stroke: #2c4329; --best-text: #1f3520;
+    --danger-fill: #f4c5c2; --danger-stroke: #b03a2e; --danger-text: #7a2419;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at top left, rgba(255,240,200,0.4), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(180,170,150,0.15), transparent 50%);
+    color: var(--ink); line-height: 1.5;
+    padding: 1.6rem clamp(1rem, 4vw, 3rem) 1.2rem; min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  header {
+    border-bottom: 1px solid var(--rule); padding-bottom: 1.1rem; margin-bottom: 1.3rem;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 2rem; flex-wrap: wrap;
+  }
+  h1 { font-weight: 600; font-size: clamp(1.5rem, 3vw, 2.1rem); letter-spacing: -0.01em; }
+  h1 .accent { font-style: italic; font-weight: 500; color: var(--muted); }
+  .mono { font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace; }
+  .meta { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 0.7rem;
+          text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+  .stage { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.9fr); gap: 1.4rem; flex: 1; }
+  @media (max-width: 1000px) { .stage { grid-template-columns: 1fr; } }
+  .panel { background: var(--paper); border: 1px solid var(--rule); border-radius: 2px;
+           padding: 1rem 1.1rem 1.1rem; display: flex; flex-direction: column;
+           box-shadow: 0 1px 0 rgba(0,0,0,0.02), 0 6px 24px rgba(50,40,20,0.04); }
+  .panel-label { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 0.65rem;
+                 text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 0.7rem;
+                 display: flex; justify-content: space-between; align-items: center; }
+  .panel-label.spaced { margin-top: 0.95rem; }
+  .viz-panel { min-height: 420px; }
+  .viz-svg { width: 100%; height: auto; display: block; flex: 1; }
+  .state-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+  .state-cell { border: 1px solid var(--rule); border-radius: 2px; padding: 0.45rem 0.4rem;
+                text-align: center; background: #fdfbf5; }
+  .state-cell .label { display: block; font-family: ui-monospace, Menlo, monospace; font-size: 0.56rem;
+                       text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .state-cell .val { display: block; font-family: ui-monospace, Menlo, monospace; font-size: 1.15rem;
+                     font-weight: 600; margin-top: 0.15rem; }
+  .state-cell.amt  .val { color: var(--active-text); }
+  .state-cell.ans  .val { color: var(--best-text); }
+  .note { margin-top: 0.8rem; border-left: 3px solid var(--rule); padding: 0.35rem 0.7rem;
+          background: #fdfbf5; font-size: 0.9rem; color: var(--muted); min-height: 2.4rem; }
+  .code { font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+          font-size: 0.76rem; line-height: 1.6; margin-top: 0.1rem; }
+  .code .ln { display: block; padding: 0.05rem 0.5rem; border-radius: 2px; white-space: pre;
+              border-left: 2px solid transparent; color: #3a362e; }
+  .code .ln.active { background: #fde7cf; border-left-color: var(--active-stroke); color: var(--ink); }
+  .code .kw { color: #9a3b1f; font-weight: 600; }
+  .code .fn { color: #2e588f; font-weight: 600; }
+  .code .num { color: #4d7349; }
+  .code .op { color: var(--muted); }
+  .code .cm { color: #a39a86; font-style: italic; }
+  .caption { margin-top: 1.2rem; padding: 0.7rem 0.2rem 0; border-top: 1px solid var(--rule);
+             display: flex; gap: 0.9rem; align-items: baseline; min-height: 3.4rem; }
+  .step-num { font-family: ui-monospace, Menlo, monospace; font-size: 0.65rem; text-transform: uppercase;
+              letter-spacing: 0.1em; color: var(--muted); white-space: nowrap; padding-top: 0.15rem; }
+  #caption-text { font-size: 1.02rem; }
+  #caption-text code { font-family: ui-monospace, Menlo, monospace; font-size: 0.86em;
+                       background: #efe8d8; padding: 0.05em 0.3em; border-radius: 2px; }
+  .scrubber { margin-top: 0.7rem; }
+  .scrubber input { width: 100%; accent-color: var(--active-stroke); cursor: pointer; }
+  .controls { margin-top: 0.8rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .controls button { font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.85rem;
+                     border: 1px solid var(--idle-stroke); background: var(--paper); color: var(--ink);
+                     border-radius: 2px; cursor: pointer; transition: background 0.15s, transform 0.05s; }
+  .controls button:hover { background: #f2ead8; }
+  .controls button:active { transform: translateY(1px); }
+  .controls button.primary { background: var(--active-fill); border-color: var(--active-stroke); color: var(--active-text); font-weight: 600; }
+  .controls button:disabled { opacity: 0.4; cursor: default; }
+  .step-counter { font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; color: var(--muted); }
+  .controls .spacer { flex: 1; }
+  .controls .speed { font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; text-transform: uppercase;
+                     letter-spacing: 0.08em; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; }
+  .controls select { font-family: inherit; font-size: 0.8rem; padding: 0.2rem 0.3rem; border: 1px solid var(--rule);
+                     border-radius: 2px; background: var(--paper); }
+  .legend { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; font-size: 0.78rem; color: var(--muted); }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 3px; border: 1.4px solid; display: inline-block; }
+  .legend-dot.idle   { background: #f4efe3;            border-color: var(--rule); }
+  .legend-dot.active { background: var(--active-fill); border-color: var(--active-stroke); }
+  .legend-dot.queued { background: var(--queued-fill); border-color: var(--queued-stroke); }
+  .legend-dot.done   { background: var(--done-fill);   border-color: var(--done-stroke); }
+  .legend-dot.best   { background: var(--best-fill);   border-color: var(--best-stroke); }
+  .legend-bar { width: 22px; height: 0; border-top: 2.4px solid var(--active-stroke); display: inline-block; }
+  footer { margin-top: 1.1rem; padding-top: 0.9rem; border-top: 1px solid var(--rule);
+           font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Coin Change <span class="accent">— fewest coins, bottom-up</span></h1>
+  <div class="meta">Week 1 · dynamic programming · Advanced Algorithms</div>
+</header>
+
+<div class="stage">
+  <div class="panel viz-panel">
+    <div class="panel-label">
+      <span id="main-label">dp[a] = fewest coins summing to exactly a</span>
+      <span id="main-status" class="mono"></span>
+    </div>
+    <svg id="viz" class="viz-svg" viewBox="0 0 820 300" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label"><span>State</span><span></span></div>
+    <div class="state-grid">
+      <div class="state-cell amt"><span class="label">amount a</span><span class="val" id="s-a">—</span></div>
+      <div class="state-cell">    <span class="label">dp[a]</span> <span class="val" id="s-dpa">—</span></div>
+      <div class="state-cell">    <span class="label">last coin</span><span class="val" id="s-c">—</span></div>
+      <div class="state-cell ans"><span class="label">dp[18]</span><span class="val" id="s-ans">—</span></div>
+    </div>
+    <div class="note" id="note">Ready.</div>
+
+    <div class="panel-label spaced"><span>Pseudocode</span><span>coin_change</span></div>
+    <div class="code" id="code"></div>
+  </div>
+</div>
+
+<div class="caption" id="caption">
+  <span class="step-num" id="step-num">step 0</span>
+  <span id="caption-text">Ready. Press <em>Step</em> to walk through.</span>
+</div>
+
+<div class="scrubber">
+  <input type="range" id="scrub" min="0" max="0" value="0" step="1" aria-label="Jump to step">
+</div>
+
+<div class="controls">
+  <button id="reset">↺ Reset</button>
+  <button id="prev">← Back</button>
+  <button id="next" class="primary">Step →</button>
+  <button id="play">▶ Play</button>
+  <span class="step-counter" id="step-counter">0 / 0</span>
+  <div class="spacer"></div>
+  <div class="speed">Speed
+    <select id="speed">
+      <option value="1600">slow</option>
+      <option value="950" selected>normal</option>
+      <option value="480">fast</option>
+    </select>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot idle"></span>not computed (∞)</div>
+  <div class="legend-item"><span class="legend-dot active"></span>current amount a</div>
+  <div class="legend-item"><span class="legend-dot queued"></span>subproblem dp[a−c]</div>
+  <div class="legend-item"><span class="legend-dot done"></span>settled</div>
+  <div class="legend-item"><span class="legend-dot best"></span>chosen coin / answer path</div>
+  <div class="legend-item"><span class="legend-bar"></span>last coin taken</div>
+</div>
+
+<footer>dp[a] = 1 + min over coins c ≤ a of dp[a−c] · dp[0]=0 · answer dp[amount] · keys: →/space step · ← back · p play · r reset</footer>
+
+<script>
+'use strict';
+
+/* ============================================================
+   PROBLEM
+   ============================================================ */
+const COINS = [1, 9, 10];
+const AMOUNT = 18;
+const INF = AMOUNT + 1;   // safe sentinel: no answer needs more coins than `amount`
+
+/* ============================================================
+   PSEUDOCODE
+   ============================================================ */
+const codeLines = [
+  { key: 'sig',  html: '<span class="kw">function</span> <span class="fn">coin_change</span>(coins, amount)' },
+  { key: 'init', html: 'dp[0] <span class="op">=</span> <span class="num">0</span>;  dp[a] <span class="op">=</span> ∞ <span class="kw">for</span> a ≥ <span class="num">1</span>', indent: 1 },
+  { key: 'for_a',html: '<span class="kw">for</span> a <span class="op">=</span> <span class="num">1</span> <span class="kw">to</span> amount:', indent: 1 },
+  { key: 'for_c',html: '<span class="kw">for</span> c <span class="kw">in</span> coins <span class="kw">with</span> c ≤ a:', indent: 2 },
+  { key: 'upd',  html: 'dp[a] <span class="op">=</span> <span class="fn">min</span>(dp[a], dp[a<span class="op">−</span>c] <span class="op">+</span> <span class="num">1</span>)', indent: 3 },
+  { key: 'ret',  html: '<span class="kw">return</span> dp[amount]', indent: 1 },
+];
+
+/* ============================================================
+   SIMULATION
+   ============================================================ */
+function buildSteps() {
+  const events = [];
+  const dp = new Array(AMOUNT + 1).fill(INF);
+  const choice = new Array(AMOUNT + 1).fill(null);   // coin taken to achieve dp[a]
+  dp[0] = 0;
+
+  const clone = (x) => x.slice();
+  const shown = (v) => (v >= INF ? '∞' : v);
+
+  function snap(o) {
+    events.push({
+      dp: clone(dp),
+      settledUpTo: o.settledUpTo,        // amounts 1..settledUpTo are committed
+      a: o.a == null ? null : o.a,
+      candidates: o.candidates || [],    // [{c, src, val, win}]
+      bestCoin: o.bestCoin == null ? null : o.bestCoin,
+      isFinal: !!o.isFinal,
+      pathCells: o.pathCells || [],      // reconstruction highlight
+      pathArcs: o.pathArcs || [],        // [{from,to,coin}]
+      coinsUsed: o.coinsUsed || null,
+      caption: o.caption,
+      note: o.note || '',
+      lineKey: o.lineKey || null,
+    });
+  }
+
+  snap({
+    settledUpTo: 0,
+    caption: 'Make change for <code>amount = ' + AMOUNT + '</code> using coins <code>{' + COINS.join(', ') + '}</code>, each in unlimited supply. Goal: the <strong>fewest coins</strong> that sum to exactly ' + AMOUNT + '.',
+    note: 'Subproblem: dp[a] = fewest coins for exactly a.',
+    lineKey: 'sig',
+  });
+  snap({
+    settledUpTo: 0, a: 0,
+    caption: 'Base case: <code>dp[0] = 0</code> — zero coins make amount 0. Every other <code>dp[a]</code> starts at <code>∞</code> (unknown / unreachable).',
+    note: 'INF = amount + 1 = ' + INF + ' is a safe stand-in for ∞.',
+    lineKey: 'init',
+  });
+
+  for (let a = 1; a <= AMOUNT; a++) {
+    const cands = [];
+    let minVal = INF, bestC = null;
+    for (const c of COINS) {
+      if (c <= a && dp[a - c] < INF) {
+        const val = dp[a - c] + 1;
+        cands.push({ c, src: a - c, val });
+        if (val < minVal) { minVal = val; bestC = c; }
+      }
+    }
+    dp[a] = minVal; choice[a] = bestC;
+    cands.forEach(k => { k.win = (k.c === bestC); });
+
+    // caption
+    let cap;
+    if (cands.length === 1) {
+      cap = '<code>a = ' + a + '</code>: only coin <code>' + cands[0].c + '</code> fits. ' +
+            '<code>dp[' + a + '] = dp[' + cands[0].src + '] + 1 = ' + dp[cands[0].src] + ' + 1 = ' + dp[a] + '</code>.';
+    } else {
+      const parts = cands.map(k => 'dp[' + k.src + ']+1=' + k.val);
+      cap = '<code>a = ' + a + '</code>: the last coin is one of <code>{' + cands.map(k => k.c).join(', ') + '}</code>. ' +
+            '<code>dp[' + a + '] = min(' + parts.join(', ') + ') = ' + dp[a] + '</code>. Best last coin: <strong>' + bestC + '</strong>.';
+    }
+    let note = 'dp so far: [' + dp.slice(0, a + 1).map(shown).join(', ') + ']';
+    if (a === 9) note = 'dp[9] drops to 1 — one 9-coin. Greedy (grab 10 first) would miss this.';
+
+    snap({
+      settledUpTo: a, a, candidates: cands, bestCoin: bestC,
+      caption: cap, note, lineKey: 'upd',
+    });
+  }
+
+  // Reconstruction
+  const pathCells = [], pathArcs = [], coinsUsed = [];
+  let a = AMOUNT;
+  while (a > 0) {
+    const c = choice[a];
+    pathCells.push(a);
+    pathArcs.push({ from: a, to: a - c, coin: c });
+    coinsUsed.push(c);
+    a -= c;
+  }
+  pathCells.push(0);
+
+  snap({
+    settledUpTo: AMOUNT, isFinal: true,
+    pathCells, pathArcs, coinsUsed,
+    caption: 'Answer: <code>dp[' + AMOUNT + '] = ' + dp[AMOUNT] + '</code>. Follow the &ldquo;last coin&rdquo; choices back from ' + AMOUNT + ': ' +
+             coinsUsed.map((c, i) => '<code>' + c + '</code>').join(' + ') + ' = ' + AMOUNT + ' — <strong>' + coinsUsed.length + ' coins</strong>.',
+    note: 'Coins used: ' + coinsUsed.join(' + ') + '.',
+    lineKey: 'ret',
+  });
+
+  return events;
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const STEPS = buildSteps();
+const V = { w: 820, h: 300 };
+const N = AMOUNT + 1;
+const CELL = { w: 34, h: 44, gap: 4 };
+const ROW_Y = 150;
+const ROW_W = N * (CELL.w + CELL.gap) - CELL.gap;
+const ROW_X0 = Math.round((V.w - ROW_W) / 2);
+const COIN_Y = 20;
+
+const cellX = (i) => ROW_X0 + i * (CELL.w + CELL.gap);
+const cellCx = (i) => cellX(i) + CELL.w / 2;
+
+const viz = document.getElementById('viz');
+const esc = (s) => String(s);
+
+function cardSVG(x, y, w, h, val, cls) {
+  const styles = {
+    idle:   ['#f4efe3', 'var(--rule)', '#b7ae9b', 1.2],
+    active: ['var(--active-fill)', 'var(--active-stroke)', 'var(--active-text)', 2.4],
+    queued: ['var(--queued-fill)', 'var(--queued-stroke)', 'var(--queued-text)', 2.0],
+    done:   ['var(--done-fill)', 'var(--done-stroke)', 'var(--done-text)', 1.5],
+    best:   ['var(--best-fill)', 'var(--best-stroke)', 'var(--best-text)', 2.4],
+  };
+  const [fill, stroke, tcol, sw] = styles[cls] || styles.idle;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>
+    <text x="${x + w / 2}" y="${y + h / 2 + 1}" text-anchor="middle" dominant-baseline="middle"
+      font-family="ui-monospace, Menlo, monospace" font-weight="600" font-size="16" fill="${tcol}">${esc(val)}</text>`;
+}
+function label(x, y, txt, o = {}) {
+  return `<text x="${x}" y="${y}" text-anchor="${o.anchor || 'middle'}"
+    font-family="ui-monospace, Menlo, monospace" font-size="${o.size || 11}" font-weight="${o.weight || 400}"
+    fill="${o.color || 'var(--muted)'}">${esc(txt)}</text>`;
+}
+function arc(x1, x2, y, opts = {}) {
+  const span = Math.abs(x1 - x2);
+  const apex = y - Math.min(96, 24 + span * 0.34);
+  const midx = (x1 + x2) / 2;
+  const col = opts.color || '#b8b0a0';
+  const w = opts.width || 1.6;
+  const dash = opts.dash ? ` stroke-dasharray="${opts.dash}"` : '';
+  const mk = opts.marker ? ` marker-end="url(#${opts.marker})"` : '';
+  return `<path d="M ${x1} ${y} Q ${midx} ${apex} ${x2} ${y}" fill="none" stroke="${col}" stroke-width="${w}"${dash}${mk}/>`;
+}
+
+function render(s) {
+  let out = '';
+  out += `<defs>
+    <marker id="ah-win" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L7,4 L0,8 z" fill="var(--active-stroke)"/></marker>
+    <marker id="ah-grey" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L7,4 L0,8 z" fill="#b8b0a0"/></marker>
+    <marker id="ah-path" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L7,4 L0,8 z" fill="var(--best-stroke)"/></marker>
+  </defs>`;
+
+  // coins chips
+  out += label(ROW_X0, COIN_Y + 2, 'coins', { anchor: 'start' });
+  let cxc = ROW_X0 + 52;
+  for (const c of COINS) {
+    const hi = (!s.isFinal && s.bestCoin === c) || (s.isFinal && s.coinsUsed && s.coinsUsed.includes(c));
+    const fill = hi ? 'var(--active-fill)' : 'var(--paper)';
+    const stroke = hi ? 'var(--active-stroke)' : 'var(--idle-stroke)';
+    const tcol = hi ? 'var(--active-text)' : 'var(--ink)';
+    const w = 30 + (String(c).length - 1) * 8;
+    out += `<rect x="${cxc}" y="${COIN_Y - 12}" width="${w}" height="26" rx="13" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+      <text x="${cxc + w / 2}" y="${COIN_Y + 2}" text-anchor="middle" dominant-baseline="middle"
+        font-family="ui-monospace, Menlo, monospace" font-weight="600" font-size="14" fill="${tcol}">${c}</text>`;
+    cxc += w + 10;
+  }
+
+  // candidate / reconstruction arcs (draw under cells first)
+  if (!s.isFinal) {
+    for (const k of s.candidates) {
+      out += arc(cellCx(s.a), cellCx(k.src), ROW_Y, {
+        color: k.win ? 'var(--active-stroke)' : '#b8b0a0',
+        width: k.win ? 2.4 : 1.5,
+        dash: k.win ? '' : '4 3',
+        marker: k.win ? 'ah-win' : 'ah-grey',
+      });
+      // value label: winner at the apex (prominent); losers tagged just above their source cell
+      if (k.win) {
+        const span = Math.abs(cellCx(s.a) - cellCx(k.src));
+        const apex = ROW_Y - Math.min(96, 24 + span * 0.34);
+        const midx = (cellCx(s.a) + cellCx(k.src)) / 2;
+        out += label(midx, apex - 4, '+1→' + k.val, { size: 11, color: 'var(--active-text)', weight: 700 });
+      } else {
+        out += label(cellCx(k.src), ROW_Y - 6, '→' + k.val, { size: 9, color: 'var(--muted)' });
+      }
+    }
+  } else {
+    for (const pa of s.pathArcs) {
+      out += arc(cellCx(pa.from), cellCx(pa.to), ROW_Y, { color: 'var(--best-stroke)', width: 2.4, marker: 'ah-path' });
+      const span = Math.abs(cellCx(pa.from) - cellCx(pa.to));
+      const apex = ROW_Y - Math.min(96, 24 + span * 0.34);
+      const midx = (cellCx(pa.from) + cellCx(pa.to)) / 2;
+      out += label(midx, apex - 4, 'coin ' + pa.coin, { size: 10, color: 'var(--best-text)', weight: 700 });
+    }
+  }
+
+  // dp label
+  out += label(ROW_X0, ROW_Y - 12, 'dp', { anchor: 'start' });
+
+  // cells
+  for (let i = 0; i < N; i++) {
+    let cls = 'idle';
+    if (i <= s.settledUpTo) cls = 'done';
+    if (!s.isFinal && s.a === i) cls = 'active';
+    if (!s.isFinal && s.candidates.some(k => k.src === i)) cls = s.candidates.find(k => k.src === i).win ? 'best' : 'queued';
+    if (s.isFinal && s.pathCells.includes(i)) cls = 'best';
+    const v = s.dp[i] >= INF ? '∞' : s.dp[i];
+    out += cardSVG(cellX(i), ROW_Y, CELL.w, CELL.h, v, cls);
+    out += label(cellCx(i), ROW_Y + CELL.h + 14, i, { size: 10 });
+  }
+
+  viz.innerHTML = out;
+
+  // side panel
+  document.getElementById('s-a').textContent = s.a == null ? '—' : s.a;
+  document.getElementById('s-dpa').textContent = (s.a == null || s.dp[s.a] >= INF) ? '—' : s.dp[s.a];
+  document.getElementById('s-c').textContent = s.bestCoin == null ? '—' : s.bestCoin;
+  document.getElementById('s-ans').textContent = s.dp[AMOUNT] >= INF ? '—' : s.dp[AMOUNT];
+  document.getElementById('note').innerHTML = s.note || '';
+  document.getElementById('main-status').textContent = s.isFinal ? ('answer = ' + s.dp[AMOUNT]) : (s.settledUpTo + '/' + AMOUNT + ' settled');
+
+  document.getElementById('code').innerHTML = codeLines.map(l => {
+    const pad = '  '.repeat(l.indent || 0);
+    const active = (l.key === s.lineKey) ? ' active' : '';
+    return `<span class="ln${active}">${pad}${l.html}</span>`;
+  }).join('');
+}
+
+/* ============================================================
+   CONTROLS
+   ============================================================ */
+let idx = 0, playing = false, timer = null;
+const scrub = document.getElementById('scrub');
+scrub.max = STEPS.length - 1;
+const btnNext = document.getElementById('next'), btnPrev = document.getElementById('prev'),
+      btnReset = document.getElementById('reset'), btnPlay = document.getElementById('play'),
+      speedSel = document.getElementById('speed');
+
+function show(i) {
+  idx = Math.max(0, Math.min(STEPS.length - 1, i));
+  const s = STEPS[idx];
+  render(s);
+  document.getElementById('step-num').textContent = 'step ' + idx;
+  document.getElementById('caption-text').innerHTML = s.caption;
+  document.getElementById('step-counter').textContent = idx + ' / ' + (STEPS.length - 1);
+  scrub.value = idx;
+  btnPrev.disabled = (idx === 0);
+  btnNext.disabled = (idx === STEPS.length - 1);
+}
+function stopPlay() { playing = false; if (timer) clearInterval(timer); timer = null; btnPlay.innerHTML = '▶ Play'; }
+function startPlay() {
+  if (idx >= STEPS.length - 1) show(0);
+  playing = true; btnPlay.innerHTML = '❚❚ Pause';
+  timer = setInterval(() => { if (idx >= STEPS.length - 1) { stopPlay(); return; } show(idx + 1); }, parseInt(speedSel.value, 10));
+}
+btnNext.addEventListener('click', () => { stopPlay(); show(idx + 1); });
+btnPrev.addEventListener('click', () => { stopPlay(); show(idx - 1); });
+btnReset.addEventListener('click', () => { stopPlay(); show(0); });
+btnPlay.addEventListener('click', () => { playing ? stopPlay() : startPlay(); });
+scrub.addEventListener('input', () => { stopPlay(); show(parseInt(scrub.value, 10)); });
+speedSel.addEventListener('change', () => { if (playing) { stopPlay(); startPlay(); } });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); stopPlay(); show(idx + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); stopPlay(); show(idx - 1); }
+  else if (e.key === 'p' || e.key === 'P') { playing ? stopPlay() : startPlay(); }
+  else if (e.key === 'r' || e.key === 'R') { stopPlay(); show(0); }
+});
+show(0);
+</script>
+</body>
+</html>

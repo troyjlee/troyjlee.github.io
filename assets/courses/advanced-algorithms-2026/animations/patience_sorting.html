@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patience Sort — LIS in O(n log n)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f1ece1;
+    --paper: #fbf7ed;
+    --ink: #1c1c1c;
+    --muted: #6e6a5f;
+    --rule: #d8d0bf;
+
+    --idle-fill: #fbf7ed;
+    --idle-stroke: #2a2a2a;
+
+    --queued-fill: #cad9ee;
+    --queued-stroke: #2e588f;
+    --queued-text: #1d3c66;
+
+    --active-fill: #f1c79f;
+    --active-stroke: #b85a26;
+    --active-text: #6e3416;
+
+    --done-fill: #c5d6c2;
+    --done-stroke: #4d7349;
+    --done-text: #2c4329;
+
+    --base-fill: #e8d6a8;
+    --base-stroke: #9a7a26;
+    --base-text: #5f4910;
+
+    --best-fill: #b5cdb0;
+    --best-stroke: #2c4329;
+    --best-text: #1f3520;
+
+    --danger-fill: #f4c5c2;
+    --danger-stroke: #b03a2e;
+    --danger-text: #7a2419;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    font-feature-settings: "ss01", "ss02";
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at top left, rgba(255,240,200,0.4), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(180,170,150,0.15), transparent 50%);
+    color: var(--ink);
+    line-height: 1.5;
+    padding: 2rem clamp(1rem, 4vw, 3rem) 1.5rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.2rem;
+    margin-bottom: 1.4rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    letter-spacing: -0.01em;
+  }
+  h1 .accent {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .tab {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 500;
+    background: none;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--active-stroke);
+  }
+  .tab .nibble {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-left: 0.4rem;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(260px, 0.85fr);
+    gap: 1.4rem;
+    flex: 1;
+  }
+  @media (max-width: 1000px) {
+    .stage { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 1rem 1.1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02), 0 6px 24px rgba(50,40,20,0.04);
+  }
+  .panel-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin-bottom: 0.7rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel-label.spaced { margin-top: 0.9rem; }
+
+  .viz-panel { min-height: 480px; }
+  .viz-svg { width: 100%; height: auto; display: block; flex: 1; }
+
+  /* Generic card cell (used for input deck, piles, tails) */
+  .card-rect {
+    rx: 4; ry: 4;
+    stroke-width: 1.4;
+    fill: var(--idle-fill);
+    stroke: var(--idle-stroke);
+    transition: fill 0.25s, stroke 0.25s, stroke-width 0.25s, opacity 0.2s;
+  }
+  .card-rect.dealt        { fill: var(--idle-fill);   stroke: var(--rule); opacity: 0.45; }
+  .card-rect.upcoming     { fill: var(--idle-fill);   stroke: var(--idle-stroke); }
+  .card-rect.active       { fill: var(--active-fill); stroke: var(--active-stroke); stroke-width: 2.4; }
+  .card-rect.in-pile      { fill: var(--idle-fill);   stroke: var(--idle-stroke); }
+  .card-rect.pile-top     { fill: var(--queued-fill); stroke: var(--queued-stroke); stroke-width: 1.8; }
+  .card-rect.compare      { fill: var(--queued-fill); stroke: var(--queued-stroke); stroke-width: 2.2; }
+  .card-rect.skipped      { fill: var(--idle-fill);   stroke: var(--rule); opacity: 0.55; }
+  .card-rect.just-placed  { fill: var(--active-fill); stroke: var(--active-stroke); stroke-width: 2.2; }
+  .card-rect.in-lis       { fill: var(--best-fill);   stroke: var(--best-stroke);   stroke-width: 2.2; }
+  .card-rect.empty        { fill: transparent;        stroke: var(--rule); stroke-dasharray: 3 3; opacity: 0.55; }
+
+  .card-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 16px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    fill: var(--ink);
+    pointer-events: none;
+    transition: fill 0.2s, opacity 0.2s;
+  }
+  .card-val.dealt       { opacity: 0.45; }
+  .card-val.active      { fill: var(--active-text); }
+  .card-val.pile-top    { fill: var(--queued-text); }
+  .card-val.compare     { fill: var(--queued-text); font-weight: 700; }
+  .card-val.skipped     { opacity: 0.45; }
+  .card-val.just-placed { fill: var(--active-text); font-weight: 700; }
+  .card-val.in-lis      { fill: var(--best-text); font-weight: 700; }
+  .card-val.empty       { opacity: 0; }
+
+  .card-idx {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-anchor: middle;
+    fill: var(--muted);
+    font-style: italic;
+    pointer-events: none;
+  }
+
+  .row-label, .col-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    fill: var(--muted);
+  }
+  .col-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-anchor: middle;
+  }
+
+  /* Pile baseline */
+  .pile-base {
+    stroke: var(--rule);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+    opacity: 0.7;
+  }
+  .pile-top-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    fill: var(--queued-text);
+    text-anchor: middle;
+    opacity: 0.85;
+  }
+
+  /* Back-pointer arcs */
+  .arc {
+    stroke: var(--muted);
+    stroke-width: 1.3;
+    fill: none;
+    opacity: 0.55;
+    transition: stroke 0.2s, stroke-width 0.2s, opacity 0.2s;
+  }
+  .arc.fresh  { stroke: var(--active-stroke); stroke-width: 2; opacity: 1; }
+  .arc.in-lis { stroke: var(--best-stroke);   stroke-width: 2.2; opacity: 1; }
+  .arc-tick { fill: var(--muted); opacity: 0.55; }
+  .arc-tick.fresh  { fill: var(--active-stroke); opacity: 1; }
+  .arc-tick.in-lis { fill: var(--best-stroke); opacity: 1; }
+
+  /* Binary search markers (tab 2) */
+  .bs-marker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+  .bs-marker.lo  { fill: var(--queued-text); }
+  .bs-marker.hi  { fill: var(--queued-text); }
+  .bs-marker.mid { fill: var(--active-text); }
+  .bs-bracket {
+    stroke-width: 2;
+    fill: none;
+  }
+  .bs-bracket.lo  { stroke: var(--queued-stroke); }
+  .bs-bracket.hi  { stroke: var(--queued-stroke); }
+  .bs-bracket.mid { stroke: var(--active-stroke); stroke-width: 2.4; }
+
+  .bs-test {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    fill: var(--ink);
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .bs-test.yes { fill: var(--queued-text); }
+  .bs-test.no  { fill: var(--muted); }
+
+  .bs-bg {
+    fill: var(--paper);
+    stroke: var(--rule);
+    stroke-width: 1;
+    rx: 3; ry: 3;
+  }
+
+  /* State panel */
+  .state-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+  }
+  .state-cell {
+    background: var(--idle-fill);
+    border: 1.4px solid var(--idle-stroke);
+    border-radius: 3px;
+    padding: 0.5rem 0.4rem;
+    text-align: center;
+  }
+  .state-cell .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .state-cell .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--ink);
+    display: block;
+  }
+  .state-cell.active { background: var(--active-fill); border-color: var(--active-stroke); }
+  .state-cell.active .label, .state-cell.active .val { color: var(--active-text); }
+  .state-cell.best { background: var(--best-fill); border-color: var(--best-stroke); }
+  .state-cell.best .label, .state-cell.best .val { color: var(--best-text); }
+
+  /* Pseudocode */
+  .code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.65;
+    counter-reset: line;
+  }
+  .code-line {
+    display: flex;
+    gap: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    transition: background 0.15s;
+  }
+  .code-line::before {
+    counter-increment: line;
+    content: counter(line);
+    color: var(--muted);
+    opacity: 0.5;
+    font-size: 0.72rem;
+    width: 1.2rem;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .code-line.highlighted {
+    background: var(--active-fill);
+    color: var(--active-text);
+  }
+  .code-line .kw { color: #8a4f9a; font-weight: 500; }
+  .code-line .fn { color: #2e588f; font-weight: 500; }
+  .code-line .op { color: var(--muted); }
+  .code-line .num { color: var(--base-text); }
+  .code-line .comment { color: var(--muted); font-style: italic; }
+  .code-line.highlighted .kw,
+  .code-line.highlighted .fn,
+  .code-line.highlighted .op,
+  .code-line.highlighted .num,
+  .code-line.highlighted .comment { color: inherit; }
+  .indent   { padding-left: 1.0rem; }
+  .indent-2 { padding-left: 2.0rem; }
+  .indent-3 { padding-left: 3.0rem; }
+  .code-section-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin: 0.5rem 0 0.2rem;
+    padding-left: 0.4rem;
+  }
+  .code-section-label:first-child { margin-top: 0; }
+
+  /* Caption */
+  .caption {
+    margin-top: 1rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--active-stroke);
+    border-radius: 2px;
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    min-height: 3.2rem;
+    display: flex;
+    align-items: center;
+  }
+  .caption.final { border-left-color: var(--best-stroke); }
+  .caption .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-right: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* Controls */
+  .controls {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .controls button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    padding: 0.55rem 0.95rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+  .controls button:hover:not(:disabled) {
+    background: var(--active-fill);
+    border-color: var(--active-stroke);
+    color: var(--active-text);
+  }
+  .controls button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .controls button.primary {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .controls button.primary:hover:not(:disabled) {
+    background: var(--active-stroke); border-color: var(--active-stroke); color: var(--paper);
+  }
+  .controls .spacer { flex: 1; }
+  .controls .step-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-left: 0.5rem;
+  }
+  .controls .speed {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .controls .speed select {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 0.25rem 0.4rem;
+    border-radius: 2px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    border-top: 1px dashed var(--rule);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 2px; border: 1.5px solid;
+  }
+  .legend-dot.active   { background: var(--active-fill); border-color: var(--active-stroke); }
+  .legend-dot.compare  { background: var(--queued-fill); border-color: var(--queued-stroke); }
+  .legend-dot.in-pile  { background: var(--idle-fill);   border-color: var(--idle-stroke); }
+  .legend-dot.in-lis   { background: var(--best-fill);   border-color: var(--best-stroke); }
+  .legend-bar {
+    width: 18px; height: 2px;
+  }
+  .legend-bar.arc     { background: var(--muted); }
+  .legend-bar.arc-lis { background: var(--best-stroke); }
+
+  footer {
+    margin-top: 1.2rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Patience Sort <span class="accent">— LIS via piles, then binary search</span></h1>
+  <div class="meta">Week 1 · Advanced Algorithms</div>
+</header>
+
+<div class="tabs" id="tabs" style="display:none;">
+  <button class="tab active" data-example="piles">Patience Sort</button>
+</div>
+
+<div class="stage">
+
+  <div class="panel viz-panel">
+    <div class="panel-label">
+      <span id="main-label">Dealing cards onto piles</span>
+      <span id="main-status"></span>
+    </div>
+    <svg id="viz" class="viz-svg" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">
+      <span>State</span>
+      <span></span>
+    </div>
+    <div class="state-grid">
+      <div class="state-cell active">
+        <span class="label" id="state-1-label">current</span>
+        <span class="val" id="state-1-val">—</span>
+      </div>
+      <div class="state-cell best">
+        <span class="label" id="state-2-label">piles</span>
+        <span class="val" id="state-2-val">0</span>
+      </div>
+    </div>
+
+    <div class="panel-label spaced">
+      <span>Pseudocode</span>
+      <span id="code-label"></span>
+    </div>
+    <div class="code" id="code"></div>
+  </div>
+
+</div>
+
+<div class="caption" id="caption">
+  <span class="step-num" id="step-num">step 0</span>
+  <span id="caption-text">Ready. Press <em>Step</em> to begin dealing cards.</span>
+</div>
+
+<div class="controls">
+  <button id="reset">↺ Reset</button>
+  <button id="prev">← Back</button>
+  <button id="next" class="primary">Step →</button>
+  <button id="play">▶ Play</button>
+  <span class="step-counter" id="step-counter">0 / 0</span>
+  <div class="spacer"></div>
+  <div class="speed">
+    Speed
+    <select id="speed">
+      <option value="1400">slow</option>
+      <option value="800" selected>normal</option>
+      <option value="380">fast</option>
+    </select>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot active"></span>active card</div>
+  <div class="legend-item"><span class="legend-dot compare"></span>pile top under test</div>
+  <div class="legend-item"><span class="legend-dot in-pile"></span>card on pile</div>
+  <div class="legend-item"><span class="legend-bar arc"></span>back-pointer</div>
+  <div class="legend-item"><span class="legend-dot in-lis"></span>final LIS</div>
+  <div class="legend-item"><span class="legend-bar arc-lis"></span>LIS chain</div>
+</div>
+
+<footer>place each card on the leftmost pile whose top is ≥ it · # piles = LIS length</footer>
+
+<script>
+'use strict';
+
+/* ============================================================
+   INPUT — first 10 digits of pi (same as LIS animation)
+   ============================================================ */
+
+const INPUT = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3];
+
+/* ============================================================
+   PSEUDOCODE
+   ============================================================ */
+
+const programs = {
+  piles: [
+    { key: 'sig',     html: '<span class="kw">function</span> <span class="fn">patience_sort</span>(a)' },
+    { key: 'init',    html: 'piles <span class="op">=</span> []',                                                                                                                                                                                indent: 1 },
+    { key: 'for',     html: '<span class="kw">for</span> x <span class="kw">in</span> a:',                                                                                                                                                       indent: 1 },
+    { key: 'find',    html: 'k <span class="op">=</span> leftmost pile <span class="kw">with</span> top(k) <span class="op">≥</span> x',                                                                                                          indent: 2 },
+    { key: 'append',  html: '<span class="kw">if</span> no such k: start a new pile to the right',                                                                                                                                                indent: 2 },
+    { key: 'place',   html: 'place x <span class="kw">on</span> pile k; arc to top(k <span class="op">−</span> <span class="num">1</span>)',                                                                                                      indent: 2 },
+    { key: 'len',     html: '<span class="kw">return</span> len(piles) <span class="comment">// = LIS length</span>',                                                                                                                              indent: 1 },
+  ],
+  tails: [
+    { key: 'sig',     html: '<span class="kw">function</span> <span class="fn">lis_length</span>(a)' },
+    { key: 'init',    html: 'tails <span class="op">=</span> []',                                                                                                                                                                                indent: 1 },
+    { key: 'for',     html: '<span class="kw">for</span> x <span class="kw">in</span> a:',                                                                                                                                                       indent: 1 },
+    { key: 'bs_init', html: 'lo <span class="op">=</span> <span class="num">0</span>; hi <span class="op">=</span> len(tails)',                                                                                                                    indent: 2 },
+    { key: 'bs_while',html: '<span class="kw">while</span> lo <span class="op">&lt;</span> hi:',                                                                                                                                                  indent: 2 },
+    { key: 'bs_mid',  html: 'mid <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="num">2</span>',                                                                                                indent: 3 },
+    { key: 'bs_test', html: '<span class="kw">if</span> tails[mid] <span class="op">&lt;</span> x: lo <span class="op">=</span> mid <span class="op">+</span> <span class="num">1</span>',                                                          indent: 3 },
+    { key: 'bs_else', html: '<span class="kw">else</span>: hi <span class="op">=</span> mid',                                                                                                                                                     indent: 3 },
+    { key: 'place',   html: '<span class="kw">if</span> lo <span class="op">==</span> len(tails): tails.append(x) <span class="kw">else</span>: tails[lo] <span class="op">=</span> x',                                                            indent: 2 },
+    { key: 'len',     html: '<span class="kw">return</span> len(tails) <span class="comment">// = LIS length</span>',                                                                                                                              indent: 1 },
+  ],
+};
+
+/* ============================================================
+   TAB 1: PATIENCE SORT WITH PILES
+   ============================================================ */
+
+function buildPilesSteps() {
+  const events = [];
+  const n = INPUT.length;
+  // piles[k] = array of { value, inputIdx, predIdx } where predIdx is index into piles[k-1]
+  // (the row in pile k-1 that was the top at placement time)
+  const piles = [];
+
+  // For drawing, each card knows what pile it ended up in and its row position
+  // We also record back-pointers via { srcPile, srcRow, dstPile, dstRow }
+  const arcs = [];
+
+  function snap(opts) {
+    events.push({
+      // Deep-copy piles
+      piles: piles.map(p => p.map(c => Object.assign({}, c))),
+      arcs: arcs.map(a => Object.assign({}, a)),
+      inputCursor: opts.inputCursor == null ? -1 : opts.inputCursor,  // index of card currently being placed; -1 = none
+      // Comparison highlight: which pile's top is being tested
+      testingPile: opts.testingPile == null ? null : opts.testingPile,
+      testingResult: opts.testingResult || null, // 'yes' | 'no' | null
+      justPlaced: opts.justPlaced || null,  // { pile, row }
+      freshArcIdx: opts.freshArcIdx == null ? null : opts.freshArcIdx,
+      // Reconstruction state
+      lisChain: opts.lisChain || null,  // array of { pile, row, value, inputIdx } in LIS order
+      reconstructStep: opts.reconstructStep == null ? null : opts.reconstructStep,
+      isFinal: !!opts.isFinal,
+      caption: opts.caption,
+      lineKey: opts.lineKey || null,
+    });
+  }
+
+  snap({
+    caption: 'Input is the first 10 digits of π. We will deal each digit as a card and apply the patience sort rule: <em>place each card on the leftmost pile whose top is ≥ that card; if no such pile exists, start a new pile on the right.</em>',
+    lineKey: 'sig',
+  });
+
+  snap({
+    caption: 'Start with no piles.',
+    lineKey: 'init',
+  });
+
+  for (let i = 0; i < n; i++) {
+    const x = INPUT[i];
+
+    // Step: pick up the card
+    snap({
+      inputCursor: i,
+      caption: 'Pick up card <code>a[' + i + '] = ' + x + '</code>. Scan piles left to right looking for a top ≥ ' + x + '.',
+      lineKey: 'for',
+    });
+
+    // Walk piles left-to-right, test each
+    let targetPile = -1;
+    for (let k = 0; k < piles.length; k++) {
+      const top = piles[k][piles[k].length - 1].value;
+      const fits = top >= x;
+      snap({
+        inputCursor: i,
+        testingPile: k,
+        testingResult: fits ? 'yes' : 'no',
+        caption: 'Test pile ' + (k + 1) + ': top is <code>' + top + '</code>. Is <code>' + top + ' ≥ ' + x + '</code>? ' + (fits ? '<strong>Yes</strong> — place here.' : '<strong>No</strong> — try the next pile.'),
+        lineKey: 'find',
+      });
+      if (fits) { targetPile = k; break; }
+    }
+
+    if (targetPile === -1) {
+      // Start a new pile
+      const newK = piles.length;
+      snap({
+        inputCursor: i,
+        caption: 'No pile fits — start a new pile to the right (pile ' + (newK + 1) + ').',
+        lineKey: 'append',
+      });
+      piles.push([]);
+      targetPile = newK;
+    }
+
+    // Place the card
+    const predPile = targetPile - 1;
+    let predRow = null;
+    if (predPile >= 0) {
+      predRow = piles[predPile].length - 1;
+    }
+    const newRow = piles[targetPile].length;
+    piles[targetPile].push({ value: x, inputIdx: i, predRow: predRow });
+
+    // Add an arc if there's a previous pile
+    let freshArcIdx = null;
+    if (predPile >= 0) {
+      arcs.push({ srcPile: targetPile, srcRow: newRow, dstPile: predPile, dstRow: predRow });
+      freshArcIdx = arcs.length - 1;
+    }
+
+    let placedCap;
+    if (predPile >= 0) {
+      const predVal = piles[predPile][predRow].value;
+      placedCap = 'Place <code>' + x + '</code> on pile ' + (targetPile + 1) + '. Draw a back-pointer to pile ' + (predPile + 1) + '\'s current top (<code>' + predVal + '</code>) — this is how we will reconstruct an LIS later.';
+    } else {
+      placedCap = 'Place <code>' + x + '</code> on pile 1. No previous pile, so no back-pointer.';
+    }
+    snap({
+      inputCursor: i,
+      justPlaced: { pile: targetPile, row: newRow },
+      freshArcIdx: freshArcIdx,
+      caption: placedCap,
+      lineKey: 'place',
+    });
+  }
+
+  // Closing snap: all dealt, before reconstruction
+  snap({
+    caption: 'All cards dealt. We have <strong>' + piles.length + '</strong> piles. <em>The number of piles equals the length of the longest increasing subsequence</em> — this is the theorem behind patience sort.',
+    lineKey: 'len',
+  });
+
+  // Reconstruction: start from top of rightmost pile, follow back-pointers
+  const lastPile = piles.length - 1;
+  const lisChain = [];
+  let curPile = lastPile;
+  let curRow = piles[lastPile].length - 1;
+  while (curPile >= 0) {
+    const card = piles[curPile][curRow];
+    lisChain.unshift({ pile: curPile, row: curRow, value: card.value, inputIdx: card.inputIdx });
+    if (curPile === 0) break;
+    curRow = card.predRow;
+    curPile = curPile - 1;
+  }
+
+  // Animate the reconstruction one step at a time
+  for (let r = 0; r < lisChain.length; r++) {
+    // Walk right-to-left: we start at the rightmost pile and follow pointers leftward.
+    // r = 0 highlights the rightmost-pile card first, r = 1 the next one to its left, etc.
+    // Index into lisChain (which is left-to-right): lisChain.length - 1 - r
+    const chainSoFar = lisChain.slice(lisChain.length - 1 - r);
+    const card = chainSoFar[0];
+    let cap;
+    if (r === 0) {
+      cap = 'Reconstruct: start at the top of the rightmost pile, <code>' + card.value + '</code>.';
+    } else {
+      cap = 'Follow the back-pointer one pile left: <code>' + card.value + '</code>.';
+    }
+    snap({
+      lisChain: chainSoFar,
+      reconstructStep: r,
+      caption: cap,
+      lineKey: null,
+    });
+  }
+
+  // Final
+  const lisVals = lisChain.map(c => c.value);
+  const lisInputIndices = lisChain.map(c => c.inputIdx);
+  snap({
+    lisChain: lisChain,
+    isFinal: true,
+    caption: 'Done. Following back-pointers from the top of the rightmost pile yields the LIS <code>[' + lisVals.join(', ') + ']</code> at input positions <code>' + JSON.stringify(lisInputIndices) + '</code>, length <strong>' + lisVals.length + '</strong>. Multiple valid LIS of this length exist for this input (the O(n²) dp animation found a different one); patience sort recovers <em>some</em> LIS, not a canonical one.',
+    lineKey: null,
+  });
+
+  return events;
+}
+
+/* ============================================================
+   TAB 2: O(n log n) TAILS ARRAY WITH BINARY SEARCH
+   ============================================================ */
+
+function buildTailsSteps() {
+  const events = [];
+  const n = INPUT.length;
+  const tails = [];
+
+  function snap(opts) {
+    events.push({
+      tails: tails.slice(),
+      inputCursor: opts.inputCursor == null ? -1 : opts.inputCursor,
+      bs: opts.bs || null,  // { lo, hi, mid, phase } where phase ∈ 'init', 'mid', 'test-yes', 'test-no', 'done'
+      placeIdx: opts.placeIdx == null ? null : opts.placeIdx,
+      placeKind: opts.placeKind || null,  // 'replace' | 'append'
+      isFinal: !!opts.isFinal,
+      caption: opts.caption,
+      lineKey: opts.lineKey || null,
+    });
+  }
+
+  snap({
+    caption: '<em>Observation:</em> in patience sort, we only ever need the <strong>top</strong> of each pile to decide where the next card goes. And the tops are increasing left-to-right (a consequence of the placement rule). So a sorted array of tops suffices — let\'s call it <code>tails</code>.',
+    lineKey: 'sig',
+  });
+
+  snap({
+    caption: '<code>tails</code> starts empty. For each input <code>x</code>, find the position where <code>x</code> belongs in <code>tails</code> via binary search.',
+    lineKey: 'init',
+  });
+
+  for (let i = 0; i < n; i++) {
+    const x = INPUT[i];
+
+    snap({
+      inputCursor: i,
+      caption: 'Process <code>a[' + i + '] = ' + x + '</code>. Find the leftmost <code>tails[lo] ≥ ' + x + '</code> using binary search.',
+      lineKey: 'for',
+    });
+
+    let lo = 0, hi = tails.length;
+    snap({
+      inputCursor: i,
+      bs: { lo, hi, mid: null, phase: 'init' },
+      caption: 'Initialize <code>lo = 0</code>, <code>hi = ' + tails.length + '</code>.',
+      lineKey: 'bs_init',
+    });
+
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      snap({
+        inputCursor: i,
+        bs: { lo, hi, mid, phase: 'mid' },
+        caption: '<code>lo &lt; hi</code>, so continue. Compute <code>mid = (' + lo + ' + ' + hi + ') / 2 = ' + mid + '</code>.',
+        lineKey: 'bs_mid',
+      });
+
+      const tm = tails[mid];
+      if (tm < x) {
+        snap({
+          inputCursor: i,
+          bs: { lo, hi, mid, phase: 'test-yes' },
+          caption: '<code>tails[' + mid + '] = ' + tm + ' &lt; ' + x + '</code>? <strong>Yes</strong>. Move <code>lo</code> right: <code>lo = mid + 1 = ' + (mid + 1) + '</code>.',
+          lineKey: 'bs_test',
+        });
+        lo = mid + 1;
+      } else {
+        snap({
+          inputCursor: i,
+          bs: { lo, hi, mid, phase: 'test-no' },
+          caption: '<code>tails[' + mid + '] = ' + tm + ' &lt; ' + x + '</code>? <strong>No</strong>. Move <code>hi</code> left: <code>hi = mid = ' + mid + '</code>.',
+          lineKey: 'bs_else',
+        });
+        hi = mid;
+      }
+    }
+
+    snap({
+      inputCursor: i,
+      bs: { lo, hi, mid: null, phase: 'done' },
+      caption: '<code>lo == hi == ' + lo + '</code>. Position found.',
+      lineKey: 'bs_while',
+    });
+
+    if (lo === tails.length) {
+      tails.push(x);
+      snap({
+        inputCursor: i,
+        placeIdx: lo,
+        placeKind: 'append',
+        caption: '<code>lo == len(tails)</code> — <strong>append</strong> <code>' + x + '</code>. <code>tails</code> grows.',
+        lineKey: 'place',
+      });
+    } else {
+      const oldVal = tails[lo];
+      tails[lo] = x;
+      snap({
+        inputCursor: i,
+        placeIdx: lo,
+        placeKind: 'replace',
+        caption: '<strong>Replace</strong> <code>tails[' + lo + '] = ' + oldVal + '</code> with <code>' + x + '</code>. Length unchanged.' + (oldVal === x ? ' (No visible change — both values equal.)' : ''),
+        lineKey: 'place',
+      });
+    }
+  }
+
+  snap({
+    isFinal: true,
+    caption: 'Done. <code>tails = [' + tails.join(', ') + ']</code>, length <strong>' + tails.length + '</strong>. <em>Caveat:</em> <code>tails</code> itself is not necessarily an LIS — it gives the correct <em>length</em>, but for the actual subsequence you would need extra bookkeeping (e.g. back-pointers similar to Tab 1). Total work: <code>n</code> binary searches over an array of size ≤ <code>n</code>, so <strong>O(n log n)</strong>.',
+    lineKey: 'len',
+  });
+
+  return events;
+}
+
+/* ============================================================
+   STATE & DISPATCH
+   ============================================================ */
+
+const state = {
+  example: 'piles',
+  steps: [],
+  current: 0,
+  playing: false,
+  playTimer: null,
+};
+
+const stepsByTab = {};
+
+function init() {
+  stepsByTab.piles = buildPilesSteps();
+  stepsByTab.tails = buildTailsSteps();
+  setExample('piles');
+}
+
+function setExample(name) {
+  state.example = name;
+  state.steps = stepsByTab[name];
+  state.current = 0;
+  stopPlayback();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.example === name);
+  });
+  render();
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+
+const VB_W = 800;
+const CARD_W = 48;
+const CARD_H = 36;
+const CARD_GAP = 6;
+
+function render() {
+  const step = state.steps[state.current];
+  if (state.example === 'piles') renderPiles(step);
+  else                            renderTails(step);
+  renderCode(programs[state.example], step.lineKey);
+  renderState(step);
+  renderCaption(step);
+  renderControls();
+  renderHeader(step);
+}
+
+function renderHeader(step) {
+  if (state.example === 'piles') {
+    document.getElementById('main-label').textContent = 'Dealing cards onto piles';
+    document.getElementById('code-label').textContent = 'patience_sort';
+    document.getElementById('state-1-label').textContent = 'current';
+    document.getElementById('state-2-label').textContent = 'piles';
+  } else {
+    document.getElementById('main-label').textContent = 'Maintaining the tails array';
+    document.getElementById('code-label').textContent = 'lis_length';
+    document.getElementById('state-1-label').textContent = 'current';
+    document.getElementById('state-2-label').textContent = 'tails length';
+  }
+}
+
+/* --- Piles tab --- */
+
+function renderPiles(step) {
+  const n = INPUT.length;
+  let html = '';
+
+  // === Input deck row at the top ===
+  const deckW = n * CARD_W + (n - 1) * CARD_GAP;
+  const deckStartX = (VB_W - deckW) / 2;
+  const deckY = 22;
+
+  html += '<text class="row-label" x="' + (deckStartX - 10) + '" y="' + (deckY + CARD_H / 2 + 1) + '" text-anchor="end" dominant-baseline="middle">input</text>';
+
+  for (let k = 0; k < n; k++) {
+    const x = deckStartX + k * (CARD_W + CARD_GAP);
+    let cls = 'upcoming';
+    let valCls = '';
+
+    if (step.isFinal && step.lisChain && step.lisChain.some(c => c.inputIdx === k)) {
+      cls = 'in-lis';
+      valCls = 'in-lis';
+    } else if (step.inputCursor === k) {
+      cls = 'active';
+      valCls = 'active';
+    } else if (step.inputCursor > k || (step.inputCursor === -1 && step.isFinal)) {
+      cls = 'dealt';
+      valCls = 'dealt';
+    } else if (step.inputCursor >= 0 && k < step.inputCursor) {
+      cls = 'dealt';
+      valCls = 'dealt';
+    }
+
+    html += '<rect class="card-rect ' + cls + '" x="' + x + '" y="' + deckY + '" width="' + CARD_W + '" height="' + CARD_H + '" />';
+    html += '<text class="card-val ' + valCls + '" x="' + (x + CARD_W / 2) + '" y="' + (deckY + CARD_H / 2 + 1) + '">' + INPUT[k] + '</text>';
+    html += '<text class="card-idx" x="' + (x + CARD_W / 2) + '" y="' + (deckY + CARD_H + 12) + '">' + k + '</text>';
+  }
+
+  // === Piles area below ===
+  // Piles grow DOWNWARD: first card is on top, later cards below.
+  // This makes each pile read as a decreasing sequence top-to-bottom.
+  const pileTopY = 110;
+  const labelY = 410;  // pile label "pile 1" etc., below the piles
+  const numCols = Math.max(step.piles.length, 4);  // reserve at least 4 columns of width
+  const colW = CARD_W + 22;  // small horizontal channel between piles for arcs
+  const pilesW = numCols * colW;
+  const pilesStartX = (VB_W - pilesW) / 2;
+
+  const pileX = (k) => pilesStartX + k * colW + (colW - CARD_W) / 2;
+
+  // Dashed "table edge" at the top — cards drop down from here
+  html += '<line class="pile-base" x1="' + pilesStartX + '" y1="' + (pileTopY - 8) + '" x2="' + (pilesStartX + pilesW) + '" y2="' + (pileTopY - 8) + '" />';
+
+  // Pile labels below the piles area
+  for (let k = 0; k < step.piles.length; k++) {
+    const cx = pilesStartX + k * colW + colW / 2;
+    html += '<text class="col-label" x="' + cx + '" y="' + labelY + '">pile ' + (k + 1) + '</text>';
+  }
+
+  // Cards in piles. Row 0 = top of pile (first card placed); larger rows go DOWN.
+  // Pixel y of card at row r: pileTopY + r * (CARD_H + 2)
+  // The "top of the pile" in algorithm-speak (most recent card) is the VISUALLY BOTTOMMOST card.
+  const cardY = (row) => pileTopY + row * (CARD_H + 2);
+
+  for (let k = 0; k < step.piles.length; k++) {
+    const pile = step.piles[k];
+    for (let r = 0; r < pile.length; r++) {
+      const card = pile[r];
+      const x = pileX(k);
+      const y = cardY(r);
+      const isTop = (r === pile.length - 1);  // algorithmic top = most recent = visually bottom
+
+      let cls = 'in-pile';
+      let valCls = '';
+
+      if (step.lisChain && step.lisChain.some(c => c.pile === k && c.row === r)) {
+        cls = 'in-lis';
+        valCls = 'in-lis';
+      } else if (step.justPlaced && step.justPlaced.pile === k && step.justPlaced.row === r) {
+        cls = 'just-placed';
+        valCls = 'just-placed';
+      } else if (step.testingPile === k && isTop) {
+        cls = step.testingResult === 'yes' ? 'compare' : 'skipped';
+        valCls = step.testingResult === 'yes' ? 'compare' : 'skipped';
+      } else if (isTop && !step.isFinal && !step.lisChain) {
+        cls = 'pile-top';
+        valCls = 'pile-top';
+      }
+
+      html += '<rect class="card-rect ' + cls + '" x="' + x + '" y="' + y + '" width="' + CARD_W + '" height="' + CARD_H + '" />';
+      html += '<text class="card-val ' + valCls + '" x="' + (x + CARD_W / 2) + '" y="' + (y + CARD_H / 2 + 1) + '">' + card.value + '</text>';
+    }
+  }
+
+  // === Back-pointer arcs ===
+  // Arcs go from a card in pile k to a card in pile (k-1). We draw them in the channel between columns.
+  // Arc endpoint at source: right edge of source card (x = pileX(srcPile), y = midpoint of card)
+  // ... wait, source pile is k > 0 (right side) and dest is k-1 (left). So source is to the RIGHT of dest.
+  // Arc starts at left edge of source card, ends at right edge of dest card, bulging downward (or with curve depth)
+  for (let aIdx = 0; aIdx < step.arcs.length; aIdx++) {
+    const arc = step.arcs[aIdx];
+    const srcX = pileX(arc.srcPile);
+    const srcY = cardY(arc.srcRow) + CARD_H / 2;
+    const dstX = pileX(arc.dstPile) + CARD_W;
+    const dstY = cardY(arc.dstRow) + CARD_H / 2;
+
+    // Determine arc class
+    let arcCls = 'arc';
+    if (step.lisChain) {
+      const inChain =
+        step.lisChain.some(c => c.pile === arc.srcPile && c.row === arc.srcRow) &&
+        step.lisChain.some(c => c.pile === arc.dstPile && c.row === arc.dstRow);
+      if (inChain) arcCls = 'arc in-lis';
+    } else if (step.freshArcIdx === aIdx) {
+      arcCls = 'arc fresh';
+    }
+
+    // Straight line for same-row arcs; S-curve for diagonal arcs that arrives horizontally
+    // at the destination so the arrowhead always points cleanly leftward.
+    const cardEdgeX = pileX(arc.dstPile) + CARD_W;     // right edge of dst card
+    const arrowBaseX = cardEdgeX + 6;                    // line ends here, in the channel
+    const arrowTipX  = cardEdgeX - 1;                    // apex just touches the card edge
+
+    let d;
+    if (srcY === dstY) {
+      d = 'M ' + srcX + ' ' + srcY + ' L ' + arrowBaseX + ' ' + dstY;
+    } else {
+      const span = srcX - arrowBaseX;
+      const cp1x = srcX - 0.4 * span;
+      const cp2x = arrowBaseX + 0.4 * span;
+      d = 'M ' + srcX + ' ' + srcY +
+          ' C ' + cp1x + ' ' + srcY + ', ' + cp2x + ' ' + dstY + ', ' + arrowBaseX + ' ' + dstY;
+    }
+    html += '<path class="' + arcCls + '" d="' + d + '" />';
+
+    // Arrowhead: base sits at the line's end, apex points left toward the card.
+    // The bezier is designed to arrive horizontally, so the arrowhead orientation is the same
+    // for straight and curved arcs.
+    const tickCls = arcCls.replace('arc', 'arc-tick');
+    html += '<polygon class="' + tickCls + '" points="' +
+            arrowBaseX + ',' + (dstY - 4) + ' ' +
+            arrowBaseX + ',' + (dstY + 4) + ' ' +
+            arrowTipX  + ',' + dstY +
+            '" />';
+  }
+
+  document.getElementById('viz').innerHTML = html;
+}
+
+/* --- Tails tab --- */
+
+function renderTails(step) {
+  const n = INPUT.length;
+  let html = '';
+
+  // Input deck at top
+  const deckW = n * CARD_W + (n - 1) * CARD_GAP;
+  const deckStartX = (VB_W - deckW) / 2;
+  const deckY = 22;
+
+  html += '<text class="row-label" x="' + (deckStartX - 10) + '" y="' + (deckY + CARD_H / 2 + 1) + '" text-anchor="end" dominant-baseline="middle">input</text>';
+
+  for (let k = 0; k < n; k++) {
+    const x = deckStartX + k * (CARD_W + CARD_GAP);
+    let cls = 'upcoming';
+    let valCls = '';
+
+    if (step.inputCursor === k) {
+      cls = 'active';
+      valCls = 'active';
+    } else if (step.inputCursor > k || (step.inputCursor === -1 && step.isFinal)) {
+      cls = 'dealt';
+      valCls = 'dealt';
+    } else if (step.inputCursor >= 0 && k < step.inputCursor) {
+      cls = 'dealt';
+      valCls = 'dealt';
+    }
+
+    html += '<rect class="card-rect ' + cls + '" x="' + x + '" y="' + deckY + '" width="' + CARD_W + '" height="' + CARD_H + '" />';
+    html += '<text class="card-val ' + valCls + '" x="' + (x + CARD_W / 2) + '" y="' + (deckY + CARD_H / 2 + 1) + '">' + INPUT[k] + '</text>';
+    html += '<text class="card-idx" x="' + (x + CARD_W / 2) + '" y="' + (deckY + CARD_H + 12) + '">' + k + '</text>';
+  }
+
+  // Tails array — centered, fixed-width cells
+  // We reserve room for up to 6 cells in tails (very loose upper bound for our input)
+  const TAILS_MAX = 6;
+  const tailW = TAILS_MAX * CARD_W + (TAILS_MAX - 1) * CARD_GAP;
+  const tailStartX = (VB_W - tailW) / 2;
+  const tailY = 170;
+
+  html += '<text class="row-label" x="' + (tailStartX - 10) + '" y="' + (tailY + CARD_H / 2 + 1) + '" text-anchor="end" dominant-baseline="middle">tails</text>';
+
+  const tailX = (k) => tailStartX + k * (CARD_W + CARD_GAP);
+
+  for (let k = 0; k < TAILS_MAX; k++) {
+    const x = tailX(k);
+    let cls, valCls, valText;
+
+    if (k >= step.tails.length) {
+      // Empty slot
+      cls = 'empty';
+      valCls = 'empty';
+      valText = '';
+    } else if (step.bs && step.bs.mid === k && (step.bs.phase === 'mid' || step.bs.phase === 'test-yes' || step.bs.phase === 'test-no')) {
+      cls = 'compare';
+      valCls = 'compare';
+      valText = String(step.tails[k]);
+    } else if (step.placeIdx === k && step.placeKind) {
+      cls = step.placeKind === 'append' ? 'just-placed' : 'just-placed';
+      valCls = 'just-placed';
+      valText = String(step.tails[k]);
+    } else {
+      cls = 'in-pile';
+      valCls = '';
+      valText = String(step.tails[k]);
+    }
+
+    html += '<rect class="card-rect ' + cls + '" x="' + x + '" y="' + tailY + '" width="' + CARD_W + '" height="' + CARD_H + '" />';
+    html += '<text class="card-val ' + valCls + '" x="' + (x + CARD_W / 2) + '" y="' + (tailY + CARD_H / 2 + 1) + '">' + valText + '</text>';
+    html += '<text class="card-idx" x="' + (x + CARD_W / 2) + '" y="' + (tailY + CARD_H + 12) + '">' + k + '</text>';
+  }
+
+  // Size marker after the last live tail cell
+  if (step.tails.length > 0 && step.tails.length < TAILS_MAX) {
+    const x = tailX(step.tails.length) - CARD_GAP / 2;
+    html += '<line stroke="var(--done-stroke)" stroke-width="2" stroke-dasharray="4 3" x1="' + x + '" y1="' + (tailY - 4) + '" x2="' + x + '" y2="' + (tailY + CARD_H + 4) + '" />';
+    html += '<text class="col-label" style="fill:var(--done-stroke)" x="' + (x + 4) + '" y="' + (tailY - 5) + '" text-anchor="start">size = ' + step.tails.length + '</text>';
+  }
+
+  // Binary search markers below the tails array
+  if (step.bs) {
+    const markersY = tailY + CARD_H + 35;
+
+    const xAtPos = (pos) => tailX(pos) - CARD_GAP / 2;  // between cells pos-1 and pos
+
+    // lo bracket
+    {
+      const x = xAtPos(step.bs.lo);
+      const y1 = markersY;
+      const y2 = markersY + 14;
+      html += '<path class="bs-bracket lo" d="M ' + (x - 5) + ' ' + y1 + ' L ' + x + ' ' + y1 + ' L ' + x + ' ' + y2 + ' L ' + (x - 5) + ' ' + y2 + '" />';
+      html += '<text class="bs-marker lo" x="' + (x - 15) + '" y="' + (y2 + 12) + '" text-anchor="end">lo=' + step.bs.lo + '</text>';
+    }
+
+    // hi bracket
+    {
+      const x = xAtPos(step.bs.hi);
+      const y1 = markersY;
+      const y2 = markersY + 14;
+      html += '<path class="bs-bracket hi" d="M ' + (x + 5) + ' ' + y1 + ' L ' + x + ' ' + y1 + ' L ' + x + ' ' + y2 + ' L ' + (x + 5) + ' ' + y2 + '" />';
+      html += '<text class="bs-marker hi" x="' + (x + 15) + '" y="' + (y2 + 12) + '" text-anchor="start">hi=' + step.bs.hi + '</text>';
+    }
+
+    // mid pointer
+    if (step.bs.mid != null && (step.bs.phase === 'mid' || step.bs.phase === 'test-yes' || step.bs.phase === 'test-no')) {
+      const cx = tailX(step.bs.mid) + CARD_W / 2;
+      const y1 = markersY + 25;
+      const y2 = markersY - 2;
+      // small triangle pointing up at mid cell
+      html += '<polygon class="bs-bracket mid" fill="var(--active-stroke)" stroke="none" points="' +
+              cx + ',' + y2 + ' ' +
+              (cx - 5) + ',' + (y2 + 8) + ' ' +
+              (cx + 5) + ',' + (y2 + 8) +
+              '" />';
+      html += '<text class="bs-marker mid" x="' + cx + '" y="' + (y1 + 12) + '">mid=' + step.bs.mid + '</text>';
+    }
+
+    // Comparison test box
+    if (step.bs.mid != null && step.inputCursor != null && (step.bs.phase === 'test-yes' || step.bs.phase === 'test-no')) {
+      const tm = step.tails[step.bs.mid];
+      const x = INPUT[step.inputCursor];
+      const yes = step.bs.phase === 'test-yes';
+      const boxY = markersY + 55;
+      const boxX = VB_W / 2 - 130;
+      html += '<rect class="bs-bg" x="' + boxX + '" y="' + boxY + '" width="260" height="34" />';
+      html += '<text class="bs-test ' + (yes ? 'yes' : 'no') + '" x="' + (VB_W / 2) + '" y="' + (boxY + 17) + '">' +
+              'tails[' + step.bs.mid + '] = ' + tm + ' &lt; ' + x + '?  ' + (yes ? '✓ yes' : '× no') +
+              '</text>';
+    }
+  }
+
+  document.getElementById('viz').innerHTML = html;
+}
+
+function renderCode(lines, highlightKey) {
+  let html = '';
+  lines.forEach(line => {
+    if (line.kind === 'label') {
+      html += '<div class="code-section-label">' + line.text + '</div>';
+      return;
+    }
+    const indentCls = line.indent === 1 ? 'indent' : (line.indent === 2 ? 'indent-2' : (line.indent === 3 ? 'indent-3' : ''));
+    const hl = (line.key === highlightKey) ? 'highlighted' : '';
+    html += '<div class="code-line ' + hl + '"><span class="' + indentCls + '">' + line.html + '</span></div>';
+  });
+  document.getElementById('code').innerHTML = html;
+}
+
+function renderState(step) {
+  // Cell 1 ("current")
+  const cur1 = document.getElementById('state-1-val');
+  if (step.inputCursor != null && step.inputCursor >= 0) {
+    cur1.textContent = INPUT[step.inputCursor];
+  } else {
+    cur1.textContent = '—';
+  }
+
+  // Cell 2 (piles count or tails length)
+  const cur2 = document.getElementById('state-2-val');
+  if (state.example === 'piles') {
+    cur2.textContent = step.piles ? step.piles.length : 0;
+  } else {
+    cur2.textContent = step.tails ? step.tails.length : 0;
+  }
+
+  // Status
+  if (state.example === 'piles') {
+    const dealt = step.inputCursor >= 0 ? step.inputCursor + 1 : (step.isFinal || step.lisChain ? INPUT.length : 0);
+    document.getElementById('main-status').textContent = dealt + ' / ' + INPUT.length + ' dealt';
+  } else {
+    const processed = step.inputCursor >= 0 ? step.inputCursor + 1 : (step.isFinal ? INPUT.length : 0);
+    document.getElementById('main-status').textContent = processed + ' / ' + INPUT.length + ' processed';
+  }
+}
+
+function renderCaption(step) {
+  document.getElementById('step-num').textContent = 'step ' + state.current;
+  document.getElementById('caption-text').innerHTML = step.caption;
+  document.getElementById('step-counter').textContent = state.current + ' / ' + (state.steps.length - 1);
+  document.getElementById('caption').classList.toggle('final', !!step.isFinal);
+}
+
+function renderControls() {
+  document.getElementById('prev').disabled = state.current <= 0;
+  document.getElementById('next').disabled = state.current >= state.steps.length - 1;
+  document.getElementById('play').textContent = state.playing ? '❚❚ Pause' : '▶ Play';
+}
+
+/* ============================================================
+   CONTROLS
+   ============================================================ */
+
+function step(delta) {
+  const next = state.current + delta;
+  if (next < 0 || next >= state.steps.length) return;
+  state.current = next;
+  render();
+}
+
+function reset() { state.current = 0; stopPlayback(); render(); }
+function togglePlay() { state.playing ? stopPlayback() : startPlayback(); }
+
+function startPlayback() {
+  if (state.current >= state.steps.length - 1) state.current = 0;
+  state.playing = true;
+  const speed = parseInt(document.getElementById('speed').value, 10);
+  state.playTimer = setInterval(() => {
+    if (state.current >= state.steps.length - 1) { stopPlayback(); render(); return; }
+    state.current++;
+    render();
+  }, speed);
+  render();
+}
+
+function stopPlayback() {
+  state.playing = false;
+  if (state.playTimer) { clearInterval(state.playTimer); state.playTimer = null; }
+  render();
+}
+
+document.getElementById('next').onclick = () => step(1);
+document.getElementById('prev').onclick = () => step(-1);
+document.getElementById('reset').onclick = reset;
+document.getElementById('play').onclick = togglePlay;
+document.getElementById('speed').onchange = () => {
+  if (state.playing) { stopPlayback(); startPlayback(); }
+};
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => setExample(tab.dataset.example);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); step(1); }
+  else if (e.key === 'ArrowLeft')              { e.preventDefault(); step(-1); }
+  else if (e.key === 'r' || e.key === 'R')     { e.preventDefault(); reset(); }
+  else if (e.key === 'p' || e.key === 'P')     { e.preventDefault(); togglePlay(); }
+});
+
+init();
+</script>
+</body>
+</html>
