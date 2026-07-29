@@ -11,6 +11,8 @@ schedule:
     materials:
       - name: Lecture slides
         url: /assets/courses/advanced-algorithms-2026/lectures/week01.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week01.pdf
       - name: "Animation: Longest Path in a DAG"
         url: /assets/courses/advanced-algorithms-2026/animations/longest_path_dag.html
       - name: "Animation: Bellman–Ford"
