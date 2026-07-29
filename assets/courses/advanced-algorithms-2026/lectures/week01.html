@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 1: Dynamic Programming — Advanced Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <style>
+    :root { --accent: #1f6feb; --muted: #6a737d; }
+
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--accent); letter-spacing: -0.01em; }
+    .reveal h1 { font-size: 2.0em; }
+    /* Theme styling (uppercase headings, small-caps tags) garbles MathJax output. */
+    .reveal mjx-container { text-transform: none; font-variant: normal; letter-spacing: normal; }
+    .reveal h2 { text-align: center; }
+    .reveal section { font-size: 0.92em; }
+    .reveal a { color: var(--accent); }
+
+    /* Left-align most slides; titles stay centered via their own class. */
+    .reveal .slides section { text-align: left; }
+    .reveal .slides section.center { text-align: center; }
+
+    /* Boxes for theorems / definitions / takeaways. */
+    .box {
+      border-left: 5px solid var(--accent);
+      background: #f4f8ff;
+      padding: 0.5em 0.8em; margin: 0.4em 0; border-radius: 4px;
+    }
+    .box .tag { font-variant: small-caps; font-weight: 700; color: var(--accent);
+                letter-spacing: 0.04em; margin-right: 0.4em; }
+    .box.warn { border-left-color: #d29922; background: #fff8ec; }
+    .box.warn .tag { color: #b07400; }
+
+    /* Result highlight pill. */
+    .hl { background: #fff3b0; padding: 0.05em 0.25em; border-radius: 3px; }
+
+    /* Results table. */
+    .reveal table.results { margin: 0.7em auto; border-collapse: collapse; }
+    .reveal table.results th, .reveal table.results td {
+      padding: 0.4em 1.1em; border: none; text-align: left; }
+    .reveal table.results thead th { color: var(--accent);
+      border-bottom: 2px solid var(--accent); font-variant: small-caps; letter-spacing: 0.03em; }
+    .reveal table.results tbody tr { border-bottom: 1px solid #e7ebf0; }
+    .reveal table.results td.q { font-weight: 700; }
+    .reveal table.results tr.hlrow { background: #fff8d6; }
+
+    /* Two-column layout helper:  <div class="cols"> <div>..</div> <div>..</div> </div> */
+    .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+    .cols > * { flex: 1; min-width: 0; }
+
+    /* Pseudocode / algorithm blocks. */
+    .reveal pre.algo {
+      font-size: 0.5em; line-height: 1.35; box-shadow: none;
+      border: 1px solid #d0d7de; border-radius: 6px; background: #fbfcfd;
+      width: 100%;
+    }
+    .reveal pre.algo code { padding: 0.8em 1em; }
+    .algo .kw { color: var(--accent); font-weight: 700; }
+    .algo .cm { color: var(--muted); font-style: italic; }
+
+    .reveal .credit { color: var(--muted); font-size: 0.8em; }
+    .reveal .smaller { font-size: 0.82em; }
+    .reveal figure { margin: 0; text-align: center; }
+    .reveal figcaption { font-size: 0.7em; color: var(--muted); margin-top: 0.3em; }
+    .reveal .footnote { position: absolute; bottom: 0.2em; left: 0.6em;
+                        font-size: 0.55em; color: var(--muted); }
+
+    /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
+    .reveal figure svg { max-width: 100%; height: auto; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== TITLE ============================== -->
+    <section class="center">
+      <h1>Week 1: Dynamic Programming</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Advanced Algorithms</p>
+    </section>
+
+    <!-- ============================== ROADMAP ============================ -->
+    <section>
+      <h2>Roadmap</h2>
+      <ol style="line-height:1.9;">
+        <li>Longest Path in a DAG</li>
+        <li>Bellman&ndash;Ford: DP on Graphs with Cycles</li>
+        <li>Maximum Subarray Sum</li>
+        <li>Longest Increasing Subsequence</li>
+        <li>Coin Change</li>
+      </ol>
+      <p class="smaller" style="margin-top:0.8em;">One technique, five problems — plus a couple of
+      warm-up variations along the way.</p>
+    </section>
+
+    <!-- ====================== DP INTRO ==================================== -->
+    <section>
+      <h2>Dynamic Programming</h2>
+      <p>Dynamic programming is a versatile algorithmic technique that can be used to solve
+      a variety of problems.</p>
+      <p class="fragment">The hallmark is decomposing a problem into a sequence of
+      <em>subproblems</em>, which progressively build up to a solution of the original
+      problem.</p>
+      <p class="fragment">Rather than formulate a theoretical framework for dynamic
+      programming, we are going to illustrate it by means of examples.</p>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PART 1: LONGEST PATH IN A DAG                                         -->
+    <!-- ===================================================================== -->
+    <section class="center">
+      <h1>Longest Path in a DAG</h1>
+    </section>
+
+    <section>
+      <h2>Longest Path in a DAG</h2>
+      <p>The problem of finding a longest path in a DAG is a canonical dynamic programming
+      problem.</p>
+      <p class="fragment">Many other (seemingly unrelated) problems can be cast in this
+      framework.</p>
+      <div class="box fragment"><span class="tag">Plan</span>
+        Solve <em>shortest</em> paths in a DAG first — the longest path then comes for free.</div>
+    </section>
+
+    <section>
+      <h2>Shortest Paths in a DAG</h2>
+      <div class="cols">
+        <figure>
+          <svg width="440" height="250" viewBox="0 0 460 250">
+            <defs>
+              <marker id="arr-dag" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                <path d="M0,0 L8,4.5 L0,9 z" fill="#8d8678"/>
+              </marker>
+            </defs>
+            <g stroke="#8d8678" stroke-width="2" fill="none">
+              <line x1="92" y1="45" x2="204" y2="45" marker-end="url(#arr-dag)"/>
+              <line x1="368" y1="45" x2="256" y2="45" marker-end="url(#arr-dag)"/>
+              <line x1="70" y1="67" x2="70" y2="169" marker-end="url(#arr-dag)"/>
+              <line x1="390" y1="67" x2="390" y2="169" marker-end="url(#arr-dag)"/>
+              <line x1="375" y1="59" x2="248" y2="178" marker-end="url(#arr-dag)"/>
+              <line x1="215" y1="181" x2="88" y2="62" marker-end="url(#arr-dag)"/>
+              <line x1="85" y1="181" x2="212" y2="62" marker-end="url(#arr-dag)"/>
+              <line x1="208" y1="195" x2="94" y2="195" marker-end="url(#arr-dag)"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#b85a26">
+              <text x="148" y="35" text-anchor="middle">0.5</text>
+              <text x="312" y="35" text-anchor="middle">2.0</text>
+              <text x="50" y="122" text-anchor="middle">1.5</text>
+              <text x="412" y="122" text-anchor="middle">0.5</text>
+              <text x="335" y="102" text-anchor="middle">&#8722;1.0</text>
+              <text x="122" y="140" text-anchor="middle">1.0</text>
+              <text x="188" y="98" text-anchor="middle">1.0</text>
+              <text x="151" y="218" text-anchor="middle">1.0</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600">
+              <circle cx="70"  cy="45"  r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="70"  y="51"  text-anchor="middle" fill="#2a2a2a">2</text>
+              <circle cx="230" cy="45"  r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="230" y="51"  text-anchor="middle" fill="#2a2a2a">1</text>
+              <circle cx="390" cy="45"  r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="390" y="51"  text-anchor="middle" fill="#2a2a2a">0</text>
+              <circle cx="70"  cy="195" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="70"  y="201" text-anchor="middle" fill="#2a2a2a">3</text>
+              <circle cx="230" cy="195" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="230" y="201" text-anchor="middle" fill="#2a2a2a">4</text>
+              <circle cx="390" cy="195" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="390" y="201" text-anchor="middle" fill="#2a2a2a">5</text>
+            </g>
+          </svg>
+          <figcaption>A DAG with edge weights, source&nbsp;vertex&nbsp;0.</figcaption>
+        </figure>
+        <div>
+          <p>Perhaps you recall the single-source shortest path problem in a DAG.</p>
+        </div>
+      </div>
+      <p class="fragment">We can allow negative edge weights: there will be no negative-weight
+      cycles, as there are no cycles at all.</p>
+      <p class="fragment">Multiplying all weights by $-1$, the longest path becomes the
+      shortest path.</p>
+    </section>
+
+    <section>
+      <h2>Step 1: Topological Sort</h2>
+      <p><span style="color:var(--accent); font-weight:700;">Step 1:</span> Compute a
+      topological sort of the graph.</p>
+      <div class="box fragment"><span class="tag">Definition</span>
+        A topological sort is an ordering of the vertices such that $u &lt; v$ for every
+        edge $(u,v)$.</div>
+      <p class="fragment">We can compute a topological order by depth-first search or
+      Kahn&rsquo;s algorithm in time $O(|V|+|E|)$ in the adjacency list model.</p>
+    </section>
+
+    <section>
+      <h2>The Graph, Untangled</h2>
+      <p class="smaller">Laying the vertices out in topological order
+      $0, 5, 4, 2, 3, 1$ — every edge now points to the right:</p>
+      <figure>
+        <svg width="650" height="250" viewBox="0 0 650 250">
+          <defs>
+            <marker id="arr-topo" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0,0 L8,4.5 L0,9 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2" fill="none">
+            <line x1="62"  y1="125" x2="124" y2="125" marker-end="url(#arr-topo)"/>
+            <line x1="282" y1="125" x2="344" y2="125" marker-end="url(#arr-topo)"/>
+            <line x1="392" y1="125" x2="454" y2="125" marker-end="url(#arr-topo)"/>
+            <line x1="502" y1="125" x2="584" y2="125" marker-end="url(#arr-topo)"/>
+            <path d="M 55,108 Q 150,30 243,109" marker-end="url(#arr-topo)"/>
+            <path d="M 275,108 Q 370,35 463,109" marker-end="url(#arr-topo)"/>
+            <path d="M 52,141 Q 320,245 593,140" marker-end="url(#arr-topo)"/>
+            <path d="M 385,140 Q 490,185 591,136" marker-end="url(#arr-topo)"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#b85a26">
+            <text x="93"  y="113" text-anchor="middle">0.5</text>
+            <text x="313" y="113" text-anchor="middle">1.0</text>
+            <text x="423" y="113" text-anchor="middle">1.5</text>
+            <text x="543" y="113" text-anchor="middle">1.0</text>
+            <text x="150" y="55"  text-anchor="middle">&#8722;1.0</text>
+            <text x="370" y="58"  text-anchor="middle">1.0</text>
+            <text x="322" y="230" text-anchor="middle">2.0</text>
+            <text x="497" y="166" text-anchor="middle">0.5</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600">
+            <circle cx="40"  cy="125" r="20" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <text x="40"  y="131" text-anchor="middle" fill="#2c4329">0</text>
+            <circle cx="150" cy="125" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="150" y="131" text-anchor="middle" fill="#2a2a2a">5</text>
+            <circle cx="270" cy="125" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="270" y="131" text-anchor="middle" fill="#2a2a2a">4</text>
+            <circle cx="370" cy="125" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="370" y="131" text-anchor="middle" fill="#2a2a2a">2</text>
+            <circle cx="480" cy="125" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="480" y="131" text-anchor="middle" fill="#2a2a2a">3</text>
+            <circle cx="610" cy="125" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="610" y="131" text-anchor="middle" fill="#2a2a2a">1</text>
+          </g>
+        </svg>
+        <figcaption>Same DAG, vertices in topological order (source in green).</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Relaxing an Edge</h2>
+      <p>To relax the edge $e = (u,v)$ we check if</p>
+      <p>$$\texttt{dist}\_\texttt{to}[u] + e.\texttt{weight} \;&lt;\; \texttt{dist}\_\texttt{to}[v]$$</p>
+      <p class="fragment">If so, then we do the update:</p>
+      <p class="fragment">$$\texttt{dist}\_\texttt{to}[v] = \texttt{dist}\_\texttt{to}[u] + e.\texttt{weight}$$</p>
+      <p class="fragment">Note that $\texttt{dist}\_\texttt{to}[v]$ never increases under edge
+      relaxation.</p>
+    </section>
+
+    <section>
+      <h2>Step 2: Relax in Topological Order</h2>
+      <p><span style="color:var(--accent); font-weight:700;">Step 2:</span> Relax the outgoing
+      edges of each vertex following the topological order.</p>
+      <pre class="algo"><code><span class="kw">for</span> (<span class="kw">auto</span> v : topo_order) {
+    <span class="kw">for</span> (<span class="kw">const auto</span>&amp; edge : adj_list[v]) {
+        relax(edge);
+    }
+}</code></pre>
+      <p class="fragment">This takes time $O(|V|+|E|)$ as each edge is relaxed exactly once.</p>
+    </section>
+
+    <section>
+      <h2>Result</h2>
+      <div class="box"><span class="tag">Shortest path in a DAG</span>
+        There is an algorithm to find the shortest path in a DAG in time $O(|V|+|E|)$
+        in the adjacency list model.</div>
+    </section>
+
+    <section>
+      <h2>Why It Works</h2>
+      <figure>
+        <svg width="700" height="150" viewBox="0 0 700 150">
+          <defs>
+            <marker id="arr-path" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0,0 L8,4.5 L0,9 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2" fill="none">
+            <line x1="64"  y1="72"  x2="130" y2="105" marker-end="url(#arr-path)"/>
+            <line x1="170" y1="104" x2="235" y2="72"  marker-end="url(#arr-path)"/>
+            <line x1="277" y1="65"  x2="315" y2="80"  marker-end="url(#arr-path)"/>
+            <line x1="382" y1="88"  x2="423" y2="105" marker-end="url(#arr-path)"/>
+            <line x1="466" y1="103" x2="530" y2="72"  marker-end="url(#arr-path)"/>
+            <line x1="571" y1="70"  x2="629" y2="103" marker-end="url(#arr-path)"/>
+          </g>
+          <g fill="#2a2a2a">
+            <circle cx="336" cy="88" r="3.5"/><circle cx="351" cy="92" r="3.5"/><circle cx="366" cy="96" r="3.5"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#6e3416">
+            <text x="86"  y="102" text-anchor="middle">e&#8321;</text>
+            <text x="207" y="78"  text-anchor="middle">e&#8322;</text>
+            <text x="497" y="76"  text-anchor="middle">e&#8342;</text>
+            <text x="604" y="72"  text-anchor="middle">e&#8342;&#8330;&#8321;</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600">
+            <circle cx="45"  cy="62"  r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <text x="45"  y="68"  text-anchor="middle" fill="#2c4329">0</text>
+            <circle cx="150" cy="114" r="22" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="150" y="120" text-anchor="middle" fill="#2a2a2a">u&#8321;</text>
+            <circle cx="255" cy="62"  r="22" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="255" y="68"  text-anchor="middle" fill="#2a2a2a">u&#8322;</text>
+            <circle cx="445" cy="114" r="22" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="445" y="120" text-anchor="middle" fill="#2a2a2a">u&#8342;&#8331;&#8321;</text>
+            <circle cx="550" cy="62"  r="22" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="550" y="68"  text-anchor="middle" fill="#2a2a2a">u&#8342;</text>
+            <circle cx="650" cy="114" r="22" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <text x="650" y="120" text-anchor="middle" fill="#1d3c66">v</text>
+          </g>
+        </svg>
+      </figure>
+      <p class="smaller">If this is a shortest path from $0$ to vertex $v$, we know that
+      $$0 &lt; u_1 &lt; u_2 &lt; \cdots &lt; u_k &lt; v$$
+      in the topological order.</p>
+      <p class="fragment smaller">By relaxing the outgoing edges of vertices in topological
+      order we relax $e_1$ before $e_2$ before $e_3$, all the way to $e_{k+1}$ — that is,
+      we relax this entire path in order.</p>
+    </section>
+
+    <section>
+      <h2>Why It Works</h2>
+      <div class="box"><span class="tag">Relax-a-path property</span>
+        If the algorithm relaxes a shortest path from $0$ to $v$ in order, then
+        $\texttt{dist}\_\texttt{to}[v] = d(0, v)$.</div>
+      <p class="fragment">Each relaxation only ever lowers $\texttt{dist}\_\texttt{to}$, and after the
+      whole path is relaxed the value has reached the true distance.</p>
+    </section>
+
+    <section>
+      <h2>Longest Path</h2>
+      <div class="box"><span class="tag">Corollary</span>
+        There is an algorithm to find the longest path in a DAG in time
+        <span style="white-space:nowrap;">$O(|V|+|E|)$.</span></div>
+      <p class="fragment"><span style="color:var(--accent); font-weight:700;">Reason:</span>
+      multiplying all weights by $-1$ turns the longest path into the shortest path.</p>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PART 1B: BELLMAN-FORD — DP ON GRAPHS WITH CYCLES                      -->
+    <!-- ===================================================================== -->
+    <section class="center">
+      <h1>Bellman&ndash;Ford:<br>DP on Graphs with Cycles</h1>
+    </section>
+
+    <section>
+      <h2>Dropping the &ldquo;A&rdquo; in DAG</h2>
+      <p>New problem: single-source <em>shortest</em> paths in a general directed graph —
+      cycles allowed, and edge weights may be <span style="color:var(--accent);">negative</span>.</p>
+      <p class="fragment">Dijkstra&rsquo;s algorithm cannot handle this because of the
+      negative weights.</p>
+      <p class="fragment">The DAG algorithm cannot handle this because a graph with cycles
+      has <em>no topological order</em>.</p>
+    </section>
+
+    <section>
+      <h2>What&rsquo;s the Ordering?</h2>
+      <p>In the DAG algorithm, the subproblems were ordered for us: process vertices in
+      topological order. That order is gone.</p>
+      <p class="fragment">A recurring DP move: when the natural order disappears,
+      <em>add a parameter</em> that restores one.</p>
+      <div class="box fragment"><span class="tag">Idea</span>
+        Order subproblems not by vertex, but by the <em>number of edges</em> a solution is
+        allowed to use.</div>
+    </section>
+
+    <section>
+      <h2>The Subproblem</h2>
+      <div class="box"><span class="tag">Definition</span>
+        $d_k(v)$ = minimum weight of a <em>walk</em> from $s$ to $v$ using at most $k$
+        edges ($\infty$ if there is none).</div>
+      <p class="fragment">A walk may revisit vertices and edges. We don&rsquo;t forbid
+      that up front — the budget $k$ keeps every subproblem finite, and we will see that
+      the optimum has no reason to revisit anything.</p>
+      <p class="fragment"><span style="color:var(--accent); font-weight:700;">Base case
+      ($k=0$):</span> $\;d_0(s) = 0$ and $d_0(v) = \infty$ for $v \ne s$.</p>
+    </section>
+
+    <section>
+      <h2>The Recurrence</h2>
+      <p>Consider a best walk to $v$ using at most $k$ edges, and look at its
+      <em>last edge</em>.</p>
+      <p class="fragment">Either the walk uses at most $k-1$ edges, or it arrives via some
+      edge $(u,v)$ after a walk to $u$ with at most $k-1$ edges:</p>
+      <p class="fragment">$$d_k(v) = \min\Bigl(d_{k-1}(v),\;
+      \min_{(u,v) \in E} \bigl(d_{k-1}(u) + w(u,v)\bigr)\Bigr)$$</p>
+      <p class="fragment">Computing round $k$ from round $k-1$ relaxes every edge once:
+      $O(|E|)$ per round. No vertex order needed — <em>any</em> edge order works.</p>
+    </section>
+
+    <section>
+      <h2>How Many Rounds?</h2>
+      <p>Suppose no <em>negative-weight cycle</em> is reachable from $s$. Excising a cycle
+      from a walk changes its weight by the cycle&rsquo;s weight, which is $\ge 0$ — so
+      removing cycles never hurts.</p>
+      <p class="fragment">Hence some shortest walk repeats no vertex: it is a
+      <em>simple path</em>, and a simple path has at most $n - 1$ edges
+      (where $n = |V|$).</p>
+      <div class="box fragment"><span class="tag">Consequence</span>
+        If no negative cycle is reachable from $s$, then $d_{n-1}(v) = d(s,v)$ for every
+        vertex $v$: $n-1$ rounds of relaxing all edges suffice.</div>
+    </section>
+
+    <section>
+      <h2>From Table to Rolling Array</h2>
+      <figure>
+        <svg width="560" height="300" viewBox="0 0 560 300"
+             font-family="Helvetica, Arial, sans-serif">
+          <defs>
+            <marker id="arr-tbl" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L7,4 L0,8 z" fill="#555"/>
+            </marker>
+          </defs>
+
+          <!-- column headers (vertices) -->
+          <g font-size="14" fill="#6a737d" text-anchor="middle">
+            <text x="150" y="40">0</text><text x="210" y="40">1</text>
+            <text x="270" y="40">2</text><text x="330" y="40">&#8943;</text>
+            <text x="390" y="40">n&#8722;1</text>
+          </g>
+
+          <!-- row labels (rounds) -->
+          <g font-size="14" fill="#6a737d" text-anchor="end">
+            <text x="108" y="74">k = 0</text>
+            <text x="108" y="112">k = 1</text>
+            <text x="108" y="176" font-weight="700" fill="#2e588f">k &#8722; 1</text>
+            <text x="108" y="214" font-weight="700" fill="#b07400">k</text>
+            <text x="108" y="278">n &#8722; 1</text>
+          </g>
+
+          <!-- vertical ellipses in the gap rows -->
+          <g font-size="16" fill="#8d8678" text-anchor="middle">
+            <text x="108" y="146">&#8942;</text><text x="108" y="248">&#8942;</text>
+            <text x="150" y="146">&#8942;</text><text x="210" y="146">&#8942;</text>
+            <text x="270" y="146">&#8942;</text><text x="330" y="146">&#8942;</text><text x="390" y="146">&#8942;</text>
+            <text x="150" y="248">&#8942;</text><text x="210" y="248">&#8942;</text>
+            <text x="270" y="248">&#8942;</text><text x="330" y="248">&#8942;</text><text x="390" y="248">&#8942;</text>
+          </g>
+
+          <!-- normal rows: k=0, k=1, n-1 -->
+          <g fill="#fbf7ed" stroke="#b9c2cb" stroke-width="1">
+            <rect x="120" y="55" width="60" height="38"/><rect x="180" y="55" width="60" height="38"/>
+            <rect x="240" y="55" width="60" height="38"/><rect x="300" y="55" width="60" height="38"/>
+            <rect x="360" y="55" width="60" height="38"/>
+            <rect x="120" y="93" width="60" height="38"/><rect x="180" y="93" width="60" height="38"/>
+            <rect x="240" y="93" width="60" height="38"/><rect x="300" y="93" width="60" height="38"/>
+            <rect x="360" y="93" width="60" height="38"/>
+            <rect x="120" y="259" width="60" height="38"/><rect x="180" y="259" width="60" height="38"/>
+            <rect x="240" y="259" width="60" height="38"/><rect x="300" y="259" width="60" height="38"/>
+            <rect x="360" y="259" width="60" height="38"/>
+          </g>
+
+          <!-- highlighted row k-1 (source) -->
+          <g fill="#d6e6ff" stroke="#2e588f" stroke-width="1.5">
+            <rect x="120" y="157" width="60" height="38"/><rect x="180" y="157" width="60" height="38"/>
+            <rect x="240" y="157" width="60" height="38"/><rect x="300" y="157" width="60" height="38"/>
+            <rect x="360" y="157" width="60" height="38"/>
+          </g>
+          <!-- highlighted row k (being computed) -->
+          <g fill="#fff2cc" stroke="#b07400" stroke-width="1.5">
+            <rect x="120" y="195" width="60" height="38"/><rect x="180" y="195" width="60" height="38"/>
+            <rect x="240" y="195" width="60" height="38"/><rect x="300" y="195" width="60" height="38"/>
+            <rect x="360" y="195" width="60" height="38"/>
+          </g>
+
+          <!-- dependency arrow: row k reads row k-1 -->
+          <line x1="440" y1="172" x2="440" y2="214" stroke="#555" stroke-width="1.5"
+                marker-end="url(#arr-tbl)"/>
+          <g font-size="13" fill="#444">
+            <text x="450" y="184">row&#160;k</text>
+            <text x="450" y="202">reads&#160;k&#8722;1</text>
+          </g>
+        </svg>
+        <figcaption>The DP table: one row per round, one column per vertex.</figcaption>
+      </figure>
+      <p class="smaller">Round $k$ only needs the information from round $k-1$, so we only
+      need to keep two rows at a time.</p>
+    </section>
+
+    <section>
+      <h2>Updating in Place</h2>
+      <p>Even better: we can update <em>one</em> array in place.</p>
+      <p class="fragment">Mid-round, an entry may already hold a round-$k$ value when we
+      read it — that only means improvements propagate <em>sooner</em>.</p>
+      <p class="fragment">After round $k$ we still have $\texttt{dist}[v] \le d_k(v)$, and
+      every value is the weight of a genuine walk, so after $n-1$ rounds the answer is exact.</p>
+    </section>
+
+    <section>
+      <h2>Bellman&ndash;Ford: Code</h2>
+      <pre class="algo"><code><span class="kw">struct</span> Edge { <span class="kw">int</span> from; <span class="kw">int</span> to; <span class="kw">double</span> weight; };
+
+std::vector&lt;<span class="kw">double</span>&gt; bellmanFord(<span class="kw">int</span> n, <span class="kw">const</span> std::vector&lt;Edge&gt;&amp; edges, <span class="kw">int</span> s) {
+    <span class="cm">// real infinity: INF + weight stays INF, so no relax guard needed</span>
+    <span class="kw">const double</span> INF = std::numeric_limits&lt;<span class="kw">double</span>&gt;::infinity();
+    std::vector&lt;<span class="kw">double</span>&gt; dist(n, INF);   <span class="cm">// dist plays the role of d_k</span>
+    dist[s] = 0.0;
+    <span class="kw">for</span> (<span class="kw">int</span> k = 1; k &lt; n; ++k) {             <span class="cm">// rounds k = 1, ..., n-1</span>
+        <span class="kw">for</span> (<span class="kw">const auto</span>&amp; e : edges) {
+            <span class="kw">if</span> (dist[e.from] + e.weight &lt; dist[e.to]) {
+                dist[e.to] = dist[e.from] + e.weight;   <span class="cm">// relax</span>
+            }
+        }
+    }
+    <span class="kw">return</span> dist;
+}</code></pre>
+      <div class="box fragment"><span class="tag">Running time</span>
+        $n - 1$ rounds, each relaxing all $|E|$ edges: $O(|V| \cdot |E|)$,
+        with $O(|V|)$ space.</div>
+    </section>
+
+    <section>
+      <h2>Detecting Negative Cycles</h2>
+      <p>What if there <em>is</em> a negative cycle reachable from $s$? Then walks can get
+      ever cheaper by looping.</p>
+      <p class="fragment">Run one extra round: if some $\texttt{dist}[v]$ still improves in
+      round $n$, a walk with $n$ edges beats every walk with at most $n-1$ edges. Such a
+      walk must repeat a vertex, and the enclosed cycle must have negative weight.</p>
+      <div class="box fragment"><span class="tag">Negative-cycle test</span>
+        Some $\texttt{dist}$ value improves in round $n$ $\iff$ a negative cycle is
+        reachable from $s$. No improvement means the values already converged to true
+        distances.</div>
+    </section>
+
+    <section>
+      <h2>One Family of Algorithms</h2>
+      <table class="results smaller">
+        <thead><tr><th>Setting</th><th>Algorithm</th><th>Time</th></tr></thead>
+        <tbody>
+          <tr><td class="q">DAG, any weights</td>
+              <td>relax in topological order</td><td>$O(|V|+|E|)$</td></tr>
+          <tr><td class="q">Non-negative weights</td>
+              <td>Dijkstra (last semester)</td><td>$O((|V|+|E|)\log |V|)$</td></tr>
+          <tr class="hlrow"><td class="q">Negative weights, cycles</td>
+              <td>Bellman&ndash;Ford</td><td>$O(|V|\cdot|E|)$</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller">All three are edge relaxation; they differ only in the
+      <em>order</em> and <em>number of times</em> edges are relaxed — and the DP view tells
+      us why each schedule is enough.</p>
+      <div class="box fragment"><span class="tag">Animation</span>
+        Step through the rounds in
+        <a href="../animations/bellman_ford.html">the Bellman&ndash;Ford animation</a> — you may
+        remember it as the &ldquo;Advanced Algorithms preview&rdquo; at the end of the DSA
+        course. Watch $d_k$ spread one edge further per round, and the round-$n$ check
+        catch a negative cycle.</div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PART 2: MAXIMUM SUBARRAY SUM                                          -->
+    <!-- ===================================================================== -->
+    <section class="center">
+      <h1>Maximum Subarray Sum</h1>
+    </section>
+
+    <section>
+      <h2>Max Subarray Sum</h2>
+      <p>We are given an array $\texttt{arr}$ of integers:</p>
+      <figure>
+        <svg width="470" height="95" viewBox="0 0 470 95">
+          <g font-family="Helvetica, Arial, sans-serif">
+            <rect x="12"  y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="68"  y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="124" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="180" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="236" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="292" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="348" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="404" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <g font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+              <text x="38" y="44">1</text><text x="94" y="44">3</text><text x="150" y="44">&#8722;5</text>
+              <text x="206" y="44">2</text><text x="262" y="44">3</text><text x="318" y="44">1</text>
+              <text x="374" y="44">&#8722;4</text><text x="430" y="44">3</text>
+            </g>
+            <g font-size="12" fill="#6a737d" text-anchor="middle">
+              <text x="38" y="84">0</text><text x="94" y="84">1</text><text x="150" y="84">2</text>
+              <text x="206" y="84">3</text><text x="262" y="84">4</text><text x="318" y="84">5</text>
+              <text x="374" y="84">6</text><text x="430" y="84">7</text>
+            </g>
+          </g>
+        </svg>
+      </figure>
+      <p class="fragment">We want to find indices $i \le j$ that maximize the sum
+      $$\texttt{arr}[i] + \texttt{arr}[i+1] + \cdots + \texttt{arr}[j]$$</p>
+      <p class="fragment">That is, we want to maximize the sum of entries in a subarray.</p>
+    </section>
+
+    <section>
+      <h2>Example</h2>
+      <figure>
+        <svg width="470" height="95" viewBox="0 0 470 95">
+          <g font-family="Helvetica, Arial, sans-serif">
+            <rect x="12"  y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="68"  y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="124" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="180" y="12" width="52" height="52" rx="4" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.5"/>
+            <rect x="236" y="12" width="52" height="52" rx="4" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.5"/>
+            <rect x="292" y="12" width="52" height="52" rx="4" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.5"/>
+            <rect x="348" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="404" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <g font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+              <text x="38" y="44">1</text><text x="94" y="44">3</text><text x="150" y="44">&#8722;5</text>
+              <text x="206" y="44" fill="#1f3520">2</text><text x="262" y="44" fill="#1f3520">3</text>
+              <text x="318" y="44" fill="#1f3520">1</text>
+              <text x="374" y="44">&#8722;4</text><text x="430" y="44">3</text>
+            </g>
+            <g font-size="12" fill="#6a737d" text-anchor="middle">
+              <text x="38" y="84">0</text><text x="94" y="84">1</text><text x="150" y="84">2</text>
+              <text x="206" y="84">3</text><text x="262" y="84">4</text><text x="318" y="84">5</text>
+              <text x="374" y="84">6</text><text x="430" y="84">7</text>
+            </g>
+          </g>
+        </svg>
+      </figure>
+      <p>In this case the maximum sum of a subarray is <span class="hl">6</span>, realized by
+      the subarray from index 3 to index 5.</p>
+    </section>
+
+    <section>
+      <h2>Brute Force</h2>
+      <p class="smaller">Try all indices $i \le j$ and compute the sum
+      $\texttt{arr}[i] + \cdots + \texttt{arr}[j]$.</p>
+      <pre class="algo"><code><span class="kw">int</span> maxSubarraySum(<span class="kw">const</span> std::vector&lt;<span class="kw">int</span>&gt;&amp; vec) {
+    <span class="kw">int</span> n = <span class="kw">static_cast</span>&lt;<span class="kw">int</span>&gt;(vec.size());
+    <span class="kw">int</span> maxSum = vec.at(0);
+    <span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; n; ++i) {
+        <span class="kw">for</span> (<span class="kw">int</span> j = i; j &lt; n; ++j) {
+            <span class="kw">int</span> currentSum = 0;
+            <span class="kw">for</span> (<span class="kw">int</span> k = i; k &lt;= j; ++k) {
+                currentSum += vec.at(k);
+            }
+            maxSum = std::max(maxSum, currentSum);
+        }
+    }
+    <span class="kw">return</span> maxSum;
+}</code></pre>
+      <p>What is the running time? <span class="fragment">Three nested loops:
+      $O(n^3)$.</span></p>
+    </section>
+
+    <section>
+      <h2>Wasted Work</h2>
+      <p>Obviously there is wasted work in computing</p>
+      <p>$$\texttt{arr}[3] + \texttt{arr}[4] + \texttt{arr}[5] + \texttt{arr}[6]$$</p>
+      <p>from scratch when we already have computed</p>
+      <p>$$\texttt{arr}[3] + \texttt{arr}[4] + \texttt{arr}[5]$$</p>
+      <p class="fragment">We can compute all sums starting from index $i$ building on the
+      previous sum.</p>
+    </section>
+
+    <section>
+      <h2>Re-using Sums</h2>
+      <pre class="algo"><code><span class="kw">int</span> maxSubarraySum(<span class="kw">const</span> std::vector&lt;<span class="kw">int</span>&gt;&amp; vec) {
+    <span class="kw">int</span> n = <span class="kw">static_cast</span>&lt;<span class="kw">int</span>&gt;(vec.size());
+    <span class="kw">int</span> maxSum = vec.at(0);
+    <span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; n; ++i) {
+        <span class="kw">int</span> sumFromi = 0;
+        <span class="kw">for</span> (<span class="kw">int</span> j = i; j &lt; n; ++j) {
+            sumFromi += vec.at(j);
+            maxSum = std::max(maxSum, sumFromi);
+        }
+    }
+    <span class="kw">return</span> maxSum;
+}</code></pre>
+      <p>What is the running time of this solution?</p>
+      <p class="fragment">Two nested loops: $O(n^2)$. Can we do
+      better?</p>
+    </section>
+
+    <section>
+      <h2>Dynamic Programming</h2>
+      <p>Devise subproblems that build up to the full solution.</p>
+      <p class="fragment">In array problems, subproblems often focus on prefixes:
+      $$\texttt{arr}[0], \texttt{arr}[1], \ldots, \texttt{arr}[i]$$</p>
+      <div class="box fragment"><span class="tag">Recipe</span>
+        Compute some value $\texttt{dp}[i]$ of this prefix where:
+        <ol style="margin:0.2em 0 0 1em;">
+          <li>From $\texttt{dp}[0], \ldots, \texttt{dp}[n-1]$ we can solve the original problem.</li>
+          <li>From $\texttt{dp}[0], \ldots, \texttt{dp}[i]$ we can &ldquo;easily&rdquo; compute
+              $\texttt{dp}[i+1]$.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>First Attempt</h2>
+      <p><span style="color:var(--accent); font-weight:700;">First attempt</span> to define
+      subproblems:</p>
+      <p style="margin-left:1em;">What is the maximum subarray sum in
+      $\texttt{arr}[0], \texttt{arr}[1], \ldots, \texttt{arr}[i]$?</p>
+      <p class="fragment">1) Computing $\texttt{dp}[n-1]$ solves the problem. &#10003;</p>
+      <p class="fragment">2) Not obvious how to compute $\texttt{dp}[i+1]$ from
+      $\texttt{dp}[0], \ldots, \texttt{dp}[i]$. &#10007;</p>
+    </section>
+
+    <section>
+      <h2>Second Attempt</h2>
+      <p>Let $\texttt{dp}[i]$ be the maximum subarray sum that
+      <span style="color:var(--accent);">ends</span> at $i$.</p>
+      <p class="fragment">1) The final answer will be the maximum of
+      $\texttt{dp}[0], \ldots, \texttt{dp}[n-1]$.</p>
+      <p class="fragment">2) Going from $\texttt{dp}[i]$ to $\texttt{dp}[i+1]$: the maximum
+      sum ending at $i+1$ either includes $i$ or not.</p>
+      <p class="fragment" style="margin-left:1em;">If not, then
+      $\texttt{dp}[i+1] = \texttt{arr}[i+1]$.</p>
+      <p class="fragment" style="margin-left:1em;">If yes, the best we can do up to $i$ is
+      $\texttt{dp}[i]$, so $\texttt{dp}[i+1] = \texttt{dp}[i] + \texttt{arr}[i+1]$.</p>
+    </section>
+
+    <section>
+      <h2>Second Attempt: Code</h2>
+      <p style="text-align:center;">$\texttt{dp}[i+1] = \max(\texttt{arr}[i+1],\;
+      \texttt{dp}[i] + \texttt{arr}[i+1])$</p>
+      <pre class="algo"><code><span class="kw">int</span> maxSubarraySum(<span class="kw">const</span> std::vector&lt;<span class="kw">int</span>&gt;&amp; vec) {
+    <span class="kw">int</span> n = <span class="kw">static_cast</span>&lt;<span class="kw">int</span>&gt;(vec.size());
+    <span class="kw">int</span> maxSum = vec.at(0);
+    <span class="kw">int</span> currentSum = vec.at(0);   <span class="cm">// currentSum plays the role of dp[i]</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = 1; i &lt; n; ++i) {
+        currentSum = std::max(currentSum + vec.at(i), vec.at(i));
+        maxSum = std::max(currentSum, maxSum);
+    }
+    <span class="kw">return</span> maxSum;
+}</code></pre>
+      <p class="fragment smaller"><span style="color:var(--accent); font-weight:700;">Note:</span>
+      as we only use $\texttt{dp}[i]$ to compute $\texttt{dp}[i+1]$, we don&rsquo;t need to
+      store the whole $\texttt{dp}$ array.</p>
+    </section>
+
+    <section>
+      <h2>Running Time</h2>
+      <p>We now have a solution that runs in time $\Theta(n)$.</p>
+      <div class="box fragment"><span class="tag">Kadane&rsquo;s algorithm</span>
+        This is known as Kadane&rsquo;s algorithm. Its Wikipedia page recounts the interesting
+        history of the problem — worth a read.</div>
+      <p class="fragment smaller">The key move: change the subproblem from &ldquo;best in a
+      prefix&rdquo; to &ldquo;best <em>ending at</em> $i$.&rdquo; We will use this trick
+      again.</p>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PART 3: LONGEST INCREASING RUN (bridge to LIS)                        -->
+    <!-- ===================================================================== -->
+    <section class="center">
+      <h1>Longest Increasing Run:<br>Subarray and Subsequence</h1>
+    </section>
+
+    <section>
+      <h2>The Problem (Subarray)</h2>
+      <p class="smaller">We are given an array $\texttt{arr}$ of integers:</p>
+      <figure>
+        <svg width="470" height="95" viewBox="0 0 470 95">
+          <g font-family="Helvetica, Arial, sans-serif">
+            <rect x="12"  y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="68"  y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="124" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="180" y="12" width="52" height="52" rx="4" fill="#f1c79f" stroke="#b85a26" stroke-width="1.5"/>
+            <rect x="236" y="12" width="52" height="52" rx="4" fill="#f1c79f" stroke="#b85a26" stroke-width="1.5"/>
+            <rect x="292" y="12" width="52" height="52" rx="4" fill="#f1c79f" stroke="#b85a26" stroke-width="1.5"/>
+            <rect x="348" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="404" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <g font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+              <text x="38" y="44">6</text><text x="94" y="44">4</text><text x="150" y="44">5</text>
+              <text x="206" y="44" fill="#6e3416">7</text><text x="262" y="44" fill="#6e3416">8</text>
+              <text x="318" y="44" fill="#6e3416">9</text><text x="374" y="44">11</text><text x="430" y="44">12</text>
+            </g>
+            <g font-size="12" fill="#6a737d" text-anchor="middle">
+              <text x="38" y="84">0</text><text x="94" y="84">1</text><text x="150" y="84">2</text>
+              <text x="206" y="84">3</text><text x="262" y="84">4</text><text x="318" y="84">5</text>
+              <text x="374" y="84">6</text><text x="430" y="84">7</text>
+            </g>
+          </g>
+        </svg>
+      </figure>
+      <p class="smaller">We want to find the longest subarray containing consecutive
+      (increasing) numbers. We call consecutive increasing integers a
+      <span style="color:var(--accent);">run</span>.</p>
+      <p class="fragment smaller">In this case the answer is 3, because of the run $7, 8, 9$
+      from index 3 to 5.</p>
+      <p class="fragment smaller">Note that the subarray is contiguous — we cannot include
+      the 6 in index 0.</p>
+    </section>
+
+    <section>
+      <h2>DP for the Subarray Version</h2>
+      <p>We again consider subproblems defined on prefixes
+      $\texttt{arr}[0], \ldots, \texttt{arr}[i]$.</p>
+      <p class="fragment">Let&rsquo;s try the subproblem: $\texttt{dp}[i]$ is the longest run
+      <span style="color:var(--accent);">ending at</span> index $i$.</p>
+      <p class="fragment">Then the answer to the whole problem is the maximum of
+      $\texttt{dp}[0], \ldots, \texttt{dp}[n-1]$, and the update is</p>
+      <p class="fragment">$$\texttt{dp}[i+1] =
+        \begin{cases} 1 &amp; \text{if } \texttt{arr}[i+1] \ne \texttt{arr}[i] + 1 \\
+                      \texttt{dp}[i] + 1 &amp; \text{otherwise} \end{cases}$$</p>
+    </section>
+
+    <section>
+      <h2>Subarray Version: Code</h2>
+      <pre class="algo"><code><span class="kw">int</span> longestRunSubarray(<span class="kw">const</span> std::vector&lt;<span class="kw">int</span>&gt;&amp; vec) {
+    <span class="kw">if</span> (vec.empty()) {
+        <span class="kw">return</span> 0;
+    }
+    <span class="kw">int</span> n = <span class="kw">static_cast</span>&lt;<span class="kw">int</span>&gt;(vec.size());
+    <span class="kw">int</span> maxRun = 1;
+    <span class="kw">int</span> currentRun = 1;
+    <span class="kw">for</span> (<span class="kw">int</span> i = 1; i &lt; n; ++i) {
+        currentRun = (vec.at(i) == vec.at(i - 1) + 1) ? currentRun + 1 : 1;
+        maxRun = std::max(currentRun, maxRun);
+    }
+    <span class="kw">return</span> maxRun;
+}</code></pre>
+      <p class="fragment">Same shape as Kadane: one pass, $\Theta(n)$, constant extra
+      space.</p>
+    </section>
+
+    <section>
+      <h2>Subsequence Variation</h2>
+      <p class="smaller">Now we want the longest
+      <span style="color:var(--accent);">subsequence</span> of consecutive integers.</p>
+      <div class="box smaller"><span class="tag">Definition</span>
+        A subsequence of an array is obtained by deleting some entries of the array.
+        Elements appear in order, but do not have to be adjacent as in a subarray.</div>
+      <figure>
+        <svg width="470" height="95" viewBox="0 0 470 95">
+          <g font-family="Helvetica, Arial, sans-serif">
+            <rect x="12"  y="12" width="52" height="52" rx="4" fill="#f1c79f" stroke="#b85a26" stroke-width="1.5"/>
+            <rect x="68"  y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="124" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="180" y="12" width="52" height="52" rx="4" fill="#f1c79f" stroke="#b85a26" stroke-width="1.5"/>
+            <rect x="236" y="12" width="52" height="52" rx="4" fill="#f1c79f" stroke="#b85a26" stroke-width="1.5"/>
+            <rect x="292" y="12" width="52" height="52" rx="4" fill="#f1c79f" stroke="#b85a26" stroke-width="1.5"/>
+            <rect x="348" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="404" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <g font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+              <text x="38" y="44" fill="#6e3416">6</text><text x="94" y="44">4</text><text x="150" y="44">5</text>
+              <text x="206" y="44" fill="#6e3416">7</text><text x="262" y="44" fill="#6e3416">8</text>
+              <text x="318" y="44" fill="#6e3416">9</text><text x="374" y="44">11</text><text x="430" y="44">12</text>
+            </g>
+            <g font-size="12" fill="#6a737d" text-anchor="middle">
+              <text x="38" y="84">0</text><text x="94" y="84">1</text><text x="150" y="84">2</text>
+              <text x="206" y="84">3</text><text x="262" y="84">4</text><text x="318" y="84">5</text>
+              <text x="374" y="84">6</text><text x="430" y="84">7</text>
+            </g>
+          </g>
+        </svg>
+      </figure>
+      <p class="fragment smaller">The longest subsequence which is a run is $6, 7, 8, 9$.</p>
+      <p class="fragment smaller">Note that $4, 5, 6, 7, 8, 9$ does <em>not</em> form a
+      subsequence — the 6 comes before the 4 and 5.</p>
+    </section>
+
+    <section>
+      <h2>DP for the Subsequence Version</h2>
+      <p class="smaller">Let $\texttt{dp}[i]$ be the length of a longest run subsequence
+      ending at $\texttt{arr}[i]$. Because we care about runs, we need the indices $j$ where
+      $\texttt{arr}[j] + 1 == \texttt{arr}[i+1]$.</p>
+      <figure>
+        <svg width="470" height="150" viewBox="0 0 470 150">
+          <defs>
+            <marker id="arr-lirsub" markerWidth="8" markerHeight="8" refX="4" refY="1" orient="0">
+              <path d="M0,7 L4,0 L8,7 z" fill="#2e588f"/>
+            </marker>
+            <marker id="arr-lirsub-red" markerWidth="8" markerHeight="8" refX="4" refY="1" orient="0">
+              <path d="M0,7 L4,0 L8,7 z" fill="#b03a2e"/>
+            </marker>
+          </defs>
+          <g font-family="Helvetica, Arial, sans-serif">
+            <rect x="12"  y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="68"  y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="124" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="180" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="236" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="292" y="12" width="52" height="52" rx="4" fill="#f1c79f" stroke="#b85a26" stroke-width="1.5"/>
+            <rect x="348" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="404" y="12" width="52" height="52" rx="4" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <g font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+              <text x="38" y="44">4</text><text x="94" y="44">6</text><text x="150" y="44">5</text>
+              <text x="206" y="44">6</text><text x="262" y="44">8</text>
+              <text x="318" y="44" fill="#6e3416">7</text><text x="374" y="44">11</text><text x="430" y="44">6</text>
+            </g>
+            <g font-size="12" fill="#6a737d" text-anchor="middle">
+              <text x="38" y="80">0</text><text x="94" y="80">1</text><text x="150" y="80">2</text>
+              <text x="206" y="80">3</text><text x="262" y="80">4</text><text x="318" y="80">5</text>
+              <text x="374" y="80">6</text><text x="430" y="80">7</text>
+            </g>
+            <g stroke-width="2">
+              <line x1="94"  y1="118" x2="94"  y2="92" stroke="#2e588f" marker-end="url(#arr-lirsub)"/>
+              <line x1="206" y1="118" x2="206" y2="92" stroke="#2e588f" marker-end="url(#arr-lirsub)"/>
+              <line x1="318" y1="118" x2="318" y2="92" stroke="#b03a2e" marker-end="url(#arr-lirsub-red)"/>
+              <line x1="430" y1="118" x2="430" y2="92" stroke="#2e588f" marker-end="url(#arr-lirsub)"/>
+            </g>
+            <g font-size="13" font-weight="600" text-anchor="middle">
+              <text x="94"  y="138" fill="#2e588f">too small</text>
+              <text x="206" y="138" fill="#2e588f">bigger</text>
+              <text x="318" y="138" fill="#b03a2e">dp[5]</text>
+              <text x="430" y="138" fill="#2e588f">not relevant</text>
+            </g>
+          </g>
+        </svg>
+        <figcaption>To compute dp[5] we will use dp[j] where arr[j] = 6.</figcaption>
+      </figure>
+      <p class="fragment smaller">The length of a longest subsequence run ending at 6 cannot
+      decrease when 6 appears later in the array — so only the <em>latest previous</em>
+      occurrence matters. A 6 at a position after 5 is not relevant.</p>
+    </section>
+
+    <section>
+      <h2>The Update</h2>
+      <p>To compute $\texttt{dp}[i+1]$ we find the previous occurrence of
+      $\texttt{arr}[i+1] - 1$.</p>
+      <p class="fragment">If $\texttt{arr}[i+1] - 1$ has not appeared before, then
+      $\texttt{dp}[i+1] = 1$.</p>
+      <p class="fragment">Otherwise, if the previous occurrence is at position $j$, then
+      $$\texttt{dp}[i+1] = 1 + \texttt{dp}[j]$$</p>
+      <p class="fragment">We need a data structure to look up the previous occurrence of
+      $\texttt{arr}[i+1] - 1$. A dictionary data structure is good for this.</p>
+    </section>
+
+    <section>
+      <h2>A Dictionary as the DP Table</h2>
+      <p class="smaller">With a <code>map</code> or <code>unordered_map</code>, the lookup
+      structure doubles as the DP table: $\texttt{runTo}[j]$ = longest run up to value $j$
+      so far.</p>
+      <pre class="algo"><code><span class="kw">int</span> longestRunSubsequence(<span class="kw">const</span> std::vector&lt;<span class="kw">int</span>&gt;&amp; vec) {
+    <span class="kw">int</span> maxRun = 0;
+    std::unordered_map&lt;<span class="kw">int</span>,<span class="kw">int</span>&gt; runTo;
+    <span class="kw">for</span> (<span class="kw">int</span> x : vec) {
+        <span class="kw">if</span> (runTo.contains(x - 1)) {
+            runTo[x] = runTo[x - 1] + 1;
+        } <span class="kw">else</span> {
+            runTo[x] = 1;
+        }
+        maxRun = std::max(runTo[x], maxRun);
+    }
+    <span class="kw">return</span> maxRun;
+}</code></pre>
+      <p class="fragment smaller">Running time: $O(n \log n)$ with <code>map</code>,
+      average-case $O(n)$ with <code>unordered_map</code>.</p>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PART 4: LONGEST INCREASING SUBSEQUENCE                                -->
+    <!-- ===================================================================== -->
+    <section class="center">
+      <h1>Longest Increasing Subsequence</h1>
+    </section>
+
+    <section>
+      <h2>The Problem</h2>
+      <p class="smaller"><span style="color:var(--accent); font-weight:700;">Input:</span>
+      we are given an array of integers.</p>
+      <figure>
+        <svg width="640" height="95" viewBox="0 0 640 95">
+          <g font-family="Helvetica, Arial, sans-serif">
+            <rect x="10"  y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="48"  y="12" width="36" height="44" rx="3" fill="#f1c79f" stroke="#b85a26" stroke-width="1.3"/>
+            <rect x="86"  y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="124" y="12" width="36" height="44" rx="3" fill="#f1c79f" stroke="#b85a26" stroke-width="1.3"/>
+            <rect x="162" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="200" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="238" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="276" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="314" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="352" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="390" y="12" width="36" height="44" rx="3" fill="#f1c79f" stroke="#b85a26" stroke-width="1.3"/>
+            <rect x="428" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="466" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="504" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="542" y="12" width="36" height="44" rx="3" fill="#f1c79f" stroke="#b85a26" stroke-width="1.3"/>
+            <rect x="580" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <g font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+              <text x="28" y="40">0</text><text x="66" y="40" fill="#6e3416">4</text>
+              <text x="104" y="40">7</text><text x="142" y="40" fill="#6e3416">8</text>
+              <text x="180" y="40">3</text><text x="218" y="40">2</text>
+              <text x="256" y="40">1</text><text x="294" y="40">3</text>
+              <text x="332" y="40">2</text><text x="370" y="40">7</text>
+              <text x="408" y="40" fill="#6e3416">9</text><text x="446" y="40">5</text>
+              <text x="484" y="40">3</text><text x="522" y="40">2</text>
+              <text x="560" y="40" fill="#6e3416">11</text><text x="598" y="40">6</text>
+            </g>
+            <g font-size="11" fill="#6a737d" text-anchor="middle">
+              <text x="28" y="75">0</text><text x="66" y="75">1</text><text x="104" y="75">2</text>
+              <text x="142" y="75">3</text><text x="180" y="75">4</text><text x="218" y="75">5</text>
+              <text x="256" y="75">6</text><text x="294" y="75">7</text><text x="332" y="75">8</text>
+              <text x="370" y="75">9</text><text x="408" y="75">10</text><text x="446" y="75">11</text>
+              <text x="484" y="75">12</text><text x="522" y="75">13</text><text x="560" y="75">14</text>
+              <text x="598" y="75">15</text>
+            </g>
+          </g>
+        </svg>
+        <figcaption>The array z; the subsequence 4, 8, 9, 11 is highlighted.</figcaption>
+      </figure>
+      <div class="box smaller fragment"><span class="tag">Definition</span>
+        An increasing subsequence is a subsequence where each number is larger than all
+        numbers preceding it in the subsequence.</div>
+      <p class="fragment smaller">For example: $4, 8, 9, 11$ is an increasing subsequence.</p>
+    </section>
+
+    <section>
+      <h2>The Goal</h2>
+      <figure>
+        <svg width="640" height="95" viewBox="0 0 640 95">
+          <g font-family="Helvetica, Arial, sans-serif">
+            <rect x="10"  y="12" width="36" height="44" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.3"/>
+            <rect x="48"  y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="86"  y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="124" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="162" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="200" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="238" y="12" width="36" height="44" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.3"/>
+            <rect x="276" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="314" y="12" width="36" height="44" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.3"/>
+            <rect x="352" y="12" width="36" height="44" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.3"/>
+            <rect x="390" y="12" width="36" height="44" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.3"/>
+            <rect x="428" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="466" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="504" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="542" y="12" width="36" height="44" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.3"/>
+            <rect x="580" y="12" width="36" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <g font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+              <text x="28" y="40" fill="#1f3520">0</text><text x="66" y="40">4</text>
+              <text x="104" y="40">7</text><text x="142" y="40">8</text>
+              <text x="180" y="40">3</text><text x="218" y="40">2</text>
+              <text x="256" y="40" fill="#1f3520">1</text><text x="294" y="40">3</text>
+              <text x="332" y="40" fill="#1f3520">2</text><text x="370" y="40" fill="#1f3520">7</text>
+              <text x="408" y="40" fill="#1f3520">9</text><text x="446" y="40">5</text>
+              <text x="484" y="40">3</text><text x="522" y="40">2</text>
+              <text x="560" y="40" fill="#1f3520">11</text><text x="598" y="40">6</text>
+            </g>
+            <g font-size="11" fill="#6a737d" text-anchor="middle">
+              <text x="28" y="75">0</text><text x="66" y="75">1</text><text x="104" y="75">2</text>
+              <text x="142" y="75">3</text><text x="180" y="75">4</text><text x="218" y="75">5</text>
+              <text x="256" y="75">6</text><text x="294" y="75">7</text><text x="332" y="75">8</text>
+              <text x="370" y="75">9</text><text x="408" y="75">10</text><text x="446" y="75">11</text>
+              <text x="484" y="75">12</text><text x="522" y="75">13</text><text x="560" y="75">14</text>
+              <text x="598" y="75">15</text>
+            </g>
+          </g>
+        </svg>
+      </figure>
+      <p>The goal in LIS is to find the <em>length</em> of a longest increasing
+      subsequence.</p>
+      <p class="fragment">In this example, the answer is 6. An example
+      realising this is $0, 1, 2, 7, 9, 11$.</p>
+    </section>
+
+    <section>
+      <h2>Definition of Subproblem</h2>
+      <p>This problem sounds like a good candidate for 1D dynamic programming.</p>
+      <p class="fragment"><span style="color:var(--accent); font-weight:700;">Subproblems:</span>
+      what is the longest increasing subsequence ending at $z[i]$? Let this value be
+      $\texttt{dp}[i]$.</p>
+      <p class="fragment">$$\texttt{dp}[i] = 1 + \max_{j &lt; i,\; z[j] &lt; z[i]} \texttt{dp}[j]$$</p>
+      <p class="fragment">How can we compute this?</p>
+    </section>
+
+    <section>
+      <h2>The $O(n^2)$ DP</h2>
+      <p class="smaller">For each $i$, iterate over all $j &lt; i$:
+      $\texttt{dp}[i] = 1 + \max_{j &lt; i,\, z[j] &lt; z[i]} \texttt{dp}[j]$.</p>
+      <pre class="algo"><code><span class="kw">int</span> lis(<span class="kw">const</span> std::vector&lt;<span class="kw">int</span>&gt;&amp; z) {
+    <span class="kw">int</span> n = <span class="kw">static_cast</span>&lt;<span class="kw">int</span>&gt;(z.size());
+    std::vector&lt;<span class="kw">int</span>&gt; dp(n, 1);   <span class="cm">// each element alone is increasing</span>
+    <span class="kw">int</span> best = (n &gt; 0) ? 1 : 0;
+    <span class="kw">for</span> (<span class="kw">int</span> i = 1; i &lt; n; ++i) {
+        <span class="kw">for</span> (<span class="kw">int</span> j = 0; j &lt; i; ++j) {
+            <span class="kw">if</span> (z.at(j) &lt; z.at(i)) {
+                dp.at(i) = std::max(dp.at(i), dp.at(j) + 1);
+            }
+        }
+        best = std::max(best, dp.at(i));
+    }
+    <span class="kw">return</span> best;
+}</code></pre>
+      <div class="box fragment"><span class="tag">Running time</span>
+        $O(n^2)$ — the version we can easily rediscover.</div>
+    </section>
+
+    <section>
+      <h2>Faster than $O(n^2)$?</h2>
+      <div class="box warn"><span class="tag">Stretch</span>
+        Everything to the end of this section is stretch material — a taste of how data
+        structures can accelerate a DP.</div>
+      <p class="fragment">There is actually a data structure we can use to solve this problem
+      faster.</p>
+      <p class="fragment"><span style="color:var(--accent); font-weight:700;">Query:</span>
+      what is the maximum of $\texttt{dp}[j]$ over all $j$ with $z[j] &lt; z[i]$?</p>
+    </section>
+
+    <section>
+      <h2>Coordinate Compression</h2>
+      <p><span style="color:var(--accent); font-weight:700;">Problem:</span>
+      the values $z[j]$ can be any integers.</p>
+      <p class="fragment"><span style="color:var(--accent); font-weight:700;">Solution:</span> only the relative
+      order matters — sort in $O(n \log n)$ and map the values to $0, \ldots, n-1$.</p>
+      <p class="fragment">Then a value doubles as an <em>index</em> into an array $\texttt{dp}'$, where
+      $\texttt{dp}'[v]$ is the length of a longest increasing subsequence ending with
+      value $v$.</p>
+    </section>
+
+    <section>
+      <h2>Segment Tree</h2>
+      <figure>
+        <svg width="740" height="352" viewBox="0 0 740 352">
+          <g stroke="#8d8678" stroke-width="1.5">
+            <line x1="88"  y1="235" x2="60"  y2="290"/><line x1="88"  y1="235" x2="116" y2="290"/>
+            <line x1="200" y1="235" x2="172" y2="290"/><line x1="200" y1="235" x2="228" y2="290"/>
+            <line x1="312" y1="235" x2="284" y2="290"/><line x1="312" y1="235" x2="340" y2="290"/>
+            <line x1="424" y1="235" x2="396" y2="290"/><line x1="424" y1="235" x2="452" y2="290"/>
+            <line x1="536" y1="235" x2="508" y2="290"/><line x1="536" y1="235" x2="564" y2="290"/>
+            <line x1="648" y1="235" x2="620" y2="290"/><line x1="648" y1="235" x2="676" y2="290"/>
+            <line x1="144" y1="165" x2="88"  y2="225"/><line x1="144" y1="165" x2="200" y2="225"/>
+            <line x1="368" y1="165" x2="312" y2="225"/><line x1="368" y1="165" x2="424" y2="225"/>
+            <line x1="592" y1="165" x2="536" y2="225"/><line x1="592" y1="165" x2="648" y2="225"/>
+            <line x1="256" y1="95"  x2="144" y2="155"/><line x1="256" y1="95"  x2="368" y2="155"/>
+            <line x1="424" y1="30"  x2="256" y2="85"/><line x1="424" y1="30"  x2="592" y2="155"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="88"  y="230">1</text><text x="200" y="230">0</text><text x="312" y="230">2</text>
+            <text x="424" y="230">3</text><text x="536" y="230">0</text><text x="648" y="230">0</text>
+            <text x="144" y="160">1</text><text x="368" y="160">3</text><text x="592" y="160">0</text>
+            <text x="256" y="90">3</text>
+            <text x="424" y="25">3</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif">
+            <rect x="34"  y="292" width="52" height="42" rx="3" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.3" transform="translate(0,-4)"/>
+            <rect x="90"  y="288" width="52" height="42" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="146" y="288" width="52" height="42" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="202" y="288" width="52" height="42" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="258" y="288" width="52" height="42" rx="3" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.3"/>
+            <rect x="314" y="288" width="52" height="42" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="370" y="288" width="52" height="42" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="426" y="288" width="52" height="42" rx="3" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.3"/>
+            <rect x="482" y="288" width="52" height="42" rx="3" fill="#e8d6a8" stroke="#9a7a26" stroke-width="1.3"/>
+            <rect x="538" y="288" width="52" height="42" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="594" y="288" width="52" height="42" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="650" y="288" width="52" height="42" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <g font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+              <text x="60"  y="313">1</text><text x="116" y="315">0</text><text x="172" y="315">0</text>
+              <text x="228" y="315">0</text><text x="284" y="315" fill="#2c4329">2</text><text x="340" y="315">0</text>
+              <text x="396" y="315">0</text><text x="452" y="315" fill="#2c4329">3</text>
+              <text x="508" y="315" fill="#5f4910">4</text><text x="564" y="315">0</text>
+              <text x="620" y="315">0</text><text x="676" y="315">0</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#6a737d" text-anchor="middle">
+              <text x="60"  y="346">0</text><text x="116" y="346">1</text><text x="172" y="346">2</text>
+              <text x="228" y="346">3</text><text x="284" y="346">4</text><text x="340" y="346">5</text>
+              <text x="396" y="346">6</text><text x="452" y="346">7</text><text x="508" y="346">8</text>
+              <text x="564" y="346">9</text><text x="620" y="346">10</text><text x="676" y="346">11</text>
+            </g>
+          </g>
+        </svg>
+        <figcaption>dp&#8242; after processing 0, 4, 7 — leaves are dp&#8242;, each internal node stores
+        the max of its subtree. The update dp&#8242;[8] = 4 (gold) refreshes one leaf-to-root path.</figcaption>
+      </figure>
+      <p class="fragment smaller">The array values form the leaves of a binary tree, where we
+      take the maximum at each node. A prefix-max query
+      $\max_{v &lt; z[i]} \texttt{dp}'[v]$ checks at most $O(\log n)$ nodes; an update
+      rewrites the $\log n$ nodes on the path from leaf to root.</p>
+      <p class="fragment smaller">Total: <span class="hl">$O(n \log n)$</span> for LIS.</p>
+    </section>
+
+    <section>
+      <h2>Patience Sorting</h2>
+      <div class="box warn"><span class="tag">Stretch</span>
+        Another $O(n \log n)$ route — a beautiful algorithm, easier to implement than a
+        segment tree, but not dynamic programming.</div>
+      <p class="fragment smaller">Patience sorting is similar to the card game of solitaire.
+      We think of the array entries as &ldquo;cards&rdquo; and pass through the array from
+      left to right putting the cards into <span style="color:var(--accent);">piles</span>.
+      Each pile is non-increasing: we cannot put a larger card on top of a smaller card.</p>
+      <div class="box fragment smaller"><span class="tag">Rule</span>
+        Place each card on the leftmost pile where it is at most the top card of the pile.
+        If the card is larger than the top card of all piles, start a new pile to the right
+        of all existing piles.</div>
+    </section>
+
+    <section>
+      <h2>Why Patience Sorting Works</h2>
+      <div class="box smaller"><span class="tag">Fact 1</span>
+        The elements of any increasing subsequence must be in distinct piles:
+        $\;\#\text{piles} \;\ge\; \text{length of a LIS}$.</div>
+      <div class="box smaller fragment"><span class="tag">Fact 2</span>
+        $\text{length of a LIS} \;\ge\; \#\text{piles}$: start with a number in the
+        rightmost pile and follow the arrows back to the first pile — this gives an
+        increasing subsequence with one element per pile.</div>
+      <p class="fragment">Fact 1 + Fact 2: $\;\text{length of a LIS} = \#\text{piles}$.
+      With binary search for the target pile, this runs in $O(n \log n)$.</p>
+      <div class="box warn fragment smaller"><span class="tag">Fun consequence</span>
+        Any sequence of $n$ numbers has an increasing or a non-increasing subsequence of
+        size $\sqrt{n}$: with fewer than $\sqrt{n}$ piles, some pile has $\ge \sqrt{n}$
+        cards — and each pile is non-increasing.</div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PART 5: COIN CHANGE                                                   -->
+    <!-- ===================================================================== -->
+    <section class="center">
+      <h1>Coin Change</h1>
+    </section>
+
+    <section>
+      <h2>Coin Change</h2>
+      <p>In the making change problem we are given a set of coin denominations and a target
+      amount. We have an unlimited supply of each denomination.</p>
+      <p class="fragment">We want to find the <em>minimum number of coins</em> that sums to
+      the target amount.</p>
+      <p class="fragment">For example, with $\texttt{coins} = \{1, 9, 10\}$ and
+      $\texttt{amount} = 18$, the answer is 2 (two 9-coins).</p>
+      <p class="fragment">What is the dynamic programming algorithm for this?</p>
+    </section>
+
+    <section>
+      <h2>Subproblem and Update</h2>
+      <p>Subproblems are now <em>amounts</em>, not prefixes: let $\texttt{dp}[a]$ be the
+      minimum number of coins summing to exactly $a$.</p>
+      <p class="fragment">1) $\texttt{dp}[\texttt{amount}]$ solves the problem.</p>
+      <p class="fragment">2) The last coin of an optimal solution for $a$ is some
+      denomination $c \le a$; removing it leaves an optimal solution for $a - c$:
+      $$\texttt{dp}[a] = 1 + \min_{c \,\in\, \texttt{coins},\; c \le a} \texttt{dp}[a - c]$$</p>
+      <p class="fragment">Base case: $\texttt{dp}[0] = 0$; unreachable amounts stay
+      $\infty$.</p>
+    </section>
+
+    <section>
+      <h2>Worked Example</h2>
+      <p class="smaller">$\texttt{coins} = \{1, 9, 10\}$, $\texttt{amount} = 18$:</p>
+      <figure>
+        <svg width="740" height="95" viewBox="0 0 740 95">
+          <g font-family="Helvetica, Arial, sans-serif">
+            <rect x="10"  y="12" width="34" height="44" rx="3" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.3"/>
+            <rect x="48"  y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="86"  y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="124" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="162" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="200" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="238" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="276" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="314" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="352" y="12" width="34" height="44" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.3"/>
+            <rect x="390" y="12" width="34" height="44" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.3"/>
+            <rect x="428" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="466" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="504" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="542" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="580" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="618" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="656" y="12" width="34" height="44" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.3"/>
+            <rect x="694" y="12" width="34" height="44" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="1.3"/>
+            <g font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+              <text x="27"  y="40" fill="#2c4329">0</text><text x="65"  y="40">1</text>
+              <text x="103" y="40">2</text><text x="141" y="40">3</text>
+              <text x="179" y="40">4</text><text x="217" y="40">5</text>
+              <text x="255" y="40">6</text><text x="293" y="40">7</text>
+              <text x="331" y="40">8</text><text x="369" y="40" fill="#1d3c66">1</text>
+              <text x="407" y="40" fill="#1d3c66">1</text><text x="445" y="40">2</text>
+              <text x="483" y="40">3</text><text x="521" y="40">4</text>
+              <text x="559" y="40">5</text><text x="597" y="40">6</text>
+              <text x="635" y="40">7</text><text x="673" y="40">8</text>
+              <text x="711" y="40" fill="#1f3520">2</text>
+            </g>
+            <g font-size="11" fill="#6a737d" text-anchor="middle">
+              <text x="27"  y="75">0</text><text x="65"  y="75">1</text><text x="103" y="75">2</text>
+              <text x="141" y="75">3</text><text x="179" y="75">4</text><text x="217" y="75">5</text>
+              <text x="255" y="75">6</text><text x="293" y="75">7</text><text x="331" y="75">8</text>
+              <text x="369" y="75">9</text><text x="407" y="75">10</text><text x="445" y="75">11</text>
+              <text x="483" y="75">12</text><text x="521" y="75">13</text><text x="559" y="75">14</text>
+              <text x="597" y="75">15</text><text x="635" y="75">16</text><text x="673" y="75">17</text>
+              <text x="711" y="75">18</text>
+            </g>
+          </g>
+        </svg>
+        <figcaption>dp[a] for a = 0, &hellip;, 18. Base case in green (left); the single-coin
+        amounts 9 and 10 in blue; the answer dp[18] = 2 in green (right).</figcaption>
+      </figure>
+      <p class="fragment smaller">$\texttt{dp}[18] = 1 + \min(\texttt{dp}[17],\,
+      \texttt{dp}[9],\, \texttt{dp}[8]) = 1 + \min(8, 1, 8) = 2$.</p>
+      <p class="fragment smaller">Note how the answer <em>drops</em> at $a = 9$: taking the
+      biggest coin first is not always the way — $\texttt{dp}$ considers every last coin.</p>
+    </section>
+
+    <section>
+      <h2>Coin Change: Code</h2>
+      <pre class="algo"><code><span class="kw">int</span> coinChange(<span class="kw">const</span> std::vector&lt;<span class="kw">int</span>&gt;&amp; coins, <span class="kw">int</span> amount) {
+    <span class="kw">const int</span> INF = amount + 1;   <span class="cm">// no answer needs more coins</span>
+    std::vector&lt;<span class="kw">int</span>&gt; dp(amount + 1, INF);
+    dp[0] = 0;
+    <span class="kw">for</span> (<span class="kw">int</span> a = 1; a &lt;= amount; ++a) {
+        <span class="kw">for</span> (<span class="kw">int</span> c : coins) {
+            <span class="kw">if</span> (c &lt;= a) {
+                dp[a] = std::min(dp[a], dp[a - c] + 1);
+            }
+        }
+    }
+    <span class="kw">return</span> (dp[amount] &lt; INF) ? dp[amount] : -1;
+}</code></pre>
+      <div class="box fragment"><span class="tag">Running time</span>
+        $O(\texttt{amount} \times \#\texttt{coins})$.</div>
+      <div class="box warn fragment smaller"><span class="tag">Teaser</span>
+        Greedy shortcut for coins like $\{1, 5, 25\}$? See Week 4.</div>
+    </section>
+
+    <!-- ============================== WRAP-UP ============================== -->
+    <section>
+      <h2>Week 1 Takeaways</h2>
+      <table class="results smaller">
+        <thead><tr><th>Problem</th><th>Subproblem</th><th>Time</th></tr></thead>
+        <tbody>
+          <tr><td class="q">Longest path in a DAG</td>
+              <td>best path <em>into</em> $v$, in topological order</td><td>$O(|V|+|E|)$</td></tr>
+          <tr><td class="q">Bellman&ndash;Ford</td>
+              <td>shortest walk to $v$ using <em>at most $k$ edges</em></td><td>$O(|V|\cdot|E|)$</td></tr>
+          <tr><td class="q">Max subarray sum</td>
+              <td>best sum <em>ending at</em> $i$</td><td>$\Theta(n)$</td></tr>
+          <tr><td class="q">Longest increasing subsequence</td>
+              <td>longest LIS <em>ending at</em> $i$</td><td>$O(n^2)$, stretch $O(n\log n)$</td></tr>
+          <tr><td class="q">Coin change</td>
+              <td>fewest coins for <em>amount</em> $a$</td><td>$O(\texttt{amount}\cdot\#\texttt{coins})$</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Week 1 Takeaways</h2>
+      <div class="box"><span class="tag">The recipe</span>
+        Define subproblems whose answers (1) combine to solve the whole problem, and
+        (2) can be computed from earlier subproblems. &ldquo;Best <em>ending here</em>&rdquo;
+        is often the right refinement.</div>
+    </section>
+
+  </div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [ RevealMath.MathJax3, RevealNotes ],
+
+    mathjax3: {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        macros: {
+          tO:   ['{\\widetilde{O}}'],
+          R:    ['{\\mathbb{R}}'],
+          E:    ['{\\mathbb{E}}']
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+</script>
+</body>
+</html>
