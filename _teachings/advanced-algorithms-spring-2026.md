@@ -8,6 +8,10 @@ course_id: advanced-algorithms-2026
 schedule:
   - week: 1
     topic: Dynamic Programming
+    description: >-
+      Longest path in a DAG · Bellman–Ford: shortest paths with negative edges
+      as DP on walks · maximum subarray sum · longest increasing subsequence ·
+      coin change
     materials:
       - name: Lecture slides
         url: /assets/courses/advanced-algorithms-2026/lectures/week01.html
@@ -27,11 +31,78 @@ schedule:
         url: /assets/courses/advanced-algorithms-2026/animations/coin_change.html
   - week: 2
     topic: 2D Dynamic Programming
+    description: >-
+      Longest common subsequence · reducing LCS to LIS · fine-grained
+      complexity: why the textbook algorithm may be optimal
     materials:
       - name: Lecture slides
         url: /assets/courses/advanced-algorithms-2026/lectures/week02.html
       - name: Lecture slides (PDF)
         url: /assets/courses/advanced-algorithms-2026/lectures/week02.pdf
+  - week: 3
+    topic: Dynamic Programming on Trees
+    description: >-
+      Maximum matching, maximum independent set, and minimum vertex cover on
+      trees
+  - week: 4
+    topic: Greedy Algorithms
+    description: >-
+      Greedy maximum matching on a tree · activity selection · the exchange
+      property
+  - week: 5
+    topic: Kruskal's Algorithm
+    description: >-
+      The graphic matroid · every cut's minimum weight edge is in an MST ·
+      implementing Kruskal with union-find
+  - week: 6
+    topic: Prim's Algorithm
+    description: >-
+      Review of Dijkstra's algorithm · Prim as Dijkstra with bottleneck
+      distance · Borůvka's MST algorithm
+  - week: 7
+    topic: Minimum Cut
+    description: >-
+      Randomised algorithms and basic probability · Karger's randomised
+      contraction algorithm
+  - week: 8
+    topic: Maximum Flow
+    description: >-
+      Ford–Fulkerson · Edmonds–Karp · max-flow = min-cut via the residual
+      graph · applications: bipartite matching, matrix rounding
+  - week: 9
+    topic: Linear Programming I — Modelling and Geometry
+    description: >-
+      LPs in standard form · the feasible region as a polytope · LP
+      relaxations and integrality gaps · Kruskal and the matroid polytope
+  - week: 10
+    topic: Linear Programming II — Duality
+    description: >-
+      Weak and strong duality · writing the dual of an LP · max-flow/min-cut
+      as LP duality · König's theorem · complementary slackness
+  - week: 11
+    topic: NP-completeness
+    description: >-
+      Decision vs search problems · the verifier definition of NP ·
+      polynomial-time reductions · SAT, 3SAT, independent set, vertex cover,
+      clique, Hamiltonian path
+  - week: 12
+    topic: Approximation Algorithms
+    description: >-
+      LP-rounding and primal–dual 2-approximations for vertex cover ·
+      2-approximation for metric TSP via MST · greedy ln(n)-approximation for
+      set cover
 ---
 
-Lecture notes and course materials are posted in the schedule below.
+A 12-week course on advanced algorithm design and analysis, continuing on from
+Data Structures and Algorithms in C++. Each week is one 3-hour session that
+blends lecture blocks with two kinds of activity: a pen-and-paper worksheet
+done in pairs, and programming activities with starter code and a test
+harness. Activities are labelled **Core** / **Stretch** — finishing Core is a
+full session. Each week also has a graded programming exercise, autograded on
+Ed.
+
+All course code builds with
+`clang++ -std=c++20 -Wall -Wextra -fsanitize=address,undefined -g file.cpp -o file`.
+
+Lecture notes and course materials are posted in the schedule below as the
+course progresses.
