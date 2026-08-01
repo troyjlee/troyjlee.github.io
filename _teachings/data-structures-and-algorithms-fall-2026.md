@@ -79,7 +79,8 @@ schedule:
       DP as recursion + memoisation · top-down (memoised) vs bottom-up
       (tabulated) formulations · overlapping subproblems and optimal
       substructure · connection back to DAG shortest paths · full treatment
-      continues in Advanced Algorithms
+      continues in
+      [Advanced Algorithms](/teachings/advanced-algorithms-spring-2026/)
 ---
 
 A 12-week course on fundamental data structures and algorithms in C++. Each
