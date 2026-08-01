@@ -39,6 +39,8 @@ schedule:
         url: /assets/courses/advanced-algorithms-2026/lectures/week02.html
       - name: Lecture slides (PDF)
         url: /assets/courses/advanced-algorithms-2026/lectures/week02.pdf
+      - name: "Animation: Longest Common Subsequence"
+        url: /assets/courses/advanced-algorithms-2026/animations/lcs.html
   - week: 3
     topic: Dynamic Programming on Trees
     description: >-
