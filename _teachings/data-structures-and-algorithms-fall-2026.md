@@ -1,7 +1,7 @@
 ---
 layout: course
 title: Data Structures and Algorithms
-description: Fundamental data structures and algorithms.
+description: Fundamental data structures and algorithms in C++.
 year: 2026
 term: Fall
 course_id: data-structures-algorithms-2026
