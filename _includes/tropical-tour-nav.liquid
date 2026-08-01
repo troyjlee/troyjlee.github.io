@@ -1,0 +1,32 @@
+{% assign tour_chapters = site.stories | where: 'series', 'tropical-tour' | sort: 'order' %}
+{% assign previous_chapter = null %}
+{% assign next_chapter = null %}
+{% assign current_found = false %}
+
+{% for chapter in tour_chapters %}
+  {% if current_found %}
+    {% unless next_chapter %}
+      {% assign next_chapter = chapter %}
+    {% endunless %}
+  {% elsif chapter.url == page.url %}
+    {% assign current_found = true %}
+  {% else %}
+    {% assign previous_chapter = chapter %}
+  {% endif %}
+{% endfor %}
+
+<nav aria-label="Tropical Tour chapter navigation" class="d-flex flex-column flex-sm-row justify-content-between mt-5 pt-3 border-top">
+  <div class="mb-2 mb-sm-0">
+    {% if previous_chapter %}
+      <a href="{{ previous_chapter.url | relative_url }}">&larr; {{ previous_chapter.title }}</a>
+    {% endif %}
+  </div>
+  <div class="mb-2 mb-sm-0">
+    <a href="{{ '/stories/tropical-tour/' | relative_url }}">Tour map</a>
+  </div>
+  <div class="text-sm-right">
+    {% if next_chapter %}
+      <a href="{{ next_chapter.url | relative_url }}">{{ next_chapter.title }} &rarr;</a>
+    {% endif %}
+  </div>
+</nav>
