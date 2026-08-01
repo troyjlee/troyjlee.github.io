@@ -94,15 +94,7 @@ schedule:
 ---
 
 A 12-week course on advanced algorithm design and analysis, continuing on from
-Data Structures and Algorithms in C++. Each week is one 3-hour session that
-blends lecture blocks with two kinds of activity: a pen-and-paper worksheet
-done in pairs, and programming activities with starter code and a test
-harness. Activities are labelled **Core** / **Stretch** — finishing Core is a
-full session. Each week also has a graded programming exercise, autograded on
-Ed.
-
-All course code builds with
-`clang++ -std=c++20 -Wall -Wextra -fsanitize=address,undefined -g file.cpp -o file`.
+Data Structures and Algorithms in C++.
 
 Lecture notes and course materials are posted in the schedule below as the
 course progresses.
