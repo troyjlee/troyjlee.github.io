@@ -42,7 +42,7 @@ ninja.data = [{
               window.location.href = "/teachings/advanced-algorithms-spring-2026/";
             },},{id: "teachings-data-structures-and-algorithms",
           title: 'Data Structures and Algorithms',
-          description: "Fundamental data structures and algorithms.",
+          description: "Fundamental data structures and algorithms in C++.",
           section: "Teachings",handler: () => {
               window.location.href = "/teachings/data-structures-and-algorithms-fall-2026/";
             },},{
