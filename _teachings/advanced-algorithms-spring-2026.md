@@ -25,6 +25,11 @@ schedule:
         url: /assets/courses/advanced-algorithms-2026/animations/patience_sorting.html
       - name: "Animation: Coin Change"
         url: /assets/courses/advanced-algorithms-2026/animations/coin_change.html
+  - week: 2
+    topic: 2D Dynamic Programming
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week02.html
 ---
 
 Lecture notes and course materials are posted in the schedule below.
