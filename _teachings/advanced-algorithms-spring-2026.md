@@ -30,6 +30,8 @@ schedule:
     materials:
       - name: Lecture slides
         url: /assets/courses/advanced-algorithms-2026/lectures/week02.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week02.pdf
 ---
 
 Lecture notes and course materials are posted in the schedule below.
