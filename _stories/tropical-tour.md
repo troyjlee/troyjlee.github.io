@@ -7,14 +7,15 @@ order: 3
 
 Take the matrix multiplication you already know, and change the arithmetic inside it:
 wherever you would _multiply_ two numbers, **add** them instead; wherever you would
-_add_, take the **max**. The result is called _tropical_ matrix multiplication, and it
-has a strange superpower: many of the dynamic programming algorithms you meet in an
-algorithms class — House Robber, maximum subarray sum, stock trading — _are_ tropical
-matrix products, in disguise.
+_add_, take the **max**. The result is called _tropical_ matrix multiplication, and
+amazingly it can capture many dynamic programming algorithms:
+house robber, maximum subarray sum, best time to buy and
+sell stock are all tropical matrix products, in disguise.
 
-This is not a party trick. Once a DP is a matrix product, associativity kicks in: you
+Formulating them as a matrix product gives several nice features. By associativity
+of matrix multiplication, you
 can cut the input anywhere, summarize the pieces independently, and multiply the
-summaries back together. That one fact generates segment trees, parallel algorithms,
+summaries back together. This allows for parallel algorithms, handling dynamic updates,
 and closed-form answers for inputs of astronomical length — and it explains where the
 "clever" combine rules in textbooks actually come from.
 
