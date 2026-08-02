@@ -25,7 +25,7 @@ ninja.data = [{
           },
         },{id: "nav-stories",
           title: "stories",
-          description: "Series of pages that each unfold one idea, told at a human pace.",
+          description: "Interesting things I don&#39;t want to forget.",
           section: "Navigation",
           handler: () => {
             window.location.href = "/stories/";
