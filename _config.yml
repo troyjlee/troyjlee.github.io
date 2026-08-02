@@ -143,8 +143,9 @@ newsletter:
 # -----------------------------------------------------------------------------
 
 collections:
-  notes:
+  stories:
     output: true
+    permalink: /stories/:path/
   teachings:
     output: true
 
