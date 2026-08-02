@@ -23,18 +23,28 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/teaching/";
           },
-        },{id: "nav-notes",
-          title: "notes",
-          description: "Series of informative pages on topics I find interesting.",
+        },{id: "nav-stories",
+          title: "stories",
+          description: "Series of pages that each unfold one idea, told at a human pace.",
           section: "Navigation",
           handler: () => {
-            window.location.href = "/notes/";
+            window.location.href = "/stories/";
           },
-        },{id: "notes-example-note-replace-me",
-          title: 'Example note (replace me)',
-          description: "A placeholder showing how the notes collection works.",
-          section: "Notes",handler: () => {
-              window.location.href = "/notes/example-topic/";
+        },{id: "stories-a-tropical-tour-of-leetcode",
+          title: 'A Tropical Tour of LeetCode',
+          description: "Classic dynamic programming problems, revisited as matrix multiplication in an exotic arithmetic.",
+          section: "Stories",handler: () => {
+              window.location.href = "/stories/tropical-tour/";
+            },},{id: "stories-house-robber-as-matrix-multiplication",
+          title: 'House Robber As Matrix Multiplication',
+          description: "Follow the familiar two-state sweep step by step, then watch its choices become a 2×2 tropical matrix.",
+          section: "Stories",handler: () => {
+              window.location.href = "/stories/tropical-tour/house-robber/";
+            },},{id: "stories-a-tropical-take-on-maximum-subarray-sum",
+          title: 'A Tropical Take on Maximum Subarray Sum',
+          description: "Let the crossing problem force the four-field block summary, then watch the combine rules become one 3×3 tropical matrix product.",
+          section: "Stories",handler: () => {
+              window.location.href = "/stories/tropical-tour/kadane/";
             },},{id: "teachings-advanced-algorithms",
           title: 'Advanced Algorithms',
           description: "Advanced algorithm design and analysis.",
