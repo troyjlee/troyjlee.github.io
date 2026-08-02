@@ -2,7 +2,7 @@
 layout: page
 permalink: /stories/
 title: stories
-description: Series of pages that each unfold one idea, told at a human pace.
+description: Interesting things I don't want to forget.
 nav: true
 nav_order: 3
 ---
