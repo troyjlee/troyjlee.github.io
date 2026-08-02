@@ -328,15 +328,11 @@ And we never had to invent the summary or a clever rule for combining segments.
 We only wrote down the ordinary DP's legal moves; associativity supplied the
 rest for free.
 
-{% comment %}
-Restore when the rest of the tour is published:
-
 The [next stop]({{ '/stories/tropical-tour/kadane/' | relative_url }}) repeats the
-process for maximum subarray sum. Its state space has three phases rather than two
-statuses, and its matrix entries turn out to be the textbook's famous
-prefix/suffix/total/best summary. Later stops keep these matrices in a
-[segment tree]({{ '/stories/tropical-tour/segment-tree/' | relative_url }}) and
-raise them to enormous powers.
-{% endcomment %}
+process for maximum subarray sum. Its state space has three states rather than
+two, and its matrix entries turn out to be the textbook's famous four-field
+summary: `best`, `beginning`, `ending`, and `total`. Later stops will keep
+these matrices in a segment tree and raise them to enormous powers.
+{% comment %} Link the segment tree mention when that stop is published. {% endcomment %}
 
 {% include tropical-tour-nav.liquid %}
