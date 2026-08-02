@@ -20,7 +20,7 @@ and closed-form answers for inputs of astronomical length — and it explains wh
 "clever" combine rules in textbooks actually come from.
 
 Each stop on the tour takes one problem you may have seen before, puts on the tropical
-glasses, and cashes in one payoff. No prerequisites beyond basic DP and matrix
+glasses, and cashes in on the payoff. No prerequisites beyond basic DP and matrix
 multiplication.
 
 ## Stops on the tour
