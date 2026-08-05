@@ -69,6 +69,11 @@
     .reveal pre.algo code { padding: 0.8em 1em; }
     .algo .kw { color: var(--accent); font-weight: 700; }
     .algo .cm { color: var(--muted); font-style: italic; }
+    /* Unified-diff output.  .keep takes no horizontal padding, unlike .hl, so
+       the highlighted characters stay on the monospace grid. */
+    .reveal .del  { color: #b42318; font-weight: 700; }
+    .reveal .ins  { color: #1a7f37; font-weight: 700; }
+    .algo .keep   { background: #fff3b0; border-radius: 3px; font-weight: 700; }
 
     .reveal .credit { color: var(--muted); font-size: 0.8em; }
     .reveal .smaller { font-size: 0.82em; }
@@ -703,6 +708,76 @@
         as is &ldquo;sheatr&rdquo;.</p>
       <p class="fragment">These realize the maximum length of an LCS, which is
         <span class="hl">6</span>.</p>
+    </section>
+
+    <section>
+      <h2><code>diff</code> Computes an LCS</h2>
+      <div class="cols">
+        <div>
+          <pre class="algo" style="font-size:0.4em;"><code><span class="cm">$ diff -U 100 spaceheater.txt \
+         sheeptractor.txt</span>
+ <span class="keep">s</span>
+<span class="del">-p</span>
+<span class="del">-a</span>
+<span class="del">-c</span>
+<span class="del">-e</span>
+ <span class="keep">h</span>
+ <span class="keep">e</span>
+<span class="ins">+e</span>
+<span class="ins">+p</span>
+<span class="ins">+t</span>
+<span class="ins">+r</span>
+ <span class="keep">a</span>
+<span class="ins">+c</span>
+ <span class="keep">t</span>
+<span class="del">-e</span>
+<span class="ins">+o</span>
+ <span class="keep">r</span></code></pre>
+        </div>
+        <div>
+          <p class="smaller">One character per line, so a line diff is a
+            character diff.</p>
+          <p class="fragment smaller"><span class="del">&minus;</span> deletes,
+            <span class="ins">+</span> inserts, and the untouched lines are a
+            common subsequence &mdash; here <span class="hl">sheatr</span>.</p>
+          <p class="fragment credit">Fewest edits = most lines left untouched.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>An LCS, Not <em>The</em> LCS</h2>
+      <div class="cols">
+        <div>
+          <pre class="algo" style="font-size:0.4em;"><code><span class="cm">$ diff -U 100 sheeptractor.txt \
+         spaceheater.txt</span>
+ <span class="keep">s</span>
+<span class="del">-h</span>
+<span class="del">-e</span>
+<span class="del">-e</span>
+ <span class="keep">p</span>
+<span class="del">-t</span>
+<span class="del">-r</span>
+ <span class="keep">a</span>
+ <span class="keep">c</span>
+<span class="ins">+e</span>
+<span class="ins">+h</span>
+<span class="ins">+e</span>
+<span class="ins">+a</span>
+ <span class="keep">t</span>
+<span class="del">-o</span>
+<span class="ins">+e</span>
+ <span class="keep">r</span></code></pre>
+        </div>
+        <div>
+          <p class="smaller">Swap the arguments and <code>diff</code> returns the
+            <em>other</em> subsequence: <span class="hl">spactr</span>.</p>
+          <p class="fragment smaller">Both have length 6.  A longest common
+            subsequence need not be unique.</p>
+          <p class="fragment credit">Which one you get depends on how ties are
+            broken.</p>
+        </div>
+      </div>
     </section>
 
     <section>
