@@ -515,7 +515,7 @@
   <div class="legend-item"><span class="legend-bar hypo"></span>hypothetical edge</div>
 </div>
 
-<footer>u = unmatched in l · z = alternating-reachable from u · c = (l∖z) ∪ (r∩z) · kőnig 1931: max matching = min vertex cover in bipartite graphs · keys: →/space step · ← back · p play · r reset</footer>
+<footer>u = unmatched in l,  z = alternating-reachable from u,  c = (l∖z) ∪ (r∩z) · kőnig 1931: max matching = min vertex cover in bipartite graphs · keys: →/space step · ← back · p play · r reset</footer>
 
 <script>
 'use strict';
@@ -556,7 +556,7 @@ const en = (u, v) => '<code>' + NL[u] + '–' + NL[v] + '</code>';
    PSEUDOCODE PER TAB
    ============================================================ */
 
-const RECAP = { key: 'rec', html: '<span class="comment">U = unmatched in L · Z = alternating-reachable from U · C = (L∖Z) ∪ (R∩Z)</span>' };
+const RECAP = { key: 'rec', html: '<span class="comment">U = unmatched in L,  Z = alternating-reachable from U,  C = (L∖Z) ∪ (R∩Z)</span>' };
 
 const programs = {
   build: [
