@@ -548,6 +548,8 @@ const NL = {
   r1: 'r<sub>1</sub>', r2: 'r<sub>2</sub>', r3: 'r<sub>3</sub>', r4: 'r<sub>4</sub>',
 };
 const cn = id => '<code>' + NL[id] + '</code>';
+const ZSTR = '{' + NL.l2 + ', ' + NL.r1 + ', ' + NL.l1 + ', ' + NL.r2 + ', ' + NL.l3 + '}';
+const CSTR = '{' + NL.l4 + ', ' + NL.r1 + ', ' + NL.r2 + '}';
 const en = (u, v) => '<code>' + NL[u] + '–' + NL[v] + '</code>';
 
 /* ============================================================
@@ -683,7 +685,7 @@ function buildBuildSteps() {
   });
 
   snap({
-    caption: 'Stuck: ' + cn('l3') + '’s only edge is the matching edge it arrived on, and no other vertex of Z has a new way out. Z = {ℓ2, r1, ℓ1, r2, ℓ3}. Never reached: ' + cn('l4') + ', ' + cn('r3') + ', ' + cn('r4') + '.',
+    caption: 'Stuck: ' + cn('l3') + '’s only edge is the matching edge it arrived on, and no other vertex of Z has a new way out. Z = ' + ZSTR + '. Never reached: ' + cn('l4') + ', ' + cn('r3') + ', ' + cn('r4') + '.',
     lineKey: 'loop',
     U: ['l2'], Z: ZFULL,
     status: '|Z| = 5, done',
@@ -721,7 +723,7 @@ function buildCoversSteps() {
   const BASE = { U: ['l2'], Z: ZFULL, C: CFULL };
 
   snap({
-    caption: 'Where the construction ended: Z (halo) = {ℓ2, r1, ℓ1, r2, ℓ3}; C (green) = (L∖Z) ∪ (R∩Z) = {ℓ4, r1, r2}. <strong>Claim:</strong> every edge has an endpoint in C. Let’s hunt for a counterexample.',
+    caption: 'Where the construction ended: Z (halo) = ' + ZSTR + '; C (green) = (L∖Z) ∪ (R∩Z) = ' + CSTR + '. <strong>Claim:</strong> every edge has an endpoint in C. Let’s hunt for a counterexample.',
     lineKey: 'rec', ...BASE,
   });
 
@@ -780,7 +782,7 @@ function buildSizeSteps() {
   const BASE = { U: ['l2'], Z: ZFULL, C: CFULL };
 
   snap({
-    caption: 'C = {ℓ4, r1, r2} covers every edge (previous tab). Now the count: |C| = |M|. The plan is a <strong>charging argument</strong> — show every C-vertex sits on its <em>own</em> matching edge.',
+    caption: 'C = ' + CSTR + ' covers every edge (previous tab). Now the count: |C| = |M|. The plan is a <strong>charging argument</strong> — show every C-vertex sits on its <em>own</em> matching edge.',
     lineKey: 'rec', ...BASE,
   });
 
