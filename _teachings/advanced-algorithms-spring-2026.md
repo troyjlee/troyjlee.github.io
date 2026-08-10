@@ -51,6 +51,8 @@ schedule:
         url: /assets/courses/advanced-algorithms-2026/lectures/week03.html
       - name: Lecture slides (PDF)
         url: /assets/courses/advanced-algorithms-2026/lectures/week03.pdf
+      - name: "Animation: Dynamic Programming on Trees"
+        url: /assets/courses/advanced-algorithms-2026/animations/tree_dp.html
   - week: 4
     topic: Greedy Algorithms
     description: >-
