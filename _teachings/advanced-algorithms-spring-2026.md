@@ -53,6 +53,8 @@ schedule:
         url: /assets/courses/advanced-algorithms-2026/lectures/week03.pdf
       - name: "Animation: Dynamic Programming on Trees"
         url: /assets/courses/advanced-algorithms-2026/animations/tree_dp.html
+      - name: "Animation: Kőnig's Theorem"
+        url: /assets/courses/advanced-algorithms-2026/animations/konig.html
   - week: 4
     topic: Greedy Algorithms
     description: >-
