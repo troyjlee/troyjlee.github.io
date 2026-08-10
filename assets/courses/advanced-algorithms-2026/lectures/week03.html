@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 3: Dynamic Programming on Trees — Advanced Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <style>
+    :root { --accent: #1f6feb; --muted: #6a737d; }
+
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--accent); letter-spacing: -0.01em; }
+    .reveal h1 { font-size: 2.0em; }
+    /* Theme styling (uppercase headings, small-caps tags) garbles MathJax output. */
+    .reveal mjx-container { text-transform: none; font-variant: normal; letter-spacing: normal; }
+    .reveal h2 { text-align: center; }
+    .reveal section { font-size: 0.92em; }
+    .reveal a { color: var(--accent); }
+
+    /* Left-align most slides; titles stay centered via their own class. */
+    .reveal .slides section { text-align: left; }
+    .reveal .slides section.center { text-align: center; }
+
+    /* Boxes for theorems / definitions / takeaways. */
+    .box {
+      border-left: 5px solid var(--accent);
+      background: #f4f8ff;
+      padding: 0.5em 0.8em; margin: 0.4em 0; border-radius: 4px;
+    }
+    .box .tag { font-variant: small-caps; font-weight: 700; color: var(--accent);
+                letter-spacing: 0.04em; margin-right: 0.4em; }
+    .box.warn { border-left-color: #d29922; background: #fff8ec; }
+    /* Display math in a box carries MathJax's full 1em margins; trim them. */
+    .box.tight mjx-container[display="true"] { margin: 0.25em 0; }
+    .box.warn .tag { color: #b07400; }
+
+    /* Result highlight pill. */
+    .hl { background: #fff3b0; padding: 0.05em 0.25em; border-radius: 3px; }
+
+    /* Results table. */
+    .reveal table.results { margin: 0.7em auto; border-collapse: collapse; }
+    .reveal table.results th, .reveal table.results td {
+      padding: 0.4em 1.1em; border: none; text-align: left; }
+    .reveal table.results thead th { color: var(--accent);
+      border-bottom: 2px solid var(--accent); font-variant: small-caps; letter-spacing: 0.03em; }
+    .reveal table.results tbody tr { border-bottom: 1px solid #e7ebf0; }
+    .reveal table.results td.q { font-weight: 700; }
+    .reveal table.results tr.hlrow { background: #fff8d6; }
+
+    /* Two-column layout helper:  <div class="cols"> <div>..</div> <div>..</div> </div> */
+    .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+    .cols > * { flex: 1; min-width: 0; }
+
+    /* Pseudocode / algorithm blocks. */
+    .reveal pre.algo {
+      font-size: 0.5em; line-height: 1.35; box-shadow: none;
+      border: 1px solid #d0d7de; border-radius: 6px; background: #fbfcfd;
+      width: 100%;
+    }
+    .reveal pre.algo code { padding: 0.8em 1em; }
+    .algo .kw { color: var(--accent); font-weight: 700; }
+    .algo .cm { color: var(--muted); font-style: italic; }
+
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
+
+    /* Kőnig slides: set markers matching the diagram colours. */
+    .setU { border: 2px dashed #1f6feb; border-radius: 8px; padding: 0 0.25em; }
+    .setZ { background: #cfe2ff; border-radius: 8px; padding: 0 0.25em; }
+    .setC { background: #c5d6c2; border-radius: 8px; padding: 0 0.25em; }
+    /* One-line reminder of the U/Z/C definitions, repeated on each proof slide. */
+    .reveal .recap { font-size: 0.58em; text-align: center; color: #3b3b3b;
+      background: #f6f8fa; border-radius: 6px; padding: 0.35em 0.5em;
+      margin: 0.1em 0 0.4em; }
+
+    .reveal .credit { color: var(--muted); font-size: 0.8em; }
+    .reveal .smaller { font-size: 0.82em; }
+    .reveal figure { margin: 0; text-align: center; }
+    .reveal figcaption { font-size: 0.7em; color: var(--muted); margin-top: 0.3em; }
+    .reveal .footnote { position: absolute; bottom: 0.2em; left: 0.6em;
+                        font-size: 0.55em; color: var(--muted); }
+
+    /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
+    .reveal figure svg { max-width: 100%; height: auto; }
+
+    /* Photographs: drop reveal's default frame, round the corners. */
+    .reveal figure img { margin: 0; border: none; box-shadow: none;
+                         max-width: 100%; height: auto; border-radius: 6px; }
+    .cols.mid { align-items: center; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== TITLE ============================== -->
+    <section class="center">
+      <h1>Week 3: Dynamic Programming on Trees</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Advanced Algorithms</p>
+    </section>
+
+    <!-- ============================== ROADMAP ============================ -->
+    <section>
+      <h2>Roadmap</h2>
+      <ol style="line-height:1.7;">
+        <li><b>Maximum Independent Set on a Tree</b></li>
+        <li><b>Minimum Vertex Cover on a Tree</b></li>
+        <li><b>Maximum Matching on a Tree</b></li>
+        <li><b>Kőnig and Gallai</b> — connections between our three problems</li>
+      </ol>
+      <p class="fragment">Three different problems — <em>one</em> algorithmic pattern:
+        root the tree, define a subproblem on subtrees, fill them in
+        <b>postorder</b>.</p>
+    </section>
+
+    <!-- ===================== INTRO: FROM PATHS TO TREES =================== -->
+    <section>
+      <h2>Recap: House Robber</h2>
+      <p>Remember the house robber problem? Maximise the money you rob,
+         but you cannot rob two <em>adjacent</em> houses.</p>
+      <figure>
+        <svg width="600" viewBox="0 0 720 95" role="img" aria-label="A path of seven houses with values 4 5 0 5 10 2 3; houses 5, 10 and 3 are selected">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="60" y1="45" x2="160" y2="45"/>
+            <line x1="160" y1="45" x2="260" y2="45"/>
+            <line x1="260" y1="45" x2="360" y2="45"/>
+            <line x1="360" y1="45" x2="460" y2="45"/>
+            <line x1="460" y1="45" x2="560" y2="45"/>
+            <line x1="560" y1="45" x2="660" y2="45"/>
+          </g>
+          <g stroke-width="1.5">
+            <circle cx="60"  cy="45" r="24" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="160" cy="45" r="24" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="260" cy="45" r="24" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="360" cy="45" r="24" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="460" cy="45" r="24" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="560" cy="45" r="24" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="660" cy="45" r="24" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="60"  y="51">4</text>
+            <text x="160" y="51" fill="#2c4329">5</text>
+            <text x="260" y="51">0</text>
+            <text x="360" y="51">5</text>
+            <text x="460" y="51" fill="#2c4329">10</text>
+            <text x="560" y="51">2</text>
+            <text x="660" y="51">3</text>
+          </g>
+        </svg>
+        <figcaption>An optimal plan: rob $5 + 10 + 3 = 18$.</figcaption>
+      </figure>
+      <p class="fragment">This neighborhood has a very simple layout: a <b>path</b>.</p>
+    </section>
+
+    <section>
+      <h2>The Two-State Trick, on a Path</h2>
+      <p>We can solve house robber in one pass from left to right keeping <em>two</em> values per house:</p>
+      <div class="box fragment"><span class="tag">States</span>
+        $\mathrm{rob}[i]$ = best haul from houses $0..i$ <b>robbing</b> house $i$;<br>
+        $\mathrm{skip}[i]$ = best haul from houses $0..i$ <b>not robbing</b> house $i$.
+      </div>
+    </section>
+
+    <section>
+      <h2>The Two-State Trick, on a Path</h2>
+      <div class="box"><span class="tag">Base case</span>
+        $\mathrm{rob}[0] = w_0$ and $\mathrm{skip}[0] = 0$.
+      </div>
+      <div class="box tight fragment"><span class="tag">Update</span>
+        For $i \ge 1$:
+        $$\begin{aligned}
+          \mathrm{rob}[i] &= w_i + \mathrm{skip}[i-1]\\
+          \mathrm{skip}[i] &= \max\big(\mathrm{rob}[i-1],\, \mathrm{skip}[i-1]\big)
+        \end{aligned}$$
+      </div>
+      <p class="fragment">Answer:
+        $\max\big(\mathrm{rob}[n-1], \mathrm{skip}[n-1]\big)$.</p>
+      <p class="fragment smaller">Filled left to right — each house looks only at its
+        <em>neighbor</em>. Today's theme: the trick survives on a <b>tree</b>.</p>
+    </section>
+
+    <section>
+      <h2>From a Path to a Tree</h2>
+      <p>What if we want to rob Palm Jumeirah island in Dubai?
+         Its streets branch like a palm frond — the neighborhood is a <b>tree</b>.</p>
+      <figure>
+        <div class="cols mid">
+        <img src="palm.jpg" alt="Aerial view of Palm Jumeirah, Dubai: one trunk road with sixteen frond branches">
+        <svg width="620" viewBox="0 0 760 300" role="img" aria-label="Example tree with 12 weighted vertices">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22"/>
+            <circle cx="240" cy="105" r="22"/>
+            <circle cx="555" cy="105" r="22"/>
+            <circle cx="150" cy="175" r="22"/>
+            <circle cx="330" cy="175" r="22"/>
+            <circle cx="480" cy="175" r="22"/>
+            <circle cx="640" cy="175" r="22"/>
+            <circle cx="85"  cy="250" r="22"/>
+            <circle cx="215" cy="250" r="22"/>
+            <circle cx="385" cy="250" r="22"/>
+            <circle cx="535" cy="250" r="22"/>
+            <circle cx="700" cy="250" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41">5</text>
+            <text x="240" y="111">10</text>
+            <text x="555" y="111">3</text>
+            <text x="150" y="181">7</text>
+            <text x="330" y="181">8</text>
+            <text x="480" y="181">2</text>
+            <text x="640" y="181">4</text>
+            <text x="85"  y="256">5</text>
+            <text x="215" y="256">3</text>
+            <text x="385" y="256">5</text>
+            <text x="535" y="256">3</text>
+            <text x="700" y="256">5</text>
+          </g>
+        </svg>
+        </div>
+        <figcaption>The island, and our abstraction of it: each vertex is a house with
+          a value, and we cannot rob two houses connected by an edge.<br>
+          Photo: <a href="https://shre.ae/palm-jumeirah-island-dubai-largest-artifical-archipelago/">shre.ae/palm-jumeirah-island-dubai-largest-artifical-archipelago</a></figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>The Tree DP Recipe</h2>
+      <div class="box"><span class="tag">Recipe</span>
+        <ol style="margin:0.2em 0;">
+          <li><b>Root</b> the tree at any vertex $r$.</li>
+          <li>Subproblem = the <b>subtree</b> $T_v$ rooted at $v$ — that is, $v$ together
+            with everything below it.</li>
+          <li>Keep a few <b>states</b> per vertex (e.g. "$v$ used" / "$v$ not used").</li>
+          <li><b>Combine</b>: a vertex's values depend only on its children's values.</li>
+          <li>Fill in <b>postorder</b> — children before parents; read off the root.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>The Subproblem DAG</h2>
+      <p>In weeks 1 and 2 the subproblem DAG was a path or grid, not explicit in the problem.
+        Here the subproblem DAG <em>is the tree itself</em>, with edges directed from children to parents.</p>
+      <p class="fragment">That recipe is <b>generic</b> — we run it three times today, on
+        three different problems. Robbing the island is just the first instance.</p>
+    </section>
+
+    <section>
+      <h2>Why the Recipe Works</h2>
+      <p>Robbing constrains only <b>neighbours</b>, so every constraint sits on an edge.
+        And every edge of $T_v$ either lies inside one child subtree or joins $v$ to a
+        child — <b>none joins two child subtrees</b>.</p>
+      <p class="fragment">So with $v$'s state fixed the children cannot interfere: the
+        combine step is a sum or a max over children, never a search over combinations.</p>
+      <p class="fragment">A subtree touches the rest of the tree only at $v$. Everything
+        <em>above</em> $v$ is outside $T_v$, and $v$'s state is the whole interface.</p>
+    </section>
+
+    <section>
+      <h2>One Tree, Three Problems</h2>
+      <p>This tree is our running example for the whole session
+         (12 vertices, 11 edges; numbers are vertex weights).</p>
+      <figure>
+        <svg width="620" viewBox="0 0 760 300" role="img" aria-label="The recurring example tree">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22"/>
+            <circle cx="240" cy="105" r="22"/>
+            <circle cx="555" cy="105" r="22"/>
+            <circle cx="150" cy="175" r="22"/>
+            <circle cx="330" cy="175" r="22"/>
+            <circle cx="480" cy="175" r="22"/>
+            <circle cx="640" cy="175" r="22"/>
+            <circle cx="85"  cy="250" r="22"/>
+            <circle cx="215" cy="250" r="22"/>
+            <circle cx="385" cy="250" r="22"/>
+            <circle cx="535" cy="250" r="22"/>
+            <circle cx="700" cy="250" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41">5</text>
+            <text x="240" y="111">10</text>
+            <text x="555" y="111">3</text>
+            <text x="150" y="181">7</text>
+            <text x="330" y="181">8</text>
+            <text x="480" y="181">2</text>
+            <text x="640" y="181">4</text>
+            <text x="85"  y="256">5</text>
+            <text x="215" y="256">3</text>
+            <text x="385" y="256">5</text>
+            <text x="535" y="256">3</text>
+            <text x="700" y="256">5</text>
+          </g>
+        </svg>
+        <figcaption>Rooted at the top vertex (weight 5). The worksheet uses the same tree.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ================= PART I: MAX INDEPENDENT SET ====================== -->
+    <section class="center">
+      <h1>Part I: Maximum Independent Set on a Tree</h1>
+    </section>
+
+    <section>
+      <h2>Tree Robber</h2>
+      <p>We are robbing the
+         palm-tree island: maximise the total value of robbed houses, but we
+         <b>cannot rob two houses connected by an edge</b>.</p>
+      <div class="box fragment"><span class="tag">Definition</span>
+        A set of vertices with no two of them connected by an edge is called an
+        <b>independent set</b>.</div>
+      <p class="fragment">So the tree robber wants a
+        <b>maximum weight independent set</b>: an independent set $S$ maximising
+        $\sum_{v \in S} w_v$, where $w_v$ is the value of house $v$.</p>
+    </section>
+
+    <section>
+      <h2>An Independent Set</h2>
+      <figure>
+        <svg width="620" viewBox="0 0 760 300" role="img" aria-label="An independent set of weight 27">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="240" cy="105" r="22"/>
+            <circle cx="555" cy="105" r="22"/>
+            <circle cx="150" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="330" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="480" cy="175" r="22"/>
+            <circle cx="640" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="85"  cy="250" r="22"/>
+            <circle cx="215" cy="250" r="22"/>
+            <circle cx="385" cy="250" r="22"/>
+            <circle cx="535" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="700" cy="250" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41" fill="#2c4329">5</text>
+            <text x="240" y="111">10</text>
+            <text x="555" y="111">3</text>
+            <text x="150" y="181" fill="#2c4329">7</text>
+            <text x="330" y="181" fill="#2c4329">8</text>
+            <text x="480" y="181">2</text>
+            <text x="640" y="181" fill="#2c4329">4</text>
+            <text x="85"  y="256">5</text>
+            <text x="215" y="256">3</text>
+            <text x="385" y="256">5</text>
+            <text x="535" y="256" fill="#2c4329">3</text>
+            <text x="700" y="256">5</text>
+          </g>
+        </svg>
+        <figcaption>Green vertices form an independent set of weight $5+7+8+4+3 = 27$.</figcaption>
+      </figure>
+      <p class="fragment">No other vertex can be added without breaking independence.
+        Is 27 the best we can do?</p>
+    </section>
+
+    <section>
+      <h2>Careful: Maximal $\neq$ Maximum</h2>
+      <figure>
+        <svg width="620" viewBox="0 0 760 300" role="img" aria-label="An independent set of weight 34">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22"/>
+            <circle cx="240" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="555" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="150" cy="175" r="22"/>
+            <circle cx="330" cy="175" r="22"/>
+            <circle cx="480" cy="175" r="22"/>
+            <circle cx="640" cy="175" r="22"/>
+            <circle cx="85"  cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="215" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="385" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="535" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="700" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41">5</text>
+            <text x="240" y="111" fill="#2c4329">10</text>
+            <text x="555" y="111" fill="#2c4329">3</text>
+            <text x="150" y="181">7</text>
+            <text x="330" y="181">8</text>
+            <text x="480" y="181">2</text>
+            <text x="640" y="181">4</text>
+            <text x="85"  y="256" fill="#2c4329">5</text>
+            <text x="215" y="256" fill="#2c4329">3</text>
+            <text x="385" y="256" fill="#2c4329">5</text>
+            <text x="535" y="256" fill="#2c4329">3</text>
+            <text x="700" y="256" fill="#2c4329">5</text>
+          </g>
+        </svg>
+        <figcaption>A better plan: weight $10+3+5+3+5+3+5 = 34$.</figcaption>
+      </figure>
+      <div class="box warn"><span class="tag">Careful</span>
+        A <b>maximal</b> independent set (cannot add any vertex) need not be
+        <b>maximum</b> (largest weight overall). The weight-27 set was maximal —
+        yet weight 34 is achievable.
+      </div>
+    </section>
+
+    <section>
+      <h2>Maximum Weight Independent Set</h2>
+      <div class="box"><span class="tag">Problem</span>
+        Given a tree $T = (V, E)$ with vertex weights $w_v \ge 0$, find the maximum
+        total weight of an independent set in $T$.</div>
+      <ul>
+        <li class="fragment">On general graphs this problem is famously hard —
+          it is NP-complete (Week 11!).</li>
+        <li class="fragment">On trees, dynamic programming solves it in
+          linear time. Let's find the subproblems.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Subproblems, Take 1</h2>
+      <div class="box"><span class="tag">Subproblem</span>
+        Let $\mathrm{dp}(v)$ be the maximum amount we can rob in the subtree
+        rooted at $v$.</div>
+      <p class="fragment">Key case split: we may or may not rob vertex $v$.</p>
+      <ul>
+        <li class="fragment">If we <b>rob</b> $v$: we cannot rob any of its children —
+          but its grandchildren are fair game.</li>
+        <li class="fragment">If we <b>don't rob</b> $v$: each child $w$ independently
+          contributes its own best, $\mathrm{dp}(w)$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Recurrence, Take 1</h2>
+      <div class="fragment" style="font-size:0.85em;">
+        $$\mathrm{dp}(v) \;=\; \max\Big(
+            \underbrace{w_v + \sum_{u\,:\,\text{grandchild of } v} \mathrm{dp}(u)}_{\text{rob } v},\;\;
+            \underbrace{\sum_{w\,:\,\text{child of } v} \mathrm{dp}(w)}_{\text{don't rob } v}
+          \Big)$$
+      </div>
+      <p class="fragment">Initialisation: for a leaf $v$, both sums are empty, so
+        $\mathrm{dp}(v) = w_v$.</p>
+      <p class="fragment">Answer: $\mathrm{dp}(\mathrm{root})$.</p>
+      <p class="fragment">This is correct — and still $O(n)$ overall, since each vertex
+        is a child of one vertex and a grandchild of at most one vertex.</p>
+    </section>
+
+    <section>
+      <h2>Take 1 Works, But…</h2>
+      <ul>
+        <li class="fragment">The recurrence reaches <em>two levels down</em>:
+          to fill $\mathrm{dp}(v)$ we must iterate over children <em>of children</em>.</li>
+        <li class="fragment">That makes the code fiddlier and breaks the clean pattern
+          "a vertex only talks to its children".</li>
+        <li class="fragment">Just like house robber, there is an alternative
+          formulation which is <b>easier to implement</b>: put more information
+          <em>into the state</em> instead of reaching deeper into the tree.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Moral</span>
+        When a recurrence wants to peek past its immediate neighbors,
+        enrich the state instead.</div>
+    </section>
+
+    <section>
+      <h2>Alternative Definition: Two States</h2>
+      <div class="box"><span class="tag">States</span>
+        Let $\mathrm{dp}_1(v)$ be the maximum profit from robbing the subtree rooted
+        at $v$ <b>when we rob</b> $v$.<br><br>
+        Let $\mathrm{dp}_2(v)$ be the maximum profit from robbing the subtree rooted
+        at $v$ <b>when we do not rob</b> $v$.
+      </div>
+      <p class="fragment">This is exactly $\mathrm{rob}[i]$ / $\mathrm{skip}[i]$ from
+        the path version — the state records the decision at $v$, so the parent
+        never needs to look past its children.</p>
+    </section>
+
+    <section>
+      <h2>MIS: the Update</h2>
+      <p class="fragment" data-fragment-index="1">If we rob $v$, no child may be
+        robbed:</p>
+      <div class="fragment" data-fragment-index="1">
+        $$\mathrm{dp}_1(v) \;=\; w_v + \sum_{u\,:\,\text{child of } v} \mathrm{dp}_2(u)$$
+      </div>
+      <p class="fragment" data-fragment-index="2">If we do not rob $v$, each child is
+        free to make its own best choice:</p>
+      <div class="fragment" data-fragment-index="2">
+        $$\mathrm{dp}_2(v) \;=\; \sum_{u\,:\,\text{child of } v}
+           \max\big(\mathrm{dp}_1(u),\, \mathrm{dp}_2(u)\big)$$
+      </div>
+      <p class="fragment" data-fragment-index="3">Note the asymmetry: skipping $v$
+        does <em>not</em> force us to rob the children — we take whichever is better
+        for each child independently.</p>
+    </section>
+
+    <section>
+      <h2>MIS: Initialisation and Answer</h2>
+      <div class="box fragment"><span class="tag">Initialisation</span>
+        If $v$ is a leaf: $\;\mathrm{dp}_1(v) = w_v$ and $\mathrm{dp}_2(v) = 0$.
+      </div>
+      <div class="box fragment"><span class="tag">Answer</span>
+        $\max\big(\mathrm{dp}_1(\mathrm{root}),\, \mathrm{dp}_2(\mathrm{root})\big)$
+      </div>
+      <p class="fragment">How do we order the computation? When we process a vertex
+        $v$, we want to have already processed its children…
+        <b>postorder traversal!</b></p>
+    </section>
+
+    <section>
+      <h2>MIS: Worked Example</h2>
+      <figure>
+        <svg width="640" viewBox="0 0 760 300" role="img" aria-label="Example tree annotated with dp1 and dp2 values; the optimal independent set is highlighted">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22"/>
+            <circle cx="240" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="555" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="150" cy="175" r="22"/>
+            <circle cx="330" cy="175" r="22"/>
+            <circle cx="480" cy="175" r="22"/>
+            <circle cx="640" cy="175" r="22"/>
+            <circle cx="85"  cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="215" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="385" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="535" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="700" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41">5</text>
+            <text x="240" y="111" fill="#2c4329">10</text>
+            <text x="555" y="111" fill="#2c4329">3</text>
+            <text x="150" y="181">7</text>
+            <text x="330" y="181">8</text>
+            <text x="480" y="181">2</text>
+            <text x="640" y="181">4</text>
+            <text x="85"  y="256" fill="#2c4329">5</text>
+            <text x="215" y="256" fill="#2c4329">3</text>
+            <text x="385" y="256" fill="#2c4329">5</text>
+            <text x="535" y="256" fill="#2c4329">3</text>
+            <text x="700" y="256" fill="#2c4329">5</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#6a737d">
+            <text x="432" y="33" text-anchor="start">29 / 34</text>
+            <text x="203" y="100" text-anchor="end">23 / 16</text>
+            <text x="592" y="100" text-anchor="start">11 / 8</text>
+            <text x="113" y="172" text-anchor="end">7 / 8</text>
+            <text x="360" y="163" text-anchor="start">8 / 5</text>
+            <text x="450" y="163" text-anchor="end">2 / 3</text>
+            <text x="677" y="172" text-anchor="start">4 / 5</text>
+            <text x="85"  y="288" text-anchor="middle">5 / 0</text>
+            <text x="215" y="288" text-anchor="middle">3 / 0</text>
+            <text x="385" y="288" text-anchor="middle">5 / 0</text>
+            <text x="535" y="288" text-anchor="middle">3 / 0</text>
+            <text x="700" y="288" text-anchor="middle">5 / 0</text>
+          </g>
+        </svg>
+        <figcaption>Beside each vertex: $\mathrm{dp}_1(v)$ / $\mathrm{dp}_2(v)$. Green = the optimal set traced back from the root.</figcaption>
+      </figure>
+      <p class="smaller">At the root: $\mathrm{dp}_1 = 5 + 16 + 8 = 29$ and
+        $\mathrm{dp}_2 = \max(23,16) + \max(11,8) = 34$.
+        Answer: $\max(29, 34) =$ <span class="hl">34</span> — don't rob the root.</p>
+    </section>
+
+    <section>
+      <h2>MIS: Implementation</h2>
+      <pre class="algo"><code><span class="cm">// dp1[v]: best in subtree of v if we rob v</span>
+<span class="cm">// dp2[v]: best in subtree of v if we do not rob v</span>
+<span class="kw">void</span> dfs(int v, int parent) {
+    dp1[v] = w[v];                          <span class="cm">// leaf initialisation…</span>
+    dp2[v] = 0;
+    <span class="kw">for</span> (int u : adj[v]) {
+        <span class="kw">if</span> (u == parent) <span class="kw">continue</span>;
+        dfs(u, v);                          <span class="cm">// postorder: children first</span>
+        dp1[v] += dp2[u];                   <span class="cm">// …updated as children return</span>
+        dp2[v] += max(dp1[u], dp2[u]);
+    }
+}
+<span class="cm">// answer: max(dp1[root], dp2[root])</span></code></pre>
+      <ul class="smaller">
+        <li class="fragment">Store the tree as adjacency lists; passing
+          <code>parent</code> stops the DFS from walking back up.</li>
+        <li class="fragment">Time $O(n)$; recursion depth can hit $n$ on a path —
+          for huge inputs use an explicit stack.</li>
+      </ul>
+    </section>
+
+
+    <!-- ===================== ACTIVITY: VERTEX COVER ======================= -->
+    <section>
+      <h2>Your Turn: Vertex Cover</h2>
+      <div class="box"><span class="tag">Activity</span>
+        A <b>vertex cover</b> is a set of vertices $C$ such that <em>every edge</em>
+        has at least one endpoint in $C$. On our weighted tree, find a vertex cover
+        of minimum total weight.</div>
+      <ul class="smaller">
+        <li class="fragment">Design the DP yourself. The MIS states are a good
+          template — but something has to change. What?</li>
+        <li class="fragment">Run it on our tree and set the answer beside the MIS
+          answer. Anything strike you?</li>
+      </ul>
+    </section>
+
+    <!-- ================== PART II: MIN VERTEX COVER ======================= -->
+    <section class="center">
+      <h1>Part II: Minimum Vertex Cover on a Tree</h1>
+    </section>
+
+    <section>
+      <h2>Vertex Covers</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A <b>vertex cover</b> is a subset of vertices $S$ such that every edge
+        has an endpoint in $S$.</div>
+      <figure>
+        <svg width="580" viewBox="0 0 760 300" role="img" aria-label="A vertex cover of weight 30">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+            <circle cx="240" cy="105" r="22"/>
+            <circle cx="555" cy="105" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+            <circle cx="150" cy="175" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+            <circle cx="330" cy="175" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+            <circle cx="480" cy="175" r="22"/>
+            <circle cx="640" cy="175" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+            <circle cx="85"  cy="250" r="22"/>
+            <circle cx="215" cy="250" r="22"/>
+            <circle cx="385" cy="250" r="22"/>
+            <circle cx="535" cy="250" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+            <circle cx="700" cy="250" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41" fill="#6e3416">5</text>
+            <text x="240" y="111">10</text>
+            <text x="555" y="111" fill="#6e3416">3</text>
+            <text x="150" y="181" fill="#6e3416">7</text>
+            <text x="330" y="181" fill="#6e3416">8</text>
+            <text x="480" y="181">2</text>
+            <text x="640" y="181" fill="#6e3416">4</text>
+            <text x="85"  y="256">5</text>
+            <text x="215" y="256">3</text>
+            <text x="385" y="256">5</text>
+            <text x="535" y="256" fill="#6e3416">3</text>
+            <text x="700" y="256">5</text>
+          </g>
+        </svg>
+        <figcaption>Orange vertices cover all 11 edges: a vertex cover of weight $5+3+7+8+4+3 = 30$.</figcaption>
+      </figure>
+      <p class="fragment">Check for yourself: every edge touches an orange endpoint.
+        Is 30 the <em>minimum</em> weight possible?</p>
+    </section>
+
+    <section>
+      <h2>Minimum Weight Vertex Cover</h2>
+      <div class="box"><span class="tag">Problem</span>
+        Given a tree $T = (V, E)$ with vertex weights $w_v \ge 0$, find a vertex
+        cover of minimum total weight.</div>
+      <p class="fragment">Think of it as placing guards: every street (edge) must be
+        watched by a guard at one of its ends, and guard $v$ costs $w_v$.</p>
+    </section>
+
+    <section>
+      <h2>Minimum Weight Vertex Cover</h2>
+      <p>Same recipe: root the tree, and for each vertex remember
+        the one bit the parent needs — <em>is $v$ in the cover or not?</em></p>
+      <div class="box fragment"><span class="tag">States</span>
+        $\mathrm{in}(v)$ = min weight to cover all edges of $T_v$ with $v$
+        <b>in</b> the cover;<br>
+        $\mathrm{out}(v)$ = min weight to cover all edges of $T_v$ with $v$
+        <b>not in</b> the cover.
+      </div>
+    </section>
+
+    <section>
+      <h2>VC: the Recurrence</h2>
+      <p class="fragment" data-fragment-index="1">If $v$ is in the cover, every child
+        edge is covered — each child chooses freely:</p>
+      <div class="fragment" data-fragment-index="1">
+        $$\mathrm{in}(v) \;=\; w_v + \sum_{u\,:\,\text{child of } v}
+          \min\big(\mathrm{in}(u),\, \mathrm{out}(u)\big)$$
+      </div>
+      <p class="fragment" data-fragment-index="2">If $v$ is <em>not</em> in the cover,
+        each edge $(v,u)$ needs its other end — every child is <b>forced in</b>:</p>
+      <div class="fragment" data-fragment-index="2">
+        $$\mathrm{out}(v) \;=\; \sum_{u\,:\,\text{child of } v} \mathrm{in}(u)$$
+      </div>
+    </section>
+
+    <section>
+      <h2>VC: Initialisation and Answer</h2>
+      <div class="box fragment"><span class="tag">Initialisation</span>
+        If $v$ is a leaf (no edges inside $T_v$):
+        $\;\mathrm{in}(v) = w_v$ and $\mathrm{out}(v) = 0$.
+      </div>
+      <div class="box fragment"><span class="tag">Answer</span>
+        $\min\big(\mathrm{in}(\mathrm{root}),\, \mathrm{out}(\mathrm{root})\big)$
+      </div>
+      <p class="fragment">Fill in postorder, exactly as before. To output the cover
+        itself, trace back from the root: if $v$ is out, all its children are in;
+        if $v$ is in, each child picks its cheaper option.</p>
+    </section>
+
+    <section>
+      <h2>VC: Worked Example</h2>
+      <figure>
+        <svg width="640" viewBox="0 0 760 300" role="img" aria-label="Example tree annotated with in and out values; the minimum cover is highlighted">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="240" cy="105" r="22"/>
+            <circle cx="555" cy="105" r="22"/>
+            <circle cx="150" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="330" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="480" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="640" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="85"  cy="250" r="22"/>
+            <circle cx="215" cy="250" r="22"/>
+            <circle cx="385" cy="250" r="22"/>
+            <circle cx="535" cy="250" r="22"/>
+            <circle cx="700" cy="250" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41" fill="#2c4329">5</text>
+            <text x="240" y="111">10</text>
+            <text x="555" y="111">3</text>
+            <text x="150" y="181" fill="#2c4329">7</text>
+            <text x="330" y="181" fill="#2c4329">8</text>
+            <text x="480" y="181" fill="#2c4329">2</text>
+            <text x="640" y="181" fill="#2c4329">4</text>
+            <text x="85"  y="256">5</text>
+            <text x="215" y="256">3</text>
+            <text x="385" y="256">5</text>
+            <text x="535" y="256">3</text>
+            <text x="700" y="256">5</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#6a737d">
+            <text x="432" y="33" text-anchor="start">26 / 31</text>
+            <text x="203" y="100" text-anchor="end">22 / 15</text>
+            <text x="592" y="100" text-anchor="start">9 / 6</text>
+            <text x="113" y="172" text-anchor="end">7 / 8</text>
+            <text x="360" y="163" text-anchor="start">8 / 5</text>
+            <text x="450" y="163" text-anchor="end">2 / 3</text>
+            <text x="677" y="172" text-anchor="start">4 / 5</text>
+            <text x="85"  y="288" text-anchor="middle">5 / 0</text>
+            <text x="215" y="288" text-anchor="middle">3 / 0</text>
+            <text x="385" y="288" text-anchor="middle">5 / 0</text>
+            <text x="535" y="288" text-anchor="middle">3 / 0</text>
+            <text x="700" y="288" text-anchor="middle">5 / 0</text>
+          </g>
+        </svg>
+        <figcaption>Beside each vertex: $\mathrm{in}(v)$ / $\mathrm{out}(v)$. Green = the minimum cover, traced back from the root.</figcaption>
+      </figure>
+      <p class="smaller">Root: $\mathrm{in} = 5 + \min(22,15) + \min(9,6) = 26$,
+        $\;\mathrm{out} = 22 + 9 = 31$. Minimum weight
+        <span class="hl">26</span> — beating our earlier cover of weight 30.</p>
+    </section>
+
+    <section>
+      <h2>VC: Implementation</h2>
+      <pre class="algo"><code><span class="cm">// in_[v]: min cover of subtree of v, v in the cover</span>
+<span class="cm">// out[v]: min cover of subtree of v, v not in the cover</span>
+<span class="kw">void</span> dfs(int v, int parent) {
+    in_[v] = w[v];                          <span class="cm">// leaf values…</span>
+    out[v] = 0;
+    <span class="kw">for</span> (int u : adj[v]) {
+        <span class="kw">if</span> (u == parent) <span class="kw">continue</span>;
+        dfs(u, v);                          <span class="cm">// postorder</span>
+        in_[v] += min(in_[u], out[u]);      <span class="cm">// child free to choose</span>
+        out[v] += in_[u];                   <span class="cm">// child forced into cover</span>
+    }
+}
+<span class="cm">// answer: min(in_[root], out[root])</span></code></pre>
+      <p class="fragment">Structurally identical to the MIS code — swap
+        $\max \leftrightarrow \min$ and flip which state constrains the children.
+        Time <span class="hl">$O(n)$</span>.</p>
+    </section>
+
+    <!-- =================== PART III: MAXIMUM MATCHING ===================== -->
+    <section class="center">
+      <h1>Part III: Maximum Matching on a Tree</h1>
+    </section>
+
+    <section>
+      <h2>Matchings</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A <b>matching</b> is a set of edges such that no two edges in the set
+        share an endpoint.</div>
+      <figure>
+        <svg width="580" viewBox="0 0 760 300" role="img" aria-label="A matching of size three in the example tree">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175" stroke="#b85a26" stroke-width="4"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175" stroke="#b85a26" stroke-width="4"/>
+            <line x1="150" y1="175" x2="85" y2="250"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250" stroke="#b85a26" stroke-width="4"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22"/>
+            <circle cx="240" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="555" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="150" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="330" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="480" cy="175" r="22"/>
+            <circle cx="640" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="85"  cy="250" r="22"/>
+            <circle cx="215" cy="250" r="22"/>
+            <circle cx="385" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="535" cy="250" r="22"/>
+            <circle cx="700" cy="250" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41">5</text>
+            <text x="240" y="111" fill="#2c4329">10</text>
+            <text x="555" y="111" fill="#2c4329">3</text>
+            <text x="150" y="181" fill="#2c4329">7</text>
+            <text x="330" y="181" fill="#2c4329">8</text>
+            <text x="480" y="181">2</text>
+            <text x="640" y="181">4</text>
+            <text x="85"  y="256">5</text>
+            <text x="215" y="256">3</text>
+            <text x="385" y="256" fill="#2c4329">5</text>
+            <text x="535" y="256">3</text>
+            <text x="700" y="256">5</text>
+          </g>
+        </svg>
+        <figcaption>Three edges, no shared endpoints: a matching of size 3. Matched vertices in green.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Maximum Matching on a Tree</h2>
+      <div class="box"><span class="tag">Problem</span>
+        Given a tree $T = (V, E)$, find the size of a largest matching in $T$.</div>
+      <figure>
+        <svg width="580" viewBox="0 0 760 300" role="img" aria-label="A matching of size five in the example tree">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105" stroke="#b85a26" stroke-width="4"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250" stroke="#b85a26" stroke-width="4"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250" stroke="#b85a26" stroke-width="4"/>
+            <line x1="480" y1="175" x2="535" y2="250" stroke="#b85a26" stroke-width="4"/>
+            <line x1="640" y1="175" x2="700" y2="250" stroke="#b85a26" stroke-width="4"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="240" cy="105" r="22"/>
+            <circle cx="555" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="150" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="330" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="480" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="640" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="85"  cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="215" cy="250" r="22"/>
+            <circle cx="385" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="535" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="700" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41" fill="#2c4329">5</text>
+            <text x="240" y="111">10</text>
+            <text x="555" y="111" fill="#2c4329">3</text>
+            <text x="150" y="181" fill="#2c4329">7</text>
+            <text x="330" y="181" fill="#2c4329">8</text>
+            <text x="480" y="181" fill="#2c4329">2</text>
+            <text x="640" y="181" fill="#2c4329">4</text>
+            <text x="85"  y="256" fill="#2c4329">5</text>
+            <text x="215" y="256">3</text>
+            <text x="385" y="256" fill="#2c4329">5</text>
+            <text x="535" y="256" fill="#2c4329">3</text>
+            <text x="700" y="256" fill="#2c4329">5</text>
+          </g>
+        </svg>
+        <figcaption>A matching of size 5 in our tree. (Vertex weights play no role in this problem.)</figcaption>
+      </figure>
+      <p class="fragment">Can we do better than 5?</p>
+    </section>
+
+    <section>
+      <h2>How Large Can a Matching Be?</h2>
+      <p>Every matched edge uses 2 vertices, so with $n = 12$ vertices any matching
+         has size at most $\lfloor n/2 \rfloor = 6$.</p>
+      <figure>
+        <svg width="380" viewBox="0 0 760 300" role="img" aria-label="Vertex 7 and its two leaf children highlighted">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250" stroke="#b85a26" stroke-width="4"/>
+            <line x1="150" y1="175" x2="215" y2="250" stroke="#b85a26" stroke-width="4"/>
+            <line x1="330" y1="175" x2="385" y2="250"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22"/>
+            <circle cx="240" cy="105" r="22"/>
+            <circle cx="555" cy="105" r="22"/>
+            <circle cx="150" cy="175" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+            <circle cx="330" cy="175" r="22"/>
+            <circle cx="480" cy="175" r="22"/>
+            <circle cx="640" cy="175" r="22"/>
+            <circle cx="85"  cy="250" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+            <circle cx="215" cy="250" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+            <circle cx="385" cy="250" r="22"/>
+            <circle cx="535" cy="250" r="22"/>
+            <circle cx="700" cy="250" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41">5</text>
+            <text x="240" y="111">10</text>
+            <text x="555" y="111">3</text>
+            <text x="150" y="181" fill="#6e3416">7</text>
+            <text x="330" y="181">8</text>
+            <text x="480" y="181">2</text>
+            <text x="640" y="181">4</text>
+            <text x="85"  y="256" fill="#6e3416">5</text>
+            <text x="215" y="256" fill="#6e3416">3</text>
+            <text x="385" y="256">5</text>
+            <text x="535" y="256">3</text>
+            <text x="700" y="256">5</text>
+          </g>
+        </svg>
+      </figure>
+      <p class="fragment">Size 6 means a <b>perfect matching</b> — every vertex used.</p>
+      <p class="fragment">But the two highlighted leaves share their only neighbor: at
+        most one can be matched. So 6 is impossible, and <span class="hl">5</span> is
+        maximum.</p>
+    </section>
+
+    <section>
+      <h2>Subproblems for Matching</h2>
+      <p>Root the tree. For each vertex $v$, consider the best matching inside the
+         subtree $T_v$ — but we must remember whether $v$ itself is still available
+         to be matched upward.</p>
+      <div class="box fragment"><span class="tag">States</span>
+        $\mathrm{free}(v)$ = size of a largest matching in $T_v$ in which
+        $v$ is <b>unmatched</b>;<br>
+        $\mathrm{best}(v)$ = size of a largest matching in $T_v$
+        (no constraint on $v$).
+      </div>
+      <p class="fragment">Two states per vertex, exactly as in the tree robber —
+        but this time the decision recorded at $v$ is whether $v$ is still
+        available to its parent, not whether we robbed it.</p>
+    </section>
+
+    <section>
+      <h2>Matching: the Recurrence</h2>
+      <p class="fragment" data-fragment-index="1">If $v$ stays unmatched, each child
+        subtree contributes its own best matching, independently:</p>
+      <div class="fragment" data-fragment-index="1">
+        $$\mathrm{free}(v) \;=\; \sum_{u\,:\,\text{child of } v} \mathrm{best}(u)$$
+      </div>
+      <p class="fragment" data-fragment-index="2">If $v$ is matched, it is matched to
+        exactly one child $u$; that child must have been free below:</p>
+      <div class="fragment" data-fragment-index="2">
+        $$\mathrm{take}(v) \;=\; \max_{u\,:\,\text{child of } v}
+          \Big( 1 + \mathrm{free}(u) + \sum_{u' \neq u} \mathrm{best}(u') \Big)$$
+      </div>
+    </section>
+
+    <section>
+      <h2>Matching: the Recurrence</h2>
+      <p>Finally, take the better of the two states:</p>
+      <div>
+        $$\mathrm{best}(v) \;=\; \max\big(\mathrm{free}(v),\, \mathrm{take}(v)\big)$$
+      </div>
+      <p class="fragment smaller">Implementation trick:
+        $\mathrm{take}(v) = \mathrm{free}(v) + \max_u \big(1 + \mathrm{free}(u) - \mathrm{best}(u)\big)$ —
+        one pass over the children, no "all but one" re-summing.</p>
+    </section>
+
+    <section>
+      <h2>Matching: Initialisation and Answer</h2>
+      <p>Where does the recursion bottom out? At the leaves.</p>
+      <div class="box fragment"><span class="tag">Initialisation</span>
+        If $v$ is a leaf: $\;\mathrm{free}(v) = 0$, and $\mathrm{take}(v)$ is
+        impossible (no children), so $\mathrm{best}(v) = 0$.
+      </div>
+      <div class="box fragment"><span class="tag">Answer</span>
+        $\mathrm{best}(\mathrm{root})$ — the root of the whole tree has no parent,
+        so no constraint applies.
+      </div>
+      <p class="fragment">To compute $\mathrm{free}(v)$ and $\mathrm{best}(v)$ we need
+        the values of <em>all children first</em> — postorder again.</p>
+    </section>
+
+    <section>
+      <h2>Matching: Worked Example</h2>
+      <figure>
+        <svg width="640" viewBox="0 0 760 300" role="img" aria-label="Example tree annotated with free and best values; a maximum matching is highlighted">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105" stroke="#b85a26" stroke-width="4"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250" stroke="#b85a26" stroke-width="4"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250" stroke="#b85a26" stroke-width="4"/>
+            <line x1="480" y1="175" x2="535" y2="250" stroke="#b85a26" stroke-width="4"/>
+            <line x1="640" y1="175" x2="700" y2="250" stroke="#b85a26" stroke-width="4"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="395" cy="35" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="240" cy="105" r="22"/>
+            <circle cx="555" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="150" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="330" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="480" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="640" cy="175" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="85"  cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="215" cy="250" r="22"/>
+            <circle cx="385" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="535" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <circle cx="700" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="395" y="41" fill="#2c4329">5</text>
+            <text x="240" y="111">10</text>
+            <text x="555" y="111" fill="#2c4329">3</text>
+            <text x="150" y="181" fill="#2c4329">7</text>
+            <text x="330" y="181" fill="#2c4329">8</text>
+            <text x="480" y="181" fill="#2c4329">2</text>
+            <text x="640" y="181" fill="#2c4329">4</text>
+            <text x="85"  y="256" fill="#2c4329">5</text>
+            <text x="215" y="256">3</text>
+            <text x="385" y="256" fill="#2c4329">5</text>
+            <text x="535" y="256" fill="#2c4329">3</text>
+            <text x="700" y="256" fill="#2c4329">5</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#6a737d">
+            <text x="432" y="33" text-anchor="start">4 / 5</text>
+            <text x="203" y="100" text-anchor="end">2 / 2</text>
+            <text x="592" y="100" text-anchor="start">2 / 2</text>
+            <text x="113" y="172" text-anchor="end">0 / 1</text>
+            <text x="360" y="163" text-anchor="start">0 / 1</text>
+            <text x="450" y="163" text-anchor="end">0 / 1</text>
+            <text x="677" y="172" text-anchor="start">0 / 1</text>
+            <text x="85"  y="288" text-anchor="middle">0 / 0</text>
+            <text x="215" y="288" text-anchor="middle">0 / 0</text>
+            <text x="385" y="288" text-anchor="middle">0 / 0</text>
+            <text x="535" y="288" text-anchor="middle">0 / 0</text>
+            <text x="700" y="288" text-anchor="middle">0 / 0</text>
+          </g>
+        </svg>
+        <figcaption>Beside each vertex: $\mathrm{free}(v)$ / $\mathrm{best}(v)$, filled bottom-up. One maximum matching in orange.</figcaption>
+      </figure>
+      <p class="smaller">At the root: $\mathrm{free} = 2 + 2 = 4$;
+        $\;\mathrm{take} = 1 + 2 + 2 = 5$ (match the root to either child);
+        $\;\mathrm{best}(\mathrm{root}) =$ <span class="hl">5</span>.</p>
+    </section>
+
+    <section>
+      <h2>Matching: Implementation</h2>
+      <pre class="algo"><code><span class="cm">// returns {free, best} for the subtree rooted at v</span>
+pair&lt;int,int&gt; dfs(int v, int parent) {
+    int fre = 0, gain = INT_MIN;            <span class="cm">// gain: best bonus for matching v</span>
+    <span class="kw">for</span> (int u : adj[v]) {
+        <span class="kw">if</span> (u == parent) <span class="kw">continue</span>;
+        auto [f, b] = dfs(u, v);            <span class="cm">// children first!</span>
+        fre  += b;                          <span class="cm">// v stays unmatched</span>
+        gain  = max(gain, 1 + f - b);       <span class="cm">// or: match v with u</span>
+    }
+    int best = (gain == INT_MIN) ? fre      <span class="cm">// leaf: no children</span>
+                                 : max(fre, fre + gain);
+    <span class="kw">return</span> {fre, best};
+}
+<span class="cm">// answer: dfs(root, -1).second</span></code></pre>
+      <p class="fragment smaller"><b>One-pass trick:</b> matching $v$ to $u$ shifts
+        the full sum <code>fre</code> by $1 + f - b$ — so <code>fre + gain</code>
+        is the best &ldquo;all children but one&rdquo; sum.</p>
+      <p class="fragment">Every vertex and edge is touched $O(1)$ times:
+        <span class="hl">$O(n)$</span> total.</p>
+    </section>
+
+    <section>
+      <h2>Matching: Remarks</h2>
+      <ul>
+        <li class="fragment">The same two-state DP also solves <em>maximum weight</em>
+          matching on a tree — replace the $+1$ with the edge weight.</li>
+        <li class="fragment">On general graphs, maximum matching is much harder
+          (Edmonds' blossom algorithm); on <em>bipartite</em> graphs we will solve
+          it with max-flow in Week 8.</li>
+        <li class="fragment">Preview of Week 4: on trees a simple <b>greedy</b> rule
+          — repeatedly match a leaf to its parent — is also optimal.</li>
+      </ul>
+    </section>
+
+    <!-- ================== CLOSING ARC: KONIG AND GALLAI =================== -->
+    <section class="center">
+      <h1>Part IV: Kőnig and Gallai</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Connections between our three problems</p>
+    </section>
+
+    <section>
+      <h2>Matchings Bound Covers</h2>
+      <p>Write $\nu(G)$ for the maximum matching size and $\tau(G)$ for the
+         minimum vertex cover size.</p>
+      <div class="box fragment"><span class="tag">Weak duality</span>
+        $\nu(G) \le \tau(G)$ in <em>every</em> graph.</div>
+      <p class="fragment"><b>Proof.</b> Each edge of a matching $M$ must contain a
+        vertex of a cover $C$. The edges of $M$ are disjoint, so distinct edges
+        claim distinct vertices of $C$: $|M| \le |C|$. $\;\blacksquare$</p>
+      <p class="fragment">So a matching is a <b>certificate</b>: exhibit one of size
+        $k$ and every cover is forced to have at least $k$ vertices.</p>
+    </section>
+
+    <section>
+      <h2>Kőnig's Theorem</h2>
+      <div class="box"><span class="tag">Theorem (Kőnig, 1931)</span>
+        If $G$ is <b>bipartite</b>, then $\nu(G) = \tau(G)$.</div>
+      <p class="fragment">Trees are bipartite — 2-colour by depth. On our tree with
+        unit weights: maximum matching $5$, minimum cover $5$.</p>
+      <p class="fragment">Bipartite is essential: a triangle has $\nu = 1$ but
+        $\tau = 2$. Odd cycles are exactly what breaks it.</p>
+      <p class="fragment">The proof is <b>constructive</b>: it turns a maximum
+        matching into a cover of exactly the same size.</p>
+    </section>
+
+    <section>
+      <h2>Kőnig: the Construction</h2>
+      <p class="smaller">$G$ bipartite with parts $L$ and $R$; $M$ a <em>maximum</em>
+        matching (orange). Build three sets:</p>
+      <figure>
+        <svg width="520" viewBox="0 0 760 300" role="img" aria-label="A bipartite graph with parts L and R; the set U of unmatched left vertices, the alternating-reachable set Z, and the cover C are highlighted in turn">
+          <g class="fragment" data-fragment-index="2">
+            <g stroke="#cfe2ff" stroke-width="11" stroke-linecap="round">
+              <line x1="310" y1="70" x2="170" y2="240"/>
+              <line x1="170" y1="240" x2="170" y2="70"/>
+              <line x1="170" y1="70" x2="310" y2="240"/>
+              <line x1="310" y1="240" x2="450" y2="70"/>
+            </g>
+            <g fill="#cfe2ff">
+              <circle cx="170" cy="70" r="33"/>
+              <circle cx="310" cy="70" r="33"/>
+              <circle cx="450" cy="70" r="33"/>
+              <circle cx="170" cy="240" r="33"/>
+              <circle cx="310" cy="240" r="33"/>
+            </g>
+          </g>
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+          </g>
+          <g class="fragment" data-fragment-index="1">
+            <circle cx="310" cy="70" r="28" fill="none" stroke="#1f6feb"
+                    stroke-width="2.5" stroke-dasharray="7 5"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g class="fragment" data-fragment-index="3" fill="#c5d6c2" stroke="#4d7349" stroke-width="2">
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+      </figure>
+      <ul class="smaller">
+        <li class="fragment" data-fragment-index="1"><span class="setU">$U$</span> =
+          the $M$-unmatched vertices of $L$ (here just $\ell_2$).</li>
+        <li class="fragment" data-fragment-index="2"><span class="setZ">$Z$</span> =
+          everything reachable from $U$ along paths that <b>alternate</b>:
+          non-matching, matching, non-matching, &hellip; (so $U \subseteq Z$).</li>
+        <li class="fragment" data-fragment-index="3"><span class="setC">$C$</span>
+          $\;=\; (L \setminus Z) \,\cup\, (R \cap Z)$: the left vertices $Z$
+          <em>missed</em>, the right vertices it <em>reached</em>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Kőnig: Why C Covers Every Edge</h2>
+      <div class="recap"><span class="setU">$U$</span> = unmatched in $L$,&nbsp;&nbsp;
+        <span class="setZ">$Z$</span> = alternating-reachable from $U$,&nbsp;&nbsp;
+        <span class="setC">$C$</span> = $(L \setminus Z) \cup (R \cap Z)$</div>
+      <p class="smaller">Outside $C$: left vertices <em>in</em> $Z$, right vertices
+        <em>outside</em> $Z$. So an uncovered edge $\{\ell, r\}$ would have to
+        <b>escape</b>: $\ell \in Z$, $r \notin Z$.</p>
+      <figure>
+        <svg width="440" viewBox="0 0 760 300" role="img" aria-label="The same bipartite graph; a dashed hypothetical edge tries to leave Z from l3 to r3">
+          <g fill="#cfe2ff">
+            <circle cx="170" cy="70" r="33"/>
+            <circle cx="310" cy="70" r="33"/>
+            <circle cx="450" cy="70" r="33"/>
+            <circle cx="170" cy="240" r="33"/>
+            <circle cx="310" cy="240" r="33"/>
+          </g>
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+            <line x1="450" y1="70" x2="450" y2="240" stroke="#c0392b" stroke-width="3"
+                  stroke-dasharray="9 6"/>
+          </g>
+          <circle cx="310" cy="70" r="28" fill="none" stroke="#1f6feb"
+                  stroke-width="2.5" stroke-dasharray="7 5"/>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g fill="#c5d6c2" stroke="#4d7349" stroke-width="2">
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="472" y="161" fill="#c0392b" font-size="22">?</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>The dashed edge is hypothetical: could some edge leave $Z$ like this?</figcaption>
+      </figure>
+      <div class="box smaller fragment"><span class="tag">Case 1</span>
+        $\{\ell,r\} \notin M$: the path that put $\ell$ into $Z$ ended on $\ell$'s
+        matching edge (or $\ell \in U$) — so it extends along $\{\ell,r\}$,
+        and $r \in Z$. No escape.</div>
+    </section>
+
+    <section>
+      <h2>Kőnig: Why C Covers Every Edge</h2>
+      <div class="recap"><span class="setU">$U$</span> = unmatched in $L$,&nbsp;&nbsp;
+        <span class="setZ">$Z$</span> = alternating-reachable from $U$,&nbsp;&nbsp;
+        <span class="setC">$C$</span> = $(L \setminus Z) \cup (R \cap Z)$</div>
+      <p class="smaller">Still hunting an uncovered edge $\{\ell, r\}$ — one that
+        <b>escapes</b>: $\ell \in Z$, $r \notin Z$. One case left:</p>
+      <figure>
+        <svg width="440" viewBox="0 0 760 300" role="img" aria-label="The same bipartite graph; the dashed hypothetical edge from l3 to r3 cannot be a matching edge">
+          <g fill="#cfe2ff">
+            <circle cx="170" cy="70" r="33"/>
+            <circle cx="310" cy="70" r="33"/>
+            <circle cx="450" cy="70" r="33"/>
+            <circle cx="170" cy="240" r="33"/>
+            <circle cx="310" cy="240" r="33"/>
+          </g>
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+            <line x1="450" y1="70" x2="450" y2="240" stroke="#c0392b" stroke-width="3"
+                  stroke-dasharray="9 6"/>
+          </g>
+          <circle cx="310" cy="70" r="28" fill="none" stroke="#1f6feb"
+                  stroke-width="2.5" stroke-dasharray="7 5"/>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g fill="#c5d6c2" stroke="#4d7349" stroke-width="2">
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="472" y="161" fill="#c0392b" font-size="22">?</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>Could the dashed edge be in $M$? But $\ell_3$ entered $Z$ via its
+          matching edge from $r_2$.</figcaption>
+      </figure>
+      <div class="box smaller fragment"><span class="tag">Case 2</span>
+        $\{\ell,r\} \in M$: $\ell$ is matched, so $\ell \notin U$ — the path
+        <em>entered</em> $\ell$ through $\{\ell,r\}$ itself, coming from $r$.
+        So $r \in Z$ already. No escape.</div>
+      <p class="smaller fragment">Both cases force $r \in R \cap Z \subseteq C$: no
+        edge escapes, <span class="setC">$C$</span> is a cover. $\;\blacksquare$</p>
+    </section>
+
+    <section>
+      <h2>Kőnig: Why |C| = |M|</h2>
+      <div class="recap"><span class="setU">$U$</span> = unmatched in $L$,&nbsp;&nbsp;
+        <span class="setZ">$Z$</span> = alternating-reachable from $U$,&nbsp;&nbsp;
+        <span class="setC">$C$</span> = $(L \setminus Z) \cup (R \cap Z)$</div>
+      <figure>
+        <svg width="360" viewBox="0 0 760 300" role="img" aria-label="The same bipartite graph; each of the three cover vertices lies on its own matching edge">
+          <g fill="#cfe2ff">
+            <circle cx="170" cy="70" r="33"/>
+            <circle cx="310" cy="70" r="33"/>
+            <circle cx="450" cy="70" r="33"/>
+            <circle cx="170" cy="240" r="33"/>
+            <circle cx="310" cy="240" r="33"/>
+          </g>
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+          </g>
+          <circle cx="310" cy="70" r="28" fill="none" stroke="#1f6feb"
+                  stroke-width="2.5" stroke-dasharray="7 5"/>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g fill="#c5d6c2" stroke="#4d7349" stroke-width="2">
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>Each vertex of $C$ sits on its own matching edge: $|C| = 3 = |M|$.</figcaption>
+      </figure>
+      <ul class="smaller">
+        <li class="fragment">Every vertex of $C$ is matched: an unmatched left vertex
+          would be in $U \subseteq Z$, hence outside $C$&hellip;</li>
+        <li class="fragment">&hellip;and an unmatched $r \in R \cap Z$ would end an
+          <b>augmenting path</b>: swap its matching and non-matching edges and $M$
+          grows — but $M$ is <em>maximum</em>. <span class="smaller">(The only place
+          maximality is used!)</span></li>
+        <li class="fragment">The matching edges are <em>distinct</em>: an $M$-edge
+          with right end in $Z$ has left end in $Z$ too. So $|C| \le |M|$.</li>
+        <li class="fragment">With weak duality:
+          $\tau \;\le\; |C| \;\le\; |M| \;\le\; \nu \;\le\; \tau$ —
+          <span class="hl">all equal</span>. $\;\blacksquare$</li>
+      </ul>
+    </section>
+
+    <section class="center">
+      <h1>Gallai's Theorem</h1>
+    </section>
+
+    <section>
+      <h2>A Shortcut: Complements</h2>
+      <div class="box"><span class="tag">Observation</span>
+        $S$ is an independent set $\iff$ $V \setminus S$ is a vertex cover.</div>
+      <p class="fragment"><b>Proof.</b>
+        ($\Rightarrow$) If $S$ is independent, no edge has both endpoints in $S$,
+        so every edge has an endpoint in $V \setminus S$: a cover.</p>
+      <p class="fragment">($\Leftarrow$) If $V \setminus S$ is a cover, no edge has
+        both endpoints outside it — i.e. no edge has both endpoints in $S$:
+        independent. $\;\blacksquare$</p>
+    </section>
+
+    <section>
+      <h2>A Shortcut: Complements</h2>
+      <div class="box"><span class="tag">Consequence</span>
+        $$\min_{\text{cover } C} w(C) \;=\; w(V) \;-\; \max_{\text{ind. set } S} w(S)$$
+        A <b>max-weight MIS</b> solver instantly gives a <b>min-weight VC</b> solver:
+        take the complement!
+      </div>
+    </section>
+
+    <section>
+      <h2>Complements on Our Tree</h2>
+      <figure>
+        <svg width="620" viewBox="0 0 760 300" role="img" aria-label="Max independent set in green and its complement, the min vertex cover, in orange">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="395" y1="35" x2="240" y2="105"/>
+            <line x1="395" y1="35" x2="555" y2="105"/>
+            <line x1="240" y1="105" x2="150" y2="175"/>
+            <line x1="240" y1="105" x2="330" y2="175"/>
+            <line x1="555" y1="105" x2="480" y2="175"/>
+            <line x1="555" y1="105" x2="640" y2="175"/>
+            <line x1="150" y1="175" x2="85" y2="250"/>
+            <line x1="150" y1="175" x2="215" y2="250"/>
+            <line x1="330" y1="175" x2="385" y2="250"/>
+            <line x1="480" y1="175" x2="535" y2="250"/>
+            <line x1="640" y1="175" x2="700" y2="250"/>
+          </g>
+          <g stroke-width="2">
+            <circle cx="395" cy="35" r="22" fill="#f1c79f" stroke="#b85a26"/>
+            <circle cx="240" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="555" cy="105" r="22" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="150" cy="175" r="22" fill="#f1c79f" stroke="#b85a26"/>
+            <circle cx="330" cy="175" r="22" fill="#f1c79f" stroke="#b85a26"/>
+            <circle cx="480" cy="175" r="22" fill="#f1c79f" stroke="#b85a26"/>
+            <circle cx="640" cy="175" r="22" fill="#f1c79f" stroke="#b85a26"/>
+            <circle cx="85"  cy="250" r="22" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="215" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="385" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="535" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="700" cy="250" r="22" fill="#c5d6c2" stroke="#4d7349"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+            <text x="395" y="41" fill="#6e3416">5</text>
+            <text x="240" y="111" fill="#2c4329">10</text>
+            <text x="555" y="111" fill="#2c4329">3</text>
+            <text x="150" y="181" fill="#6e3416">7</text>
+            <text x="330" y="181" fill="#6e3416">8</text>
+            <text x="480" y="181" fill="#6e3416">2</text>
+            <text x="640" y="181" fill="#6e3416">4</text>
+            <text x="85"  y="256" fill="#2c4329">5</text>
+            <text x="215" y="256" fill="#2c4329">3</text>
+            <text x="385" y="256" fill="#2c4329">5</text>
+            <text x="535" y="256" fill="#2c4329">3</text>
+            <text x="700" y="256" fill="#2c4329">5</text>
+          </g>
+        </svg>
+        <figcaption>Green = maximum independent set (weight 34). Orange = its complement, the minimum vertex cover (weight 26).</figcaption>
+      </figure>
+      <p class="smaller">Total weight of the tree: $60$. And indeed
+        $34 + 26 = 60$ — the two answers are two halves of the same split.</p>
+    </section>
+
+    <section>
+      <h2>Gallai Identities</h2>
+      <div class="box"><span class="tag">Theorem (Gallai, 1959)</span>
+        In any graph $G$ on $n$ vertices:
+        $$\alpha(G) + \tau(G) = n$$
+        where $\alpha$ = size of a maximum independent set and
+        $\tau$ = size of a minimum vertex cover. With weights:
+        $\;w(S^*) + w(C^*) = w(V)$.
+      </div>
+    </section>
+
+    <section>
+      <h2>Gallai Identities</h2>
+      <div class="box"><span class="tag">Definition</span>
+        An <b>edge cover</b> of $G$ is a set of edges $F \subseteq E$ such that
+        every vertex of $G$ is an endpoint of some edge in $F$.</div>
+      <p class="smaller fragment">A companion identity relates matchings to
+        edge covers: $\nu(G) + \rho(G) = n$ for graphs with no isolated
+        vertices ($\nu$ = max matching, $\rho$ = min edge cover).</p>
+    </section>
+
+    <section>
+      <h2>The Vertex Cover Arc</h2>
+      <p>Vertex cover is where the difficulty shows as graphs get wilder:</p>
+      <table class="results" style="font-size:0.85em;">
+        <thead><tr><th>Week</th><th>Setting</th><th>Vertex cover status</th></tr></thead>
+        <tbody>
+          <tr class="hlrow"><td class="q">W3</td><td>trees</td><td>linear-time DP (today)</td></tr>
+          <tr><td class="q">W10</td><td>bipartite</td><td>polynomial, by König</td></tr>
+          <tr><td class="q">W11</td><td>general</td><td>NP-complete</td></tr>
+          <tr><td class="q">W12</td><td>general</td><td>2-approximation</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller">Matching and vertex cover meet again as an
+        LP-duality capstone in Week 10.</p>
+    </section>
+
+    <!-- ============================== WRAP-UP ============================= -->
+    <section>
+      <h2>Summary: Three Problems, One Recipe</h2>
+      <table class="results" style="font-size:0.66em;">
+        <thead>
+          <tr><th>Problem</th><th>States at $v$</th><th>Parent constraint</th><th>Answer</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="q">Max weight IS</td>
+              <td>$\mathrm{dp}_1(v)$, $\mathrm{dp}_2(v)$</td>
+              <td>take $v$ $\Rightarrow$ children out</td>
+              <td>$\max(\mathrm{dp}_1(r), \mathrm{dp}_2(r))$ $=$ 34</td></tr>
+          <tr><td class="q">Min weight VC</td>
+              <td>$\mathrm{in}(v)$, $\mathrm{out}(v)$</td>
+              <td>skip $v$ $\Rightarrow$ children in</td>
+              <td>$\min(\mathrm{in}(r), \mathrm{out}(r))$ $=$ 26</td></tr>
+          <tr><td class="q">Max matching</td>
+              <td>$\mathrm{free}(v)$, $\mathrm{best}(v)$</td>
+              <td>match $v$ $\Rightarrow$ needs a free child</td>
+              <td>$\mathrm{best}(r)$ $=$ 5</td></tr>
+        </tbody>
+      </table>
+      <div class="box smaller"><span class="tag">Takeaway</span>
+        Root the tree · state = (subtree, decision at $v$) · initialise at leaves ·
+        combine children · <b>one postorder pass</b>, $O(n)$ total.
+      </div>
+    </section>
+
+  </div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [ RevealMath.MathJax3 ],
+
+    mathjax3: {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        macros: {
+          tO:   ['{\\widetilde{O}}'],
+          R:    ['{\\mathbb{R}}'],
+          E:    ['{\\mathbb{E}}']
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+</script>
+</body>
+</html>
