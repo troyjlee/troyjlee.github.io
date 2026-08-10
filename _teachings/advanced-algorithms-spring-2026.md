@@ -46,6 +46,11 @@ schedule:
     description: >-
       Maximum matching, maximum independent set, and minimum vertex cover on
       trees
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week03.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week03.pdf
   - week: 4
     topic: Greedy Algorithms
     description: >-
