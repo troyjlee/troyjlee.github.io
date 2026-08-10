@@ -596,8 +596,9 @@ const programs = {
     { key: 'ml', html: 'ℓ ∈ L∖Z unmatched? <span class="kw">then</span> ℓ ∈ U ⊆ Z  ✗' },
     { key: 'mr', html: 'r ∈ R∩Z unmatched? augmenting path <span class="op">⇒</span> |M|+1  ✗' },
     { kind: 'label', text: 'on distinct edges of M' },
-    { key: 'de', html: 'an M-edge with right end <span class="kw">in</span> Z has left end <span class="kw">in</span> Z' },
-    { key: 'ch', html: 'charge each v ∈ C <span class="kw">to</span> its M-edge <span class="op">⇒</span> |C| ≤ |M|' },
+    { key: 'de',  html: 'two C-vertices <span class="kw">share</span> an M-edge? <span class="kw">needs</span> ℓ ∉ Z <span class="kw">and</span> r ∈ Z' },
+    { key: 'de2', html: '<span class="kw">but</span> r ∈ Z pulls ℓ <span class="kw">into</span> Z <span class="op">⇒</span> no sharing  ✗', indent: 1 },
+    { key: 'ch',  html: 'charge each v ∈ C <span class="kw">to</span> its M-edge <span class="op">⇒</span> |C| ≤ |M|' },
     { kind: 'label', text: 'close the chain' },
     { key: 'wd', html: 'τ ≤ |C| ≤ |M| ≤ ν ≤ τ <span class="op">—</span> all equal  ∎' },
   ],
@@ -815,8 +816,14 @@ function buildSizeSteps() {
   });
 
   snap({
-    caption: 'Could two C-vertices share one M-edge? That needs both ends in C: ℓ ∈ L∖Z <em>and</em> r ∈ R∩Z. But the growth rule crosses a matching edge from its right end — r ∈ Z pulls ℓ into Z. See ' + en('l3','r2') + ': ' + cn('r2') + ' ∈ Z forced ' + cn('l3') + ' ∈ Z.',
-    lineKey: 'de', ...BASE, focus: 'l3',
+    caption: 'Are the three charges <em>distinct</em>? An edge is charged twice only if <em>both</em> ends are in C: ℓ ∈ L∖Z and r ∈ R∩Z. An edge like ' + en('l4','r3') + ' is safe — its right end ' + cn('r3') + ' ∉ Z means ' + cn('r3') + ' ∉ C, so only ' + cn('l4') + ' charges it.',
+    lineKey: 'de', ...BASE, focus: 'l4',
+    edge: { 'l4-r3': 'step-m' },
+  });
+
+  snap({
+    caption: 'The dangerous shape is an M-edge with its right end in Z. But that shape is never half-in: the growth rule crosses a matching edge from its right end, pulling ℓ into Z — see ' + en('l3','r2') + ': ' + cn('r2') + ' ∈ Z forced ' + cn('l3') + ' ∈ Z, so ' + cn('l3') + ' ∉ C. No edge is charged twice.',
+    lineKey: 'de2', ...BASE, focus: 'l3',
     edge: { 'l3-r2': 'step-m' },
   });
 
