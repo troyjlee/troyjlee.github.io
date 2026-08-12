@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-07-27'
+  last_updated: '2026-08-12'
 papers:
   iSjOah4AAAAJ:-95Q15plzcUC:
     citations: 0
@@ -38,7 +38,7 @@ papers:
     title: 'Astro2020 Science White Paper: The Next Decade of Astroinformatics and Astrostatistics'
     year: '2019'
   iSjOah4AAAAJ:2osOgNQ5qMEC:
-    citations: 116
+    citations: 115
     title: How information-mapping patterns determine foraging behaviour of a honey bee colony
     year: '2002'
   iSjOah4AAAAJ:2ywjKiB__4kC:
@@ -46,7 +46,7 @@ papers:
     title: 'Familial cutaneous melanoma and two-mutational-event modeling: 160'
     year: '1993'
   iSjOah4AAAAJ:35N4QoGY0k4C:
-    citations: 12
+    citations: 11
     title: The cover number of a matrix and its algorithmic applications
     year: '2014'
   iSjOah4AAAAJ:3utUx_xxzcoC:
@@ -62,21 +62,21 @@ papers:
     title: tNP-041
     year: '2005'
   iSjOah4AAAAJ:4IpgxnMJogoC:
-    citations: 17
+    citations: 15
     title: On the cut dimension of a graph
-    year: '2021'
+    year: '2020'
   iSjOah4AAAAJ:4JMBOYKVnBMC:
-    citations: 93
+    citations: 94
     title: 'The approximate rank of a matrix and its algorithmic applications: approximate rank'
     year: '2013'
   iSjOah4AAAAJ:4UtermoNRQAC:
-    citations: 3
+    citations: 1
     title: A sublinear query quantum algorithm for st minimum cut on dense simple graphs
     year: '2021'
   iSjOah4AAAAJ:4b-LE5UluQcC:
     citations: 0
-    title: Communication Complexity, Linear Optimization, and lower bounds for the nonnegative rank of matrices (Dagstuhl Seminar 13082)
-    year: '2013'
+    title: Communication Complexity, Linear Optimization, and lower bounds for the nonnegative rank of matrices
+    year: Unknown Year
   iSjOah4AAAAJ:4fKUyHm3Qg0C:
     citations: 0
     title: The Catalytic Behavior of Zeolite-HX,-NaX and-KX in CO Reduction and Carburization of WO~ 3 to Manufacture Tungsten Carbide
@@ -106,13 +106,13 @@ papers:
     title: 'Crescentic glomerulonephritis: A review of 24 cases.'
     year: '1998'
   iSjOah4AAAAJ:6E5OHDUOeTQC:
-    citations: 12
+    citations: 13
     title: On the query complexity of connectivity with global queries
     year: '2021'
   iSjOah4AAAAJ:6G1OFF11MdUC:
-    citations: 315
+    citations: 327
     title: Quantum attacks on Bitcoin, and how to protect against them
-    year: '2018'
+    year: '2017'
   iSjOah4AAAAJ:7cqQt8SKcR0C:
     citations: 0
     title: Overexpression of DD genotype in type 2 diabetic end stage renal failure in Korea
@@ -122,7 +122,7 @@ papers:
     title: The indicators for practicing oral cancer self-examination
     year: '2002'
   iSjOah4AAAAJ:8k81kl-MbHgC:
-    citations: 12
+    citations: 13
     title: All Schatten spaces endowed with the Schur product are Q-algebras
     year: '2012'
   iSjOah4AAAAJ:9N3KX2BFTccC:
@@ -138,7 +138,7 @@ papers:
     title: Arithmetical definability over finite structures
     year: '2002'
   iSjOah4AAAAJ:9yKSN-GCB0IC:
-    citations: 120
+    citations: 123
     title: A direct product theorem for discrepancy
     year: '2008'
   iSjOah4AAAAJ:A8cqit5AE6sC:
@@ -202,9 +202,9 @@ papers:
     title: "\uC804\uC2E0 \uC9C8\uD658 \uBC0F \uACBD\uAD6C \uCCA0\uBD84 \uC81C\uC7AC\uC640 \uC5F0\uAD00\uB41C \uC2ED\uC774\uC9C0\uC7A5 \uAC00\uC131\uD751\uC0C9\uC99D 2 \uC608"
     year: '2009'
   iSjOah4AAAAJ:FSl0EHHYj-kC:
-    citations: 13
+    citations: 15
     title: Quantum complexity of minimum cut
-    year: '2021'
+    year: '2020'
   iSjOah4AAAAJ:FXgMSCUEOHUC:
     citations: 0
     title: 'Withaferin A sensitizes human renal cancer cells to TRAIL-mediated apoptosis through DR5 up-regulation and down-regulation of c-FLIP: PP7C-40'
@@ -222,7 +222,7 @@ papers:
     title: A composition theorem for randomized query complexity
     year: '2017'
   iSjOah4AAAAJ:GnPB-g6toBAC:
-    citations: 34
+    citations: 35
     title: Some upper and lower bounds on PSD-rank
     year: '2017'
   iSjOah4AAAAJ:H1aCVKaixnMC:
@@ -238,9 +238,9 @@ papers:
     title: Synthesis of aligned self-joint carbon nanotubes
     year: '2004'
   iSjOah4AAAAJ:HbR8gkJAVGIC:
-    citations: 115
+    citations: 119
     title: Separations in query complexity based on pointer functions
-    year: '2016'
+    year: '2017'
   iSjOah4AAAAJ:HhcuHIWmDEUC:
     citations: 0
     title: Fabrication and electrical characterization of FETs using CNTs and nanowires by proton irradiation and ion doping
@@ -254,7 +254,7 @@ papers:
     title: Evaluation of Step Feeding Strategy in One-Stage Simultaneous Partial Nitritation, Anammox and Denitrification (SPNAD) Process
     year: '2020'
   iSjOah4AAAAJ:IjCSPb-OGe4C:
-    citations: 20
+    citations: 19
     title: Arithmetical definability over finite structures
     year: '2003'
   iSjOah4AAAAJ:JTqpx9DYBaYC:
@@ -292,13 +292,13 @@ papers:
   iSjOah4AAAAJ:L_at8tGC9oEC:
     citations: 6
     title: Bounding quantum-classical separations for classes of nonlocal games
-    year: '2019'
+    year: '2018'
   iSjOah4AAAAJ:L_l9e5I586QC:
     citations: 0
     title: Studies on a melanocyte-stimulating hormone-sensitive adenyl cyclase of mouse melanoma. Abstr.
     year: '1974'
   iSjOah4AAAAJ:LkGwnXOMwfcC:
-    citations: 14
+    citations: 15
     title: Kolmogorov complexity and formula size lower bounds
     year: '2005'
   iSjOah4AAAAJ:LvS0yHEg1QsC:
@@ -346,7 +346,7 @@ papers:
     title: ' effects in Chern-Simons QED with a four-Fermi interaction'
     year: '1992'
   iSjOah4AAAAJ:P9oYG7HA76QC:
-    citations: 5
+    citations: 4
     title: 2011 IEEE 52nd Annual Symposium on Foundations of Computer Science
     year: '2011'
   iSjOah4AAAAJ:PNc4OtJD23oC:
@@ -362,7 +362,7 @@ papers:
     title: On the noise stability of small Demorgan formulas
     year: '2012'
   iSjOah4AAAAJ:QUKcMBy53xEC:
-    citations: 44
+    citations: 43
     title: Two new results about quantum exact learning
     year: '2021'
   iSjOah4AAAAJ:QUYzkoTeugQC:
@@ -405,6 +405,10 @@ papers:
     citations: 0
     title: 'Diffusion-Weighted Imaging Findings After Endovascular Stent Employment in Cerebral Artery Stenosis: P260'
     year: '2006'
+  iSjOah4AAAAJ:S9ByAo1SvpUC:
+    citations: 0
+    title: Monitoring of Nitrogen Ion in Nitrifying Biofilm using an Ion Selective Microelectrode
+    year: '2010'
   iSjOah4AAAAJ:SAguW2jnL4UC:
     citations: 0
     title: LIPIcs, Volume 93, FSTTCS'17, Complete Volume
@@ -437,6 +441,10 @@ papers:
     citations: 18
     title: Tight adversary bounds for composite functions
     year: '2005'
+  iSjOah4AAAAJ:U3HXUhiBGqIC:
+    citations: 2
+    title: A sublinear time quantum algorithm for st minimum cut on dense simple graphs
+    year: '2021'
   iSjOah4AAAAJ:UBSsHvkqiq4C:
     citations: 1
     title: Ia-172 is an antigenic determinant on DRw3
@@ -450,7 +458,7 @@ papers:
     title: Development of a Safeguards Approach for a Pyroprocessing Plant by IAEA Member State Support Program
     year: '2012'
   iSjOah4AAAAJ:UeHWp8X0CEIC:
-    citations: 172
+    citations: 175
     title: Lower bounds in communication complexity
     year: '2009'
   iSjOah4AAAAJ:UuaQgmrAG1sC:
@@ -486,9 +494,9 @@ papers:
     title: E-007 Urgent recanalization with stent for severe intracranial stenosis in patients with transient ischemic attack or minor stroke
     year: '2012'
   iSjOah4AAAAJ:Y0pCki6q_DkC:
-    citations: 24
+    citations: 25
     title: Optimal quantum adversary lower bounds for ordered search
-    year: '2007'
+    year: '2008'
   iSjOah4AAAAJ:YClPFpxzHmwC:
     citations: 0
     title: Dynamic Simulation of Startup in PGSFR
@@ -517,6 +525,10 @@ papers:
     citations: 0
     title: 'PRELIMINARY CALIBRATION OF THE ACP SAFEGUARDS NEUTRON COUNTER: MONTE CARLO SIMULATION'
     year: Unknown Year
+  iSjOah4AAAAJ:ZWXmI6zqLYMC:
+    citations: 0
+    title: Characterization of Denitrifier Community in Independent Anoxic Reactor Using Modified BAF Process
+    year: '2006'
   iSjOah4AAAAJ:ZeXyd9-uunAC:
     citations: 20
     title: New bounds on the classical and quantum communication complexity of some graph properties
@@ -534,15 +546,15 @@ papers:
     title: Development of a novel botanical drug (DA-9701), as a new prokinetic agent
     year: '2011'
   iSjOah4AAAAJ:_axFR9aDTf0C:
-    citations: 71
+    citations: 70
     title: Improved quantum query algorithms for triangle detection and associativity testing
     year: '2017'
   iSjOah4AAAAJ:_kc_bZDykSQC:
-    citations: 35
+    citations: 36
     title: A strong direct product theorem for quantum query complexity
-    year: '2011'
+    year: '2013'
   iSjOah4AAAAJ:_r6PDwDh8pAC:
-    citations: 7
+    citations: 9
     title: 46th International Colloquium on Automata, Languages, and Programming (ICALP 2019)
     year: '2019'
   iSjOah4AAAAJ:aKos2Y7kUz0C:
@@ -561,10 +573,6 @@ papers:
     citations: 0
     title: Is the reflux characteristic to provoke heartburn, chest pain and cough different? The study using multichannel impedance-pH monitoring in patient with positive symptom index
     year: '2012'
-  iSjOah4AAAAJ:bgW0xdllhO4C:
-    citations: 0
-    title: Synthesis and Structure of aligned Carbon nanotubes
-    year: '2003'
   iSjOah4AAAAJ:brChLMnLtjYC:
     citations: 0
     title: Anaerobic treatment for strong nitrogen removal-Activity of sulphate reducing bacteria according to COD/SO42-ratio of acrylonitrile wastewater containing high sulphate
@@ -582,7 +590,7 @@ papers:
     title: X-ray absorption spectroscopy of solvated iron pentacarbonyl measured with an ultrafast laser-driven X-ray source.
     year: '2004'
   iSjOah4AAAAJ:d7BmB2BcYiwC:
-    citations: 8
+    citations: 9
     title: Around the log-rank conjecture
     year: '2023'
   iSjOah4AAAAJ:d9ydBXnamCkC:
@@ -682,7 +690,7 @@ papers:
     title: Hellinger volume and number-on-the-forehead communication complexity
     year: '2016'
   iSjOah4AAAAJ:hMod-77fHWUC:
-    citations: 37
+    citations: 36
     title: Matrix completion from any given set of observations
     year: '2013'
   iSjOah4AAAAJ:hUq98zRk74IC:
@@ -698,7 +706,7 @@ papers:
     title: Chapter 3-Epitaxial Growth-3.3 Heteroepitaxy-Effect of Carbonization in Bias-Enhanced Nucleation Step during Highly-Oriented Growth of Diamond Films on 6H-SiC (0001) Substrate
     year: '2004'
   iSjOah4AAAAJ:j3f4tGmQtD8C:
-    citations: 13
+    citations: 14
     title: Communication complexity, linear optimization, and lower bounds for the nonnegative rank of matrices (Dagstuhl Seminar 13082)
     year: '2013'
   iSjOah4AAAAJ:j7_hQOaDUrUC:
@@ -734,7 +742,7 @@ papers:
     title: Analysis of a Fission Neutron Distribution for a measurement of Mixed Nuclear material Composition
     year: '2010'
   iSjOah4AAAAJ:kNdYIx-mwKoC:
-    citations: 29
+    citations: 31
     title: A note on the sign degree of formulas
     year: '2009'
   iSjOah4AAAAJ:kWvqk_afx_IC:
@@ -766,7 +774,7 @@ papers:
     title: 'Structure of solvated Fe (Co) 5: FTIR measurements, X-ray absorption measurements, and density functional theory calculations.'
     year: '2003'
   iSjOah4AAAAJ:mSXQG6lSlFkC:
-    citations: 18
+    citations: 19
     title: Strategies for quantum races
     year: '2019'
   iSjOah4AAAAJ:mUJArPsKIAAC:
@@ -774,9 +782,9 @@ papers:
     title: Effects of flaking processing of grains on growth performance and nutrient digestibilities for growing Korean native cattle
     year: '1994'
   iSjOah4AAAAJ:mVmsd5A6BfQC:
-    citations: 209
+    citations: 207
     title: Quantum query complexity of state conversion
-    year: '2010'
+    year: '2011'
   iSjOah4AAAAJ:mWEH9CqjF64C:
     citations: 0
     title: Canonical quantization of (2+ 1)-dimensional gravity coupled to spinning particles
@@ -804,7 +812,7 @@ papers:
   iSjOah4AAAAJ:nZtlP1Cc3DIC:
     citations: 0
     title: Finding the KT partition of a weighted graph in near-linear time
-    year: '2022'
+    year: '2021'
   iSjOah4AAAAJ:noJvBAPgP0YC:
     citations: 0
     title: Quantum speedups for graph sparsification, graph cut problems and Laplacian solving
@@ -818,7 +826,7 @@ papers:
     title: Microbial degradation of organochlorine compounds
     year: '1999'
   iSjOah4AAAAJ:qE25ZKhNtbAC:
-    citations: 9
+    citations: 10
     title: Separating quantum communication and approximate rank
     year: '2016'
   iSjOah4AAAAJ:qE4H1tSSYIIC:
@@ -840,7 +848,7 @@ papers:
   iSjOah4AAAAJ:qxL8FJ1GzNcC:
     citations: 37
     title: A learning graph based quantum query algorithm for finding constant-size subgraphs
-    year: '2012'
+    year: '2011'
   iSjOah4AAAAJ:r0BpntZqJG4C:
     citations: 13
     title: Support-based lower bounds for the positive semidefinite rank of a nonnegative matrix
@@ -858,11 +866,11 @@ papers:
     title: 'Ultrafast lasers and x-ray absorption spectroscopy: Investigating molecular structure and dynamics of solvated molecules.'
     year: '2002'
   iSjOah4AAAAJ:rn2Io16i3IwC:
-    citations: 31
+    citations: 32
     title: Quantum algorithms for graph problems with cut queries
     year: '2021'
   iSjOah4AAAAJ:roLk4NBRz8UC:
-    citations: 27
+    citations: 28
     title: Resource bounded symmetry of information revisited
     year: '2005'
   iSjOah4AAAAJ:sAujV351FBYC:
@@ -889,10 +897,6 @@ papers:
     citations: 0
     title: 'Reactive oxygen species due to expression level of mitochondrial protein reorganizes mitochondrial cristae/inner membrane structure: PP4C-7'
     year: '2008'
-  iSjOah4AAAAJ:sq_mVe84DbIC:
-    citations: 5
-    title: D. Zazulina V. Paz-Ares L
-    year: '2016'
   iSjOah4AAAAJ:sszUF3NjhM4C:
     citations: 0
     title: E-004 Safety and efficacy of transluminal balloon angioplasty using a compliant balloon for severe cerebral vasospasm after an aneurysmal subarachnoid hemorrhage
@@ -902,7 +906,7 @@ papers:
     title: Supragastric belching induce re-reflux during reflux period are frequent phenomenon in GERD patients with belching
     year: '2019'
   iSjOah4AAAAJ:t6hKUfryX1MC:
-    citations: 17
+    citations: 18
     title: On the quantum time complexity of divide and conquer
     year: '2023'
   iSjOah4AAAAJ:tS2w5q8j5-wC:
@@ -914,15 +918,15 @@ papers:
     title: Estimation of the Composition of HgCdTe/CdZnTe grown by Molecular Beam Epitaxy
     year: '1996'
   iSjOah4AAAAJ:tzPJaSocouwC:
-    citations: 3
+    citations: 4
     title: "EVALUATION OF VITAMIN E ADDED ULTRA HIGH MOLECULAR WEIGHT POLYETHYLENE IN TOTAL KNEE ARTHROPLASTY\u2013JOINT FLUID CONCENTRATIONS OF TOCOPHEROL AND MATRIX METALLOPROTEINASE 9"
     year: '2010'
   iSjOah4AAAAJ:u-x6o8ySG0sC:
-    citations: 84
+    citations: 82
     title: The quantum adversary method and classical formula size lower bounds
-    year: '2005'
+    year: '2006'
   iSjOah4AAAAJ:u5HHmVD_uO8C:
-    citations: 250
+    citations: 251
     title: Negative weights make adversaries stronger
     year: '2007'
   iSjOah4AAAAJ:uLbwQdceFCQC:
@@ -930,7 +934,7 @@ papers:
     title: Long-term outcome of renal transplant recipients in children (< 20yrs) with focal segmental glomerulosclerosis.
     year: '2005'
   iSjOah4AAAAJ:uWFADo6cQ7YC:
-    citations: 39
+    citations: 37
     title: Cut query algorithms with star contraction
     year: '2022'
   iSjOah4AAAAJ:uXirmJe02n4C:
@@ -986,6 +990,6 @@ papers:
     title: E-070 Endovascular treatment of the vertebral artery origin stenosis by using the closed-cell, self-expandable carotid wallstent
     year: '2020'
   iSjOah4AAAAJ:zYLM7Y9cAGgC:
-    citations: 31
+    citations: 30
     title: Language compression and pseudorandom generators
     year: '2005'
