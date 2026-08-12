@@ -329,7 +329,7 @@
             <text x="700" y="256">5</text>
           </g>
         </svg>
-        <figcaption>Rooted at the top vertex (weight 5). The worksheet uses the same tree.</figcaption>
+        <figcaption>Rooted at the top vertex (weight 5).</figcaption>
       </figure>
     </section>
 
@@ -650,21 +650,6 @@
       </ul>
     </section>
 
-
-    <!-- ===================== ACTIVITY: VERTEX COVER ======================= -->
-    <section>
-      <h2>Your Turn: Vertex Cover</h2>
-      <div class="box"><span class="tag">Activity</span>
-        A <b>vertex cover</b> is a set of vertices $C$ such that <em>every edge</em>
-        has at least one endpoint in $C$. On our weighted tree, find a vertex cover
-        of minimum total weight.</div>
-      <ul class="smaller">
-        <li class="fragment">Design the DP yourself. The MIS states are a good
-          template — but something has to change. What?</li>
-        <li class="fragment">Run it on our tree and set the answer beside the MIS
-          answer. Anything strike you?</li>
-      </ul>
-    </section>
 
     <!-- ================== PART II: MIN VERTEX COVER ======================= -->
     <section class="center">
@@ -1201,9 +1186,10 @@ pair&lt;int,int&gt; dfs(int v, int parent) {
          minimum vertex cover size.</p>
       <div class="box fragment"><span class="tag">Weak duality</span>
         $\nu(G) \le \tau(G)$ in <em>every</em> graph.</div>
-      <p class="fragment"><b>Proof.</b> Each edge of a matching $M$ must contain a
-        vertex of a cover $C$. The edges of $M$ are disjoint, so distinct edges
-        claim distinct vertices of $C$: $|M| \le |C|$. $\;\blacksquare$</p>
+      <p class="fragment"><b>Proof.</b> A vertex cover $C$ must contain
+      at least one endpoint from every edge of a matching $M$.
+        The edges of $M$ are disjoint, so distinct edges
+        contribute distinct vertices to $C$: $|M| \le |C|$. $\;\blacksquare$</p>
       <p class="fragment">So a matching is a <b>certificate</b>: exhibit one of size
         $k$ and every cover is forced to have at least $k$ vertices.</p>
     </section>
@@ -1482,9 +1468,8 @@ pair&lt;int,int&gt; dfs(int v, int parent) {
           maximality is used!)</span></li>
         <li class="fragment">The matching edges are <em>distinct</em>: an $M$-edge
           with right end in $Z$ has left end in $Z$ too. So $|C| \le |M|$.</li>
-        <li class="fragment">With weak duality:
-          $\tau \;\le\; |C| \;\le\; |M| \;\le\; \nu \;\le\; \tau$ —
-          <span class="hl">all equal</span>. $\;\blacksquare$</li>
+        <li class="fragment">By weak duality $|M| \le |C|$, thus $|C| = |M|$.
+          $\;\blacksquare$</li>
       </ul>
     </section>
 
