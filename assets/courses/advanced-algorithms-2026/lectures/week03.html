@@ -1200,16 +1200,474 @@ pair&lt;int,int&gt; dfs(int v, int parent) {
         If $G$ is <b>bipartite</b>, then $\nu(G) = \tau(G)$.</div>
       <p class="fragment">Trees are bipartite — 2-colour by depth. On our tree with
         unit weights: maximum matching $5$, minimum cover $5$.</p>
-      <p class="fragment">Bipartite is essential: a triangle has $\nu = 1$ but
-        $\tau = 2$. Odd cycles are exactly what breaks it.</p>
+      <p class="fragment">Bipartite is essential: a triangle has $\nu = 1$ but $\tau = 2$.</p>
       <p class="fragment">The proof is <b>constructive</b>: it turns a maximum
         matching into a cover of exactly the same size.</p>
     </section>
 
     <section>
-      <h2>Kőnig: the Construction</h2>
-      <p class="smaller">$G$ bipartite with parts $L$ and $R$; $M$ a <em>maximum</em>
-        matching (orange). Build three sets:</p>
+      <h2>A Tight Cover Has No Freedom</h2>
+      <p class="smaller">Aim for a <b>tight</b> cover — one with $|C| = |M|$, the
+        smallest weak duality allows. What must such a $C$ look like?</p>
+      <ul class="smaller">
+        <li class="fragment">The $|M|$ matching edges are disjoint and $C$ must hit
+          every one — that alone spends the whole budget.</li>
+        <li class="fragment">So $C$ takes <b>exactly one endpoint of each matching
+          edge</b> — never both — and <b>no other vertex at all</b>.</li>
+        <li class="fragment">In particular <b>no unmatched vertex is in $C$</b>.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">No design freedom</span>
+        Building $C$ is one binary choice per matching edge: <b>left endpoint or
+        right?</b></div>
+    </section>
+
+    <section>
+      <h2>Which Endpoint? Try the Left</h2>
+      <p class="smaller">Simplest guess: take the <b>left</b> endpoint of every
+        matching edge. Exactly $|M|$ vertices, on budget. What does it miss?</p>
+      <figure>
+        <svg width="430" viewBox="0 0 760 300" role="img" aria-label="The bipartite graph with the left endpoint of each matching edge chosen; the single edge out of the unmatched vertex l2 is left uncovered">
+          <g stroke="#bcd8f7" stroke-width="11" stroke-linecap="round">
+            <line x1="310" y1="70" x2="170" y2="240"/>
+          </g>
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240" stroke="#2a2a2a" stroke-width="4"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+          </g>
+          <circle cx="310" cy="70" r="28" fill="none" stroke="#1f6feb"
+                  stroke-width="2.5" stroke-dasharray="7 5"/>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g fill="#c5d6c2" stroke="#4d7349" stroke-width="2">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>Green = chosen, orange = matching. Every edge is covered except
+          the blue-highlighted one, $\{\ell_2, r_1\}$.</figcaption>
+      </figure>
+      <div class="box smaller fragment"><span class="tag">The whole difficulty</span>
+        The uncovered edges are exactly those leaving an <b>unmatched</b> left vertex.
+        They must be covered from the <b>right</b>.</div>
+    </section>
+
+    <section>
+      <h2>Forced Move: the Seed</h2>
+      <p class="smaller">$\ell_2$ is unmatched, so $\ell_2 \notin C$. Its neighbour
+        $r_1$ is therefore <b>forced in</b>.</p>
+      <figure>
+        <svg width="420" viewBox="0 0 760 300" role="img" aria-label="The unmatched vertex l2 is circled and r1 has been added to the cover, so both ends of the matching edge from l1 to r1 are now green">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+          </g>
+          <circle cx="310" cy="70" r="28" fill="none" stroke="#1f6feb"
+                  stroke-width="2.5" stroke-dasharray="7 5"/>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g fill="#c5d6c2" stroke="#4d7349" stroke-width="2">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>Every edge is covered now — but $|C| = 4 > 3 = |M|$.</figcaption>
+      </figure>
+      <p class="smaller fragment">This forces $\ell_1$ <b>out</b> of the cover.</p>
+    </section>
+
+    <section>
+      <h2>Forced Move: $\ell_1$ Drops Out</h2>
+      <figure>
+        <svg width="420" viewBox="0 0 760 300" role="img" aria-label="The same graph with l1 removed from the cover, leaving r1 as the chosen endpoint of its matching edge and the cover back at three vertices">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+          </g>
+          <circle cx="310" cy="70" r="28" fill="none" stroke="#1f6feb"
+                  stroke-width="2.5" stroke-dasharray="7 5"/>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g fill="#c5d6c2" stroke="#4d7349" stroke-width="2">
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>$r_1$ swaps in for $\ell_1$: back to $|C| = 3$, on budget.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Forced Move: the Damage</h2>
+      <p class="smaller">$\ell_1$ is out of $C$ — but $\ell_1$ had a <em>second</em>
+        edge, and nothing covers it any more.</p>
+      <figure>
+        <svg width="420" viewBox="0 0 760 300" role="img" aria-label="The same graph with the edge from l1 to r2 highlighted in blue as newly uncovered, since l1 has left the cover">
+          <g stroke="#bcd8f7" stroke-width="11" stroke-linecap="round">
+            <line x1="170" y1="70" x2="310" y2="240"/>
+          </g>
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240" stroke="#2a2a2a" stroke-width="4"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+          </g>
+          <circle cx="310" cy="70" r="28" fill="none" stroke="#1f6feb"
+                  stroke-width="2.5" stroke-dasharray="7 5"/>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g fill="#c5d6c2" stroke="#4d7349" stroke-width="2">
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>$\{\ell_1, r_2\}$ is now the uncovered edge.</figcaption>
+      </figure>
+      <div class="box smaller fragment"><span class="tag">Same situation, one step along</span>
+        An uncovered edge whose left end is out of $C$ — so its <b>right</b> end is
+        forced in, and we repeat.</div>
+    </section>
+
+    <section>
+      <h2>Forced Move: the Chain</h2>
+      <p class="smaller">$\ell_1$ is out, so $\{\ell_1, r_2\}$ must be covered by
+        $r_2$ — which pushes $\ell_3$ out.</p>
+      <figure>
+        <svg width="395" viewBox="0 0 760 300" role="img" aria-label="The completed chain: r1 and r2 are in the cover together with l4, and every edge is covered">
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+          </g>
+          <circle cx="310" cy="70" r="28" fill="none" stroke="#1f6feb"
+                  stroke-width="2.5" stroke-dasharray="7 5"/>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g fill="#c5d6c2" stroke="#4d7349" stroke-width="2">
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>$C = \{r_1, r_2, \ell_4\}$ — one endpoint per matching edge.</figcaption>
+      </figure>
+      <ul class="smaller">
+        <li class="fragment">$\ell_3$'s only edge is already covered by $r_2$, so
+          nothing new is forced: the chain <b>stops</b>.</li>
+        <li class="fragment">Every edge now has an endpoint in $C$: <b>$C$ is a vertex
+          cover</b>.</li>
+        <li class="fragment">$|C| = 3 = |M|$, and <em>every</em> choice was forced.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>What Could Break the Chain?</h2>
+      <p class="smaller">Every forced step needs the vertex it pulls in on the right
+        to be <em>matched</em>. Suppose $\ell_3$ also had an edge to the unmatched
+        $r_4$: then $r_4$ is forced in, sits on no matching edge, and the budget
+        breaks.</p>
+      <figure>
+        <svg width="400" viewBox="0 0 760 300" role="img" aria-label="The alternating walk highlighted from the unmatched l2 through to the unmatched r4, using a hypothetical dashed edge from l3 to r4">
+          <g stroke="#cfe2ff" stroke-width="11" stroke-linecap="round">
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="170" y1="240" x2="170" y2="70"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="240" x2="450" y2="70"/>
+            <line x1="450" y1="70" x2="590" y2="240"/>
+          </g>
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+            <line x1="450" y1="70" x2="590" y2="240" stroke="#c0392b" stroke-width="3"
+                  stroke-dasharray="9 6"/>
+          </g>
+          <g fill="none" stroke="#1f6feb" stroke-width="2.5" stroke-dasharray="7 5">
+            <circle cx="310" cy="70" r="28"/>
+            <circle cx="590" cy="240" r="28"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>Both circled ends are unmatched, and the highlighted walk between
+          them alternates <b>off</b>, on, <b>off</b>, on, <b>off</b> the
+          matching.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Swap Along the Walk</h2>
+      <p class="smaller">Swap the matching and non-matching edges along the walk.</p>
+      <figure>
+        <svg width="500" viewBox="0 0 760 660" role="img" aria-label="Above, the matching of size three with the alternating walk highlighted; below, the same graph after swapping along the walk, giving a matching of size four">
+          <g stroke="#cfe2ff" stroke-width="11" stroke-linecap="round">
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="170" y1="240" x2="170" y2="70"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="240" x2="450" y2="70"/>
+            <line x1="450" y1="70" x2="590" y2="240"/>
+          </g>
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="70" x2="170" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="170" y1="70" x2="310" y2="240"/>
+            <line x1="310" y1="70" x2="170" y2="240"/>
+            <line x1="450" y1="70" x2="310" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="450" y2="240" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="70" x2="590" y2="240"/>
+            <line x1="450" y1="70" x2="590" y2="240" stroke="#c0392b" stroke-width="3"
+                  stroke-dasharray="9 6"/>
+          </g>
+          <g stroke="#8d8678" stroke-width="2">
+            <line x1="170" y1="420" x2="170" y2="590"/>
+            <line x1="170" y1="420" x2="310" y2="590" stroke="#b85a26" stroke-width="4"/>
+            <line x1="310" y1="420" x2="170" y2="590" stroke="#b85a26" stroke-width="4"/>
+            <line x1="450" y1="420" x2="310" y2="590"/>
+            <line x1="590" y1="420" x2="450" y2="590" stroke="#b85a26" stroke-width="4"/>
+            <line x1="590" y1="420" x2="590" y2="590"/>
+            <line x1="450" y1="420" x2="590" y2="590" stroke="#b85a26" stroke-width="4"
+                  stroke-dasharray="9 6"/>
+          </g>
+          <g fill="none" stroke="#1f6feb" stroke-width="2.5" stroke-dasharray="7 5">
+            <circle cx="310" cy="70" r="28"/>
+            <circle cx="590" cy="240" r="28"/>
+          </g>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none">
+            <line x1="380" y1="300" x2="380" y2="352"/>
+            <polygon points="372,349 388,349 380,364" fill="#8d8678" stroke="none"/>
+          </g>
+          <g stroke-width="1.5" fill="#fbf7ed" stroke="#2a2a2a">
+            <circle cx="170" cy="70" r="22"/>
+            <circle cx="310" cy="70" r="22"/>
+            <circle cx="450" cy="70" r="22"/>
+            <circle cx="590" cy="70" r="22"/>
+            <circle cx="170" cy="240" r="22"/>
+            <circle cx="310" cy="240" r="22"/>
+            <circle cx="450" cy="240" r="22"/>
+            <circle cx="590" cy="240" r="22"/>
+            <circle cx="170" cy="420" r="22"/>
+            <circle cx="310" cy="420" r="22"/>
+            <circle cx="450" cy="420" r="22"/>
+            <circle cx="590" cy="420" r="22"/>
+            <circle cx="170" cy="590" r="22"/>
+            <circle cx="310" cy="590" r="22"/>
+            <circle cx="450" cy="590" r="22"/>
+            <circle cx="590" cy="590" r="22"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#2a2a2a">
+            <text x="80" y="76" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="246" fill="#6a737d" font-size="20">R</text>
+            <text x="80" y="426" fill="#6a737d" font-size="20">L</text>
+            <text x="80" y="596" fill="#6a737d" font-size="20">R</text>
+            <text x="700" y="50" fill="#6a737d" font-size="21">before</text>
+            <text x="700" y="400" fill="#b85a26" font-size="21">after</text>
+            <text x="170" y="76">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="76">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="76">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="76">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="246">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="246">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="246">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="246">r<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="426">&#8467;<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="426">&#8467;<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="426">&#8467;<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="426">&#8467;<tspan font-size="12" dy="4">4</tspan></text>
+            <text x="170" y="596">r<tspan font-size="12" dy="4">1</tspan></text>
+            <text x="310" y="596">r<tspan font-size="12" dy="4">2</tspan></text>
+            <text x="450" y="596">r<tspan font-size="12" dy="4">3</tspan></text>
+            <text x="590" y="596">r<tspan font-size="12" dy="4">4</tspan></text>
+          </g>
+        </svg>
+        <figcaption>Still a matching — and the walk had one more off-matching edge
+          than matching edges, so we gain exactly one: $|M| = 3 \to 4$.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Augmenting Paths</h2>
+      <div class="box"><span class="tag">Definition</span>
+        An <b>augmenting path</b> is a path that starts and ends at <em>unmatched</em>
+        vertices and alternates off, on, off, $\dots$, off the matching.</div>
+      <ul class="smaller">
+        <li class="fragment">Swapping along one always gives a matching with <b>one
+          more</b> edge — so a maximum $M$ admits <em>no</em> augmenting path.</li>
+        <li class="fragment">The forced chain walks exactly such an alternating path
+          out of the unmatched $\ell_2$.</li>
+        <li class="fragment">If it ever reached an <em>unmatched</em> right vertex, that
+          walk would be augmenting — contradicting $M$ maximum.</li>
+      </ul>
+      <div class="box smaller fragment"><span class="tag">The chain never breaks</span>
+        Every vertex forced in on the right is matched, so it <b>swaps in</b> for its
+        matched neighbour instead of adding to $C$: $|C| = |M|$.</div>
+    </section>
+
+    <section>
+      <h2>Why the Process Stops</h2>
+      <p class="smaller">Every forced move does the same thing to <em>one</em> matching
+        edge: its chosen endpoint moves from the left end to the right end.</p>
+      <ul class="smaller">
+        <li class="fragment">Moves only ever <b>add</b> right vertices and <b>drop</b>
+          left ones, so no matching edge ever flips back.</li>
+        <li class="fragment">There are $|M|$ matching edges, so at most $|M|$ moves:
+          the process <b>stops</b>.</li>
+        <li class="fragment">And it can only stop with <em>no</em> uncovered edge — an
+          uncovered edge has its left end out of $C$ and its right end matched, which
+          forces one more move.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Kőnig, constructively</span>
+        The process stops, and the $C$ it leaves is a vertex cover with $|C| = |M|$ —
+        exactly what the theorem asks for.</div>
+    </section>
+
+    <section>
+      <h2>Kőnig: Explicit Construction</h2>
+      <p class="smaller">Same argument, stated <b>explicitly</b>: instead of running
+        the swaps, we write the cover down. Trace the alternating paths from
+        <em>every</em> unmatched left vertex and name three sets:</p>
       <figure>
         <svg width="520" viewBox="0 0 760 300" role="img" aria-label="A bipartite graph with parts L and R; the set U of unmatched left vertices, the alternating-reachable set Z, and the cover C are highlighted in turn">
           <g class="fragment" data-fragment-index="2">
@@ -1270,13 +1728,14 @@ pair&lt;int,int&gt; dfs(int v, int parent) {
       </figure>
       <ul class="smaller">
         <li class="fragment" data-fragment-index="1"><span class="setU">$U$</span> =
-          the $M$-unmatched vertices of $L$ (here just $\ell_2$).</li>
+          the <b>seeds</b>: the $M$-unmatched vertices of $L$ (here just $\ell_2$).</li>
         <li class="fragment" data-fragment-index="2"><span class="setZ">$Z$</span> =
-          everything reachable from $U$ along paths that <b>alternate</b>:
+          everything reachable from $U$ by a path that <b>alternates</b>:
           non-matching, matching, non-matching, &hellip; (so $U \subseteq Z$).</li>
         <li class="fragment" data-fragment-index="3"><span class="setC">$C$</span>
           $\;=\; (L \setminus Z) \,\cup\, (R \cap Z)$: the left vertices $Z$
-          <em>missed</em>, the right vertices it <em>reached</em>.</li>
+          <em>missed</em> plus the right ones it <em>reached</em> — exactly the
+          matching edges the swaps flipped.</li>
       </ul>
     </section>
 
