@@ -65,6 +65,8 @@ schedule:
         url: /assets/courses/advanced-algorithms-2026/lectures/week04.html
       - name: Lecture slides (PDF)
         url: /assets/courses/advanced-algorithms-2026/lectures/week04.pdf
+      - name: "Animation: Activity Selection"
+        url: /assets/courses/advanced-algorithms-2026/animations/activity_selection.html
   - week: 5
     topic: Kruskal's Algorithm
     description: >-
