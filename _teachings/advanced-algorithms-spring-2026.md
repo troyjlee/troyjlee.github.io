@@ -59,7 +59,12 @@ schedule:
     topic: Greedy Algorithms
     description: >-
       Greedy maximum matching on a tree · activity selection · the exchange
-      property
+      property · making change
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week04.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week04.pdf
   - week: 5
     topic: Kruskal's Algorithm
     description: >-
