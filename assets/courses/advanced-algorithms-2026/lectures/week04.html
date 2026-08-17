@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 4: Greedy Algorithms — Advanced Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <style>
+    :root { --accent: #1f6feb; --muted: #6a737d; }
+
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--accent); letter-spacing: -0.01em; }
+    .reveal h1 { font-size: 2.0em; }
+    /* Theme styling (uppercase headings, small-caps tags) garbles MathJax output. */
+    .reveal mjx-container { text-transform: none; font-variant: normal; letter-spacing: normal; }
+    .reveal h2 { text-align: center; }
+    .reveal section { font-size: 0.92em; }
+    .reveal a { color: var(--accent); }
+
+    /* Left-align most slides; titles stay centered via their own class. */
+    .reveal .slides section { text-align: left; }
+    .reveal .slides section.center { text-align: center; }
+
+    /* Boxes for theorems / definitions / takeaways. */
+    .box {
+      border-left: 5px solid var(--accent);
+      background: #f4f8ff;
+      padding: 0.5em 0.8em; margin: 0.4em 0; border-radius: 4px;
+    }
+    .box .tag { font-variant: small-caps; font-weight: 700; color: var(--accent);
+                letter-spacing: 0.04em; margin-right: 0.4em; }
+    .box.warn { border-left-color: #d29922; background: #fff8ec; }
+    .box.warn .tag { color: #b07400; }
+
+    /* Result highlight pill. */
+    .hl { background: #fff3b0; padding: 0.05em 0.25em; border-radius: 3px; }
+
+    /* Results table. */
+    .reveal table.results { margin: 0.7em auto; border-collapse: collapse; }
+    .reveal table.results th, .reveal table.results td {
+      padding: 0.4em 1.1em; border: none; text-align: left; }
+    .reveal table.results thead th { color: var(--accent);
+      border-bottom: 2px solid var(--accent); font-variant: small-caps; letter-spacing: 0.03em; }
+    .reveal table.results tbody tr { border-bottom: 1px solid #e7ebf0; }
+    .reveal table.results td.q { font-weight: 700; }
+    .reveal table.results tr.hlrow { background: #fff8d6; }
+
+    /* Two-column layout helper:  <div class="cols"> <div>..</div> <div>..</div> </div> */
+    .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+    .cols > * { flex: 1; min-width: 0; }
+
+    /* Pseudocode / algorithm blocks. */
+    .reveal pre.algo {
+      font-size: 0.5em; line-height: 1.35; box-shadow: none;
+      border: 1px solid #d0d7de; border-radius: 6px; background: #fbfcfd;
+      width: 100%;
+    }
+    .reveal pre.algo code { padding: 0.8em 1em; }
+    .algo .kw { color: var(--accent); font-weight: 700; }
+    .algo .cm { color: var(--muted); font-style: italic; }
+
+    .reveal .credit { color: var(--muted); font-size: 0.8em; }
+    .reveal .smaller { font-size: 0.82em; }
+    .reveal figure { margin: 0; text-align: center; }
+    .reveal figcaption { font-size: 0.7em; color: var(--muted); margin-top: 0.3em; }
+    .reveal .footnote { position: absolute; bottom: 0.2em; left: 0.6em;
+                        font-size: 0.55em; color: var(--muted); }
+
+    /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
+    .reveal figure svg { max-width: 100%; height: auto; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== TITLE ============================== -->
+    <section class="center">
+      <h1>Week 4: Greedy Algorithms</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Advanced Algorithms</p>
+    </section>
+
+    <!-- ============================== ROADMAP ============================ -->
+    <section>
+      <h2>Roadmap</h2>
+      <ol style="line-height:1.7; margin-top:0.6em;">
+        <li>Greedy Matching on a Tree</li>
+        <li>The Exchange Argument</li>
+        <li>Activity Selection</li>
+        <li>Weighted Activity Selection</li>
+        <li>Making Change</li>
+      </ol>
+      <p class="smaller" style="margin-top:0.8em;">Guiding slogan for today:
+        <b>behind every greedy algorithm is a theorem.</b></p>
+    </section>
+
+    <!-- ================= PART 1: FROM DYNAMIC TO GREEDY =================== -->
+    <section class="center">
+      <h1>From Dynamic to Greedy</h1>
+    </section>
+
+    <section>
+      <h2>Dynamic to Greedy</h2>
+      <p>Dynamic programming breaks a problem into (overlapping) subproblems
+         of a similar form to the original problem.</p>
+      <p class="fragment">Correctness relies on some kind of
+         <strong>optimal substructure</strong> property.</p>
+      <div class="box fragment"><span class="tag">Example</span>
+        A shortest path from $A$ to $B$ also gives shortest paths from $A$ to every
+        intermediate vertex on the path to $B$.</div>
+    </section>
+
+    <section>
+      <h2>Dynamic Choices</h2>
+      <p class="smaller">In dynamic programming we are faced with several choices and do not
+         know which is best &mdash; so we <strong>optimise over all the choices</strong>.</p>
+      <p class="smaller fragment">Last week, for maximum matching on a tree, we optimised over
+         taking an edge of the root into the matching or not.</p>
+      <figure>
+        <svg width="540" viewBox="0 0 600 285">
+          <line x1="320" y1="40" x2="180" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="320" y1="40" x2="460" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="180" y1="110" x2="100" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="180" y1="110" x2="260" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="400" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="520" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="100" y1="180" x2="40" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="100" y1="180" x2="160" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="260" y1="180" x2="300" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="400" y1="180" x2="440" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="520" y1="180" x2="560" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <circle cx="320" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="180" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="460" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="100" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="260" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="400" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="520" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="40"  cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="160" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="300" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="440" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="560" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+        </svg>
+        <figcaption>The Week 3 tree: two choices at the root, recurse on both.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Greedy Algorithm</h2>
+      <p>A greedy algorithm is like a dynamic programming algorithm where the
+         choices <em>collapse</em>: we <strong>know</strong> the best choice at each step.</p>
+      <p class="fragment">Greedy algorithms can be simpler to code,
+         but harder to come up with.</p>
+      <div class="box fragment"><span class="tag">Slogan</span>
+        Behind every greedy algorithm is a theorem &mdash; a proof that the
+        greedy choice never hurts.</div>
+    </section>
+
+    <!-- ================= PART 2: GREEDY MATCHING ON A TREE ================ -->
+    <section class="center">
+      <h1>Greedy Matching on a Tree</h1>
+    </section>
+
+    <section>
+      <h2>Leaf Edges</h2>
+      <div class="box"><span class="tag">Definition</span>
+        An edge is a <strong>leaf edge</strong> if at least one endpoint has no other edges.</div>
+      <figure>
+        <svg width="540" viewBox="0 0 600 285">
+          <line x1="320" y1="40" x2="180" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="320" y1="40" x2="460" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="180" y1="110" x2="100" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="180" y1="110" x2="260" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="400" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="520" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="100" y1="180" x2="40" y2="250" stroke="#2e588f" stroke-width="4.5"/>
+          <line x1="100" y1="180" x2="160" y2="250" stroke="#2e588f" stroke-width="4.5"/>
+          <line x1="260" y1="180" x2="300" y2="250" stroke="#2e588f" stroke-width="4.5"/>
+          <line x1="400" y1="180" x2="440" y2="250" stroke="#2e588f" stroke-width="4.5"/>
+          <line x1="520" y1="180" x2="560" y2="250" stroke="#2e588f" stroke-width="4.5"/>
+          <circle cx="320" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="180" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="460" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="100" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="260" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="400" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="520" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="40"  cy="250" r="15" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/>
+          <circle cx="160" cy="250" r="15" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/>
+          <circle cx="300" cy="250" r="15" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/>
+          <circle cx="440" cy="250" r="15" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/>
+          <circle cx="560" cy="250" r="15" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/>
+        </svg>
+        <figcaption>Leaf edges highlighted in blue. Every tree with an edge has a leaf edge.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>The Greedy Algorithm</h2>
+      <p class="smaller">No case analysis, no table &mdash; just grab leaf edges:</p>
+      <pre class="algo"><code><span class="kw">GreedyTreeMatching</span>(T):
+    M &#8592; &#8709;
+    <span class="kw">while</span> edges remain:
+        <span class="kw">add</span> a leaf edge to the matching M
+        <span class="kw">remove</span> all edges incident to the endpoints of the leaf edge
+    <span class="kw">return</span> M</code></pre>
+      <p class="fragment smaller">A leaf edge conflicts with other edges at only
+         <em>one</em> of its endpoints &mdash; intuitively adding it has the least
+         impact on other edges.</p>
+      <p class="fragment smaller">Let's run it.</p>
+    </section>
+
+    <section data-transition="none">
+      <h2>Greedy Run: Step 1</h2>
+      <figure>
+        <svg width="540" viewBox="0 0 600 285">
+          <line x1="320" y1="40" x2="180" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="320" y1="40" x2="460" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="180" y1="110" x2="100" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="180" y1="110" x2="260" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="400" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="520" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="100" y1="180" x2="40" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <line x1="100" y1="180" x2="160" y2="250" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="260" y1="180" x2="300" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="400" y1="180" x2="440" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="520" y1="180" x2="560" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <circle cx="320" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="180" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="460" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="100" cy="180" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="260" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="400" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="520" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="40"  cy="250" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="160" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="300" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="440" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="560" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+        </svg>
+        <figcaption>A leaf edge (orange) joins the matching; the edges touching its
+          endpoints are removed (dashed).</figcaption>
+      </figure>
+    </section>
+
+    <section data-transition="none">
+      <h2>Greedy Run: Step 2</h2>
+      <figure>
+        <svg width="540" viewBox="0 0 600 285">
+          <line x1="320" y1="40" x2="180" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="320" y1="40" x2="460" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="180" y1="110" x2="100" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="180" y1="110" x2="260" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="460" y1="110" x2="400" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="520" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="100" y1="180" x2="40" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <line x1="100" y1="180" x2="160" y2="250" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="260" y1="180" x2="300" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <line x1="400" y1="180" x2="440" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="520" y1="180" x2="560" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <circle cx="320" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="180" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="460" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="100" cy="180" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="260" cy="180" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="400" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="520" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="40"  cy="250" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="160" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="300" cy="250" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="440" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="560" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+        </svg>
+        <figcaption>Another leaf edge joins; its parent edge is removed.</figcaption>
+      </figure>
+    </section>
+
+    <section data-transition="none">
+      <h2>Greedy Run: Step 3</h2>
+      <figure>
+        <svg width="540" viewBox="0 0 600 285">
+          <line x1="320" y1="40" x2="180" y2="110" stroke="#b85a26" stroke-width="5"/>
+          <line x1="320" y1="40" x2="460" y2="110" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="180" y1="110" x2="100" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="180" y1="110" x2="260" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="460" y1="110" x2="400" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="520" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="100" y1="180" x2="40" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <line x1="100" y1="180" x2="160" y2="250" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="260" y1="180" x2="300" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <line x1="400" y1="180" x2="440" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="520" y1="180" x2="560" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <circle cx="320" cy="40" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="180" cy="110" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="460" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="100" cy="180" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="260" cy="180" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="400" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="520" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="40"  cy="250" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="160" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="300" cy="250" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+          <circle cx="440" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="560" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+        </svg>
+        <figcaption>Leaf edges are not only at the bottom: after the removals the
+          root&ndash;left edge became a leaf edge, and greedy takes it.</figcaption>
+      </figure>
+    </section>
+
+    <section data-transition="none">
+      <h2>Greedy Run: Done</h2>
+      <figure>
+        <svg width="540" viewBox="0 0 600 285">
+          <line x1="320" y1="40" x2="180" y2="110" stroke="#b85a26" stroke-width="5"/>
+          <line x1="320" y1="40" x2="460" y2="110" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="180" y1="110" x2="100" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="180" y1="110" x2="260" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="460" y1="110" x2="400" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="460" y1="110" x2="520" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="100" y1="180" x2="40" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <line x1="100" y1="180" x2="160" y2="250" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="260" y1="180" x2="300" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <line x1="400" y1="180" x2="440" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <line x1="520" y1="180" x2="560" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <circle cx="320" cy="40" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="180" cy="110" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="460" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="100" cy="180" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="260" cy="180" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="400" cy="180" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="520" cy="180" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="40"  cy="250" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="160" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="300" cy="250" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="440" cy="250" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="560" cy="250" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+        </svg>
+        <figcaption>No edges remain.</figcaption>
+      </figure>
+      <p class="smaller" style="margin-top:0.3em;">We obtain a matching of size
+         <span class="hl">5</span>, which is optimal &mdash; and we never branched.
+         But <em>why</em> is grabbing leaf edges always safe?</p>
+    </section>
+
+    <!-- ================= PART 3: THE EXCHANGE ARGUMENT ==================== -->
+    <section class="center">
+      <h1>The Exchange Argument</h1>
+    </section>
+
+    <section>
+      <h2>Exchange Argument</h2>
+      <p>How can we argue that this algorithm finds an optimal solution?</p>
+      <p class="fragment">A typical way to argue that a greedy algorithm is correct is an
+         <strong>exchange argument</strong>:</p>
+      <ul>
+        <li class="fragment">Start with an <em>arbitrary</em> optimal solution.</li>
+        <li class="fragment">Argue that we can, bit by bit, modify it into a solution
+            obtainable by the greedy algorithm, <em>without making the value worse</em>.</li>
+      </ul>
+      <p class="fragment smaller">Then the greedy solution is as good as an optimal one
+         &mdash; so it is optimal.</p>
+    </section>
+
+    <section>
+      <h2>A Matching Not From Greedy</h2>
+      <figure>
+        <svg width="540" viewBox="0 0 600 285">
+          <line x1="320" y1="40" x2="180" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="320" y1="40" x2="460" y2="110" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="180" y1="110" x2="100" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="180" y1="110" x2="260" y2="180" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="460" y1="110" x2="400" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="520" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="100" y1="180" x2="40" y2="250" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="100" y1="180" x2="160" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="260" y1="180" x2="300" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="400" y1="180" x2="440" y2="250" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="520" y1="180" x2="560" y2="250" stroke="#b03a2e" stroke-width="5"/>
+          <circle cx="320" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="180" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="460" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="100" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="260" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="400" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="520" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="40"  cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="160" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="300" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="440" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="560" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+        </svg>
+        <figcaption>An optimal matching $M$ (red) that was <em>not</em> obtained by the
+          greedy algorithm: it uses two non-leaf edges.</figcaption>
+      </figure>
+      <p class="smaller">Spot the first location where $M$ differs from a greedy run.</p>
+    </section>
+
+    <section>
+      <h2>Exchange: Case 1</h2>
+      <div class="box"><span class="tag">Case 1</span>
+        Suppose some leaf edge could be <em>added</em> to $M$ and still leave a matching.</div>
+      <p class="fragment">Then we would obtain a bigger matching &mdash; contradicting
+         that $M$ is optimal.</p>
+      <p class="fragment">So no leaf edge can simply be added: every leaf edge either is in $M$,
+         or conflicts with an edge of $M$.</p>
+    </section>
+
+    <section>
+      <h2>Exchange: Case 2</h2>
+      <figure>
+        <svg width="540" viewBox="0 0 600 285">
+          <line x1="320" y1="40" x2="180" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="320" y1="40" x2="460" y2="110" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="180" y1="110" x2="100" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="180" y1="110" x2="260" y2="180" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="460" y1="110" x2="400" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="520" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="100" y1="180" x2="40" y2="250" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="100" y1="180" x2="160" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="260" y1="180" x2="300" y2="250" stroke="#b85a26" stroke-width="5" stroke-dasharray="9 6"/>
+          <line x1="400" y1="180" x2="440" y2="250" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="520" y1="180" x2="560" y2="250" stroke="#b03a2e" stroke-width="5"/>
+          <circle cx="320" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="180" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="460" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="100" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="260" cy="180" r="15" fill="#f1c79f" stroke="#b85a26" stroke-width="2.5"/>
+          <circle cx="400" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="520" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="40"  cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="160" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="300" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="440" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="560" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+        </svg>
+        <figcaption>Adding the dashed leaf edge creates <em>one</em> vertex (orange) with two
+          incident edges &mdash; the leaf endpoint had no other edges.</figcaption>
+      </figure>
+      <p class="smaller">Otherwise: take a leaf edge missing from $M$ whose non-leaf endpoint
+         is matched. Adding it violates the matching at exactly one vertex.</p>
+    </section>
+
+    <section>
+      <h2>Exchange: the Swap</h2>
+      <figure>
+        <svg width="540" viewBox="0 0 600 285">
+          <line x1="320" y1="40" x2="180" y2="110" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="320" y1="40" x2="460" y2="110" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="180" y1="110" x2="100" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="180" y1="110" x2="260" y2="180" stroke="#c8c2b6" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <line x1="460" y1="110" x2="400" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="460" y1="110" x2="520" y2="180" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="100" y1="180" x2="40" y2="250" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="100" y1="180" x2="160" y2="250" stroke="#8d8678" stroke-width="2.5"/>
+          <line x1="260" y1="180" x2="300" y2="250" stroke="#b85a26" stroke-width="5"/>
+          <line x1="400" y1="180" x2="440" y2="250" stroke="#b03a2e" stroke-width="5"/>
+          <line x1="520" y1="180" x2="560" y2="250" stroke="#b03a2e" stroke-width="5"/>
+          <circle cx="320" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="180" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="460" cy="110" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="100" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="260" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="400" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="520" cy="180" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="40"  cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="160" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="300" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="440" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="560" cy="250" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+        </svg>
+        <figcaption>Delete the other edge at that vertex (now dashed): a matching of the
+          <em>same size</em> that uses one more leaf edge.</figcaption>
+      </figure>
+      <p class="smaller fragment">So $M$ is still optimal &mdash; and now it agrees with greedy
+         on this leaf edge.</p>
+    </section>
+
+    <section>
+      <h2>Exchange: Recurse</h2>
+      <p>The leaf edge is in $M$. Delete its endpoints and every edge they touch
+         &mdash; the algorithm's own deletion step.</p>
+      <p class="fragment">What remains of $M$ is a maximum matching of the smaller forest:
+         a bigger one there, plus this leaf edge, would beat $M$.</p>
+      <p class="fragment">Repeat. Each round fixes one more greedy choice and never loses an
+         edge, so $M$ becomes a full run of the greedy algorithm.</p>
+    </section>
+
+    <section>
+      <h2>Behind Greedy, a Theorem</h2>
+      <div class="box"><span class="tag">Theorem</span>
+        The greedy leaf-edge algorithm outputs a maximum matching on every tree.</div>
+      <p class="fragment">Proof shape: <em>any</em> optimal solution can be exchanged, one edge
+         at a time, into a run of the greedy algorithm with no loss. Hence
+         $|M_{\text{greedy}}| = |M_{\text{opt}}|$.</p>
+      <p class="fragment smaller">Compare with Week 3: the DP also solved this, in $O(n)$
+         &mdash; but it had to consider both choices at every vertex.
+         The theorem is what lets greedy skip the branching.</p>
+    </section>
+
+    <section>
+      <h2>The Exchange Property</h2>
+      <div class="box"><span class="tag">Abstract idea</span>
+        A greedy choice is <strong>safe</strong> if any optimal solution can be
+        <em>exchanged</em>, one swap at a time, into one containing that choice
+        &mdash; without making the value worse.</div>
+      <ul class="smaller">
+        <li class="fragment">The argument never exhibits the optimal solution;
+            it shows greedy can <em>simulate</em> one, swap by swap.</li>
+      </ul>
+    </section>
+
+    <!-- ================= PART 4: ACTIVITY SELECTION ======================= -->
+    <section class="center">
+      <h1>Activity Selection</h1>
+    </section>
+
+    <section>
+      <h2>Activity Selection</h2>
+      <p>There are a bunch of lectures on Wednesday that we want to attend.</p>
+      <p class="fragment">Each lecture has a <strong>start time</strong> and an
+         <strong>end time</strong>.</p>
+      <div class="box fragment"><span class="tag">Problem</span>
+        Choose a schedule where no lectures overlap, attending as
+        <strong>many</strong> lectures as possible.</div>
+      <p class="fragment smaller">Also known as <em>packing intervals</em>.</p>
+    </section>
+
+    <section>
+      <h2>Wednesday's Lectures</h2>
+      <figure>
+        <svg width="760" viewBox="0 0 880 215">
+          <rect x="130" y="28" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="410" y="28" width="140" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="620" y="28" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="130" y="72" width="70"  height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="235" y="72" width="175" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="515" y="72" width="175" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="60"  y="116" width="175" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="270" y="116" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="515" y="116" width="105" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="655" y="116" width="105" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <text x="235" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">c</text>
+          <text x="480" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">f</text>
+          <text x="725" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">j</text>
+          <text x="165" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">b</text>
+          <text x="322" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">d</text>
+          <text x="602" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">h</text>
+          <text x="147" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">a</text>
+          <text x="375" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">e</text>
+          <text x="567" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">g</text>
+          <text x="707" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">i</text>
+          <line x1="60" y1="172" x2="830" y2="172" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="60"  y1="165" x2="60"  y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="130" y1="165" x2="130" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="200" y1="165" x2="200" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="270" y1="165" x2="270" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="340" y1="165" x2="340" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="410" y1="165" x2="410" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="480" y1="165" x2="480" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="550" y1="165" x2="550" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="620" y1="165" x2="620" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="690" y1="165" x2="690" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="760" y1="165" x2="760" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="830" y1="165" x2="830" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <text x="60"  y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">9</text>
+          <text x="130" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">10</text>
+          <text x="200" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">11</text>
+          <text x="270" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">12</text>
+          <text x="340" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">13</text>
+          <text x="410" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">14</text>
+          <text x="480" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">15</text>
+          <text x="550" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">16</text>
+          <text x="620" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">17</text>
+          <text x="690" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">18</text>
+          <text x="760" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">19</text>
+          <text x="830" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">20</text>
+        </svg>
+        <figcaption>Ten lectures on a time axis; letters name the lectures roughly left to
+          right by start time ($a$ finishes at 11:30, $b$ at 11:00, &hellip;, $j$ at 20:00).</figcaption>
+      </figure>
+      <p class="smaller">How many can we attend?</p>
+    </section>
+
+    <section>
+      <h2>Reduction Reflex: a DAG</h2>
+      <p>We want to <em>maximize</em> something &mdash; the Week 1 reflex:
+         can we view this as a <strong>longest path in a DAG</strong> problem?</p>
+      <p class="fragment">What shall we take as the vertices?</p>
+      <p class="fragment">Take one vertex per lecture. What should the edges be?</p>
+    </section>
+
+    <section>
+      <h2>Longest Path in a DAG</h2>
+      <div class="cols">
+        <figure>
+          <svg width="470" viewBox="0 0 720 265">
+            <defs>
+              <marker id="arrDag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+              </marker>
+            </defs>
+            <line x1="66" y1="122" x2="150" y2="62"  stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="66" y1="130" x2="150" y2="125" stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="66" y1="138" x2="150" y2="192" stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="185" y1="58"  x2="305" y2="82"  stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="185" y1="62"  x2="305" y2="155" stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="185" y1="125" x2="305" y2="90"  stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="185" y1="130" x2="305" y2="160" stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="185" y1="195" x2="455" y2="62"  stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="335" y1="82"  x2="455" y2="58"  stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="335" y1="90"  x2="455" y2="122" stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="335" y1="158" x2="455" y2="128" stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="335" y1="165" x2="455" y2="192" stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="485" y1="58"  x2="605" y2="87"  stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="485" y1="62"  x2="605" y2="160" stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="485" y1="122" x2="605" y2="93"  stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <line x1="485" y1="128" x2="605" y2="163" stroke="#8d8678" stroke-width="1.6" marker-end="url(#arrDag)"/>
+            <circle cx="50" cy="130" r="9" fill="#2a2a2a"/>
+            <text x="50" y="162" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#2a2a2a">source</text>
+            <rect x="153" y="41"  width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <rect x="153" y="111" width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <rect x="153" y="181" width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <rect x="305" y="71"  width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <rect x="305" y="146" width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <rect x="455" y="41"  width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <rect x="455" y="111" width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <rect x="455" y="181" width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <rect x="605" y="76"  width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <rect x="605" y="151" width="30" height="30" rx="3" fill="#cad9ee" stroke="#2e588f" stroke-width="1.8"/>
+            <text x="168" y="61"  text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">b</text>
+            <text x="168" y="131" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">a</text>
+            <text x="168" y="201" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">c</text>
+            <text x="320" y="91"  text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">d</text>
+            <text x="320" y="166" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">e</text>
+            <text x="470" y="61"  text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">f</text>
+            <text x="470" y="131" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">g</text>
+            <text x="470" y="201" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">h</text>
+            <text x="620" y="96"  text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">i</text>
+            <text x="620" y="171" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1d3c66">j</text>
+            <text x="360" y="245" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6a737d">(not all edges drawn)</text>
+          </svg>
+        </figure>
+        <div class="smaller">
+          <div class="box"><span class="tag">Edges</span>
+            Put an edge $(u,v)$ if $u.\mathrm{finish} \le v.\mathrm{start}$.</div>
+          <p class="fragment">With this definition, the vertices on any path
+             are pairwise <strong>compatible</strong> lectures.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Longest Path in a DAG</h2>
+      <ul>
+        <li>Add a <strong>source</strong> node with an outgoing edge to every other vertex.</li>
+        <li class="fragment">The longest path from the source is then the maximum number of
+            compatible lectures.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Consequence</span>
+        Week 1's longest-path DP already solves activity selection in $O(n^2)$ time
+        (the graph can have $\Theta(n^2)$ edges).</div>
+      <p class="fragment smaller">Good &mdash; but the graph has special structure.
+         Can we do better?</p>
+    </section>
+
+    <section>
+      <h2>Which Vertex First?</h2>
+      <p>Which vertex should we visit first from the source?</p>
+      <p class="fragment">Intuition: the lecture that <strong>finishes first</strong>
+         leaves the most room for everything else.</p>
+      <p class="fragment">Let's turn the intuition into a theorem, in two steps.</p>
+    </section>
+
+    <section>
+      <h2>First Step</h2>
+      <div class="box"><span class="tag">Key fact</span>
+        By the definition of edges, if $u.\mathrm{finish} \le v.\mathrm{finish}$ then every
+        out-neighbour of $v$ is also an out-neighbour of $u$.</div>
+      <p class="fragment smaller">Proof: an out-neighbour $w$ of $v$ has
+         $v.\mathrm{finish} \le w.\mathrm{start}$, so
+         $u.\mathrm{finish} \le v.\mathrm{finish} \le w.\mathrm{start}$.</p>
+      <p class="fragment">The earliest finisher <em>dominates</em>: whatever any other
+         first lecture can be followed by, it can be followed by too.</p>
+    </section>
+
+    <section>
+      <h2>First Step: the Exchange</h2>
+      <p class="smaller">Say a longest path goes
+         $\mathrm{source} \to v_1 \to v_2 \to \dots \to v_k$.</p>
+      <p class="fragment smaller">Let $u$ be the lecture that finishes first.
+         Since $u.\mathrm{finish} \le v_1.\mathrm{finish}$, the pair $(u, v_2)$
+         must also be an edge.</p>
+      <p class="fragment smaller">So
+         $\mathrm{source} \to u \to v_2 \to \dots \to v_k$
+         is also a longest path.</p>
+      <div class="box fragment"><span class="tag">Conclusion</span>
+        WLOG the longest path goes to $u$ first: taking the earliest finisher is
+        <em>safe</em>. This is exactly an exchange argument.</div>
+    </section>
+
+    <section>
+      <h2>Greedy Choice Property</h2>
+      <p>In contrast to dynamic programming, we can <strong>identify</strong> the best
+         choice to make.</p>
+      <p class="fragment">We do not have to consider multiple options &mdash;
+         the branching in the DP collapses to a single move.</p>
+    </section>
+
+    <section>
+      <h2>Optimal Substructure, Again</h2>
+      <p class="smaller">$\mathrm{source} \to u \to v_2 \to \dots \to v_k$ is a longest path,
+         so $u \to v_2 \to \dots \to v_k$ is a longest path starting from $u$.</p>
+      <p class="fragment smaller"><strong>Second step.</strong> Consider the lecture $x$
+         compatible with $u$ that finishes first.
+         Any out-neighbour of $v_2$ is also an out-neighbour of $x$, so
+         $\mathrm{source} \to u \to x \to v_3 \to \dots \to v_k$
+         is also a longest path.</p>
+      <p class="fragment smaller">We can apply the exact same argument again!</p>
+      <div class="box fragment"><span class="tag">Induction</span>
+        At every step, choosing the lecture compatible with previous choices that has the
+        <strong>earliest finishing time</strong> extends to a longest path.
+        By induction, greedy builds a longest path &mdash; an optimal schedule.</div>
+    </section>
+
+    <section>
+      <h2>The Greedy Algorithm</h2>
+      <pre class="algo"><code><span class="kw">ActivitySelection</span>(A):
+    <span class="kw">sort</span> A by finishing time                 <span class="cm"># a&#8321;.finish &#8804; a&#8322;.finish &#8804; ...</span>
+    S &#8592; &#8709; ;  last &#8592; &#8722;&#8734;
+    <span class="kw">for</span> each lecture a <span class="kw">in</span> sorted order:
+        <span class="kw">if</span> a.start &#8805; last:                   <span class="cm"># compatible with all chosen</span>
+            S &#8592; S &#8746; {a} ;  last &#8592; a.finish
+    <span class="kw">return</span> S</code></pre>
+      <p class="fragment smaller">Note we never build the DAG at all &mdash; the reduction was
+         scaffolding for the <em>proof</em>, not the code.</p>
+      <p class="fragment smaller">Let's run it on Wednesday's lectures.</p>
+    </section>
+
+    <section data-transition="none">
+      <h2>Greedy Run: Pick $b$</h2>
+      <figure>
+        <svg width="760" viewBox="0 0 880 215">
+          <rect x="130" y="28" width="210" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="410" y="28" width="140" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="620" y="28" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="130" y="72" width="70"  height="30" rx="3" fill="#cfe2ff" stroke="#1f6feb" stroke-width="2.4"/>
+          <rect x="235" y="72" width="175" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="515" y="72" width="175" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="60"  y="116" width="175" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="270" y="116" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="515" y="116" width="105" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="655" y="116" width="105" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <text x="235" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">c</text>
+          <text x="480" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">f</text>
+          <text x="725" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">j</text>
+          <text x="165" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#14448f">b</text>
+          <text x="322" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">d</text>
+          <text x="602" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">h</text>
+          <text x="147" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">a</text>
+          <text x="375" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">e</text>
+          <text x="567" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">g</text>
+          <text x="707" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">i</text>
+          <line x1="60" y1="172" x2="830" y2="172" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="60"  y1="165" x2="60"  y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="130" y1="165" x2="130" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="200" y1="165" x2="200" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="270" y1="165" x2="270" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="340" y1="165" x2="340" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="410" y1="165" x2="410" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="480" y1="165" x2="480" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="550" y1="165" x2="550" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="620" y1="165" x2="620" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="690" y1="165" x2="690" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="760" y1="165" x2="760" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="830" y1="165" x2="830" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <text x="60"  y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">9</text>
+          <text x="130" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">10</text>
+          <text x="200" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">11</text>
+          <text x="270" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">12</text>
+          <text x="340" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">13</text>
+          <text x="410" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">14</text>
+          <text x="480" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">15</text>
+          <text x="550" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">16</text>
+          <text x="620" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">17</text>
+          <text x="690" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">18</text>
+          <text x="760" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">19</text>
+          <text x="830" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">20</text>
+        </svg>
+        <figcaption>$b$ has the earliest finish (11:00): take it (blue). Lectures $a$ and $c$
+          overlap it and are ruled out (red).</figcaption>
+      </figure>
+    </section>
+
+    <section data-transition="none">
+      <h2>Greedy Run: Pick $d$</h2>
+      <figure>
+        <svg width="760" viewBox="0 0 880 215">
+          <rect x="130" y="28" width="210" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="410" y="28" width="140" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="620" y="28" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="130" y="72" width="70"  height="30" rx="3" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <rect x="235" y="72" width="175" height="30" rx="3" fill="#cfe2ff" stroke="#1f6feb" stroke-width="2.4"/>
+          <rect x="515" y="72" width="175" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="60"  y="116" width="175" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="270" y="116" width="210" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="515" y="116" width="105" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="655" y="116" width="105" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <text x="235" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">c</text>
+          <text x="480" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">f</text>
+          <text x="725" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">j</text>
+          <text x="165" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">b</text>
+          <text x="322" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#14448f">d</text>
+          <text x="602" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">h</text>
+          <text x="147" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">a</text>
+          <text x="375" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">e</text>
+          <text x="567" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">g</text>
+          <text x="707" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">i</text>
+          <line x1="60" y1="172" x2="830" y2="172" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="60"  y1="165" x2="60"  y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="130" y1="165" x2="130" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="200" y1="165" x2="200" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="270" y1="165" x2="270" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="340" y1="165" x2="340" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="410" y1="165" x2="410" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="480" y1="165" x2="480" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="550" y1="165" x2="550" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="620" y1="165" x2="620" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="690" y1="165" x2="690" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="760" y1="165" x2="760" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="830" y1="165" x2="830" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <text x="60"  y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">9</text>
+          <text x="130" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">10</text>
+          <text x="200" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">11</text>
+          <text x="270" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">12</text>
+          <text x="340" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">13</text>
+          <text x="410" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">14</text>
+          <text x="480" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">15</text>
+          <text x="550" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">16</text>
+          <text x="620" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">17</text>
+          <text x="690" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">18</text>
+          <text x="760" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">19</text>
+          <text x="830" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">20</text>
+        </svg>
+        <figcaption>Among lectures starting after 11:00, $d$ finishes first (14:00): take it.
+          $e$ overlaps $d$ and is ruled out.</figcaption>
+      </figure>
+    </section>
+
+    <section data-transition="none">
+      <h2>Greedy Run: Pick $f$</h2>
+      <figure>
+        <svg width="760" viewBox="0 0 880 215">
+          <rect x="130" y="28" width="210" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="410" y="28" width="140" height="30" rx="3" fill="#cfe2ff" stroke="#1f6feb" stroke-width="2.4"/>
+          <rect x="620" y="28" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="130" y="72" width="70"  height="30" rx="3" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <rect x="235" y="72" width="175" height="30" rx="3" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <rect x="515" y="72" width="175" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="60"  y="116" width="175" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="270" y="116" width="210" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="515" y="116" width="105" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="655" y="116" width="105" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <text x="235" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">c</text>
+          <text x="480" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#14448f">f</text>
+          <text x="725" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">j</text>
+          <text x="165" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">b</text>
+          <text x="322" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">d</text>
+          <text x="602" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">h</text>
+          <text x="147" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">a</text>
+          <text x="375" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">e</text>
+          <text x="567" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">g</text>
+          <text x="707" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">i</text>
+          <line x1="60" y1="172" x2="830" y2="172" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="60"  y1="165" x2="60"  y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="130" y1="165" x2="130" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="200" y1="165" x2="200" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="270" y1="165" x2="270" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="340" y1="165" x2="340" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="410" y1="165" x2="410" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="480" y1="165" x2="480" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="550" y1="165" x2="550" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="620" y1="165" x2="620" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="690" y1="165" x2="690" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="760" y1="165" x2="760" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="830" y1="165" x2="830" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <text x="60"  y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">9</text>
+          <text x="130" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">10</text>
+          <text x="200" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">11</text>
+          <text x="270" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">12</text>
+          <text x="340" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">13</text>
+          <text x="410" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">14</text>
+          <text x="480" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">15</text>
+          <text x="550" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">16</text>
+          <text x="620" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">17</text>
+          <text x="690" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">18</text>
+          <text x="760" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">19</text>
+          <text x="830" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">20</text>
+        </svg>
+        <figcaption>$f$ starts at 14:00 and finishes first among the compatible lectures: take
+          it. $g$ and $h$ start before 16:00 and are ruled out.</figcaption>
+      </figure>
+    </section>
+
+    <section data-transition="none">
+      <h2>Greedy Run: Pick $i$ &mdash; Done</h2>
+      <figure>
+        <svg width="760" viewBox="0 0 880 215">
+          <rect x="130" y="28" width="210" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="410" y="28" width="140" height="30" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="2"/>
+          <rect x="620" y="28" width="210" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="130" y="72" width="70"  height="30" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="2"/>
+          <rect x="235" y="72" width="175" height="30" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="2"/>
+          <rect x="515" y="72" width="175" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="60"  y="116" width="175" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="270" y="116" width="210" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="515" y="116" width="105" height="30" rx="3" fill="#f4c5c2" stroke="#b03a2e" stroke-width="1.6"/>
+          <rect x="655" y="116" width="105" height="30" rx="3" fill="#b5cdb0" stroke="#2c4329" stroke-width="2"/>
+          <text x="235" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">c</text>
+          <text x="480" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1f3520">f</text>
+          <text x="725" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">j</text>
+          <text x="165" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1f3520">b</text>
+          <text x="322" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1f3520">d</text>
+          <text x="602" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">h</text>
+          <text x="147" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">a</text>
+          <text x="375" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">e</text>
+          <text x="567" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">g</text>
+          <text x="707" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#1f3520">i</text>
+          <line x1="60" y1="172" x2="830" y2="172" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="60"  y1="165" x2="60"  y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="130" y1="165" x2="130" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="200" y1="165" x2="200" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="270" y1="165" x2="270" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="340" y1="165" x2="340" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="410" y1="165" x2="410" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="480" y1="165" x2="480" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="550" y1="165" x2="550" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="620" y1="165" x2="620" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="690" y1="165" x2="690" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="760" y1="165" x2="760" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="830" y1="165" x2="830" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <text x="60"  y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">9</text>
+          <text x="130" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">10</text>
+          <text x="200" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">11</text>
+          <text x="270" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">12</text>
+          <text x="340" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">13</text>
+          <text x="410" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">14</text>
+          <text x="480" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">15</text>
+          <text x="550" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">16</text>
+          <text x="620" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">17</text>
+          <text x="690" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">18</text>
+          <text x="760" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">19</text>
+          <text x="830" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">20</text>
+        </svg>
+        <figcaption>Finally $i$ (finishes 19:00) beats $j$ (finishes 20:00).
+          Schedule $\{b, d, f, i\}$ (green): <strong>four lectures</strong>, the maximum.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Running Time</h2>
+      <p>What is the running time of the greedy algorithm for activity selection?</p>
+      <ul>
+        <li class="fragment">Sort by finishing time: $O(n \log n)$.</li>
+        <li class="fragment">One pass, comparing each start time against the last chosen
+            finish time: $O(n)$.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Total</span>
+        $O(n \log n)$ &mdash; down from the $O(n^2)$ of the longest-path DP.
+        The theorem bought us both simplicity and speed.</div>
+    </section>
+
+    <!-- ================= PART 5: WEIGHTED ACTIVITY SELECTION ============== -->
+    <section class="center">
+      <h1>Weighted Activity Selection</h1>
+    </section>
+
+    <section>
+      <h2>Weighted Activity Selection</h2>
+      <p class="smaller">Each lecture now has a <strong>positive enjoyment score</strong>.
+         Choose a schedule with no overlaps that <strong>maximizes total enjoyment</strong>.</p>
+      <figure>
+        <svg width="760" viewBox="0 0 880 215">
+          <rect x="130" y="28" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="410" y="28" width="140" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="620" y="28" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="130" y="72" width="70"  height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="235" y="72" width="175" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="515" y="72" width="175" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="60"  y="116" width="175" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="270" y="116" width="210" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="515" y="116" width="105" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <rect x="655" y="116" width="105" height="30" rx="3" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.6"/>
+          <text x="235" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">c : 7</text>
+          <text x="480" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">f : 8</text>
+          <text x="725" y="49" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">j : 7</text>
+          <text x="165" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">b : 3</text>
+          <text x="322" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">d : 6</text>
+          <text x="602" y="93" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">h : 4</text>
+          <text x="147" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">a : 5</text>
+          <text x="375" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">e : 10</text>
+          <text x="567" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">g : 5</text>
+          <text x="707" y="137" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">i : 7</text>
+          <line x1="60" y1="172" x2="830" y2="172" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="60"  y1="165" x2="60"  y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="130" y1="165" x2="130" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="200" y1="165" x2="200" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="270" y1="165" x2="270" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="340" y1="165" x2="340" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="410" y1="165" x2="410" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="480" y1="165" x2="480" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="550" y1="165" x2="550" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="620" y1="165" x2="620" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="690" y1="165" x2="690" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="760" y1="165" x2="760" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="830" y1="165" x2="830" y2="179" stroke="#2a2a2a" stroke-width="2"/>
+          <text x="60"  y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">9</text>
+          <text x="130" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">10</text>
+          <text x="200" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">11</text>
+          <text x="270" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">12</text>
+          <text x="340" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">13</text>
+          <text x="410" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">14</text>
+          <text x="480" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">15</text>
+          <text x="550" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">16</text>
+          <text x="620" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">17</text>
+          <text x="690" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">18</text>
+          <text x="760" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">19</text>
+          <text x="830" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2a2a2a">20</text>
+        </svg>
+        <figcaption>Same lectures, now with enjoyment scores.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>The Greedy Choice Fails</h2>
+      <p class="smaller">It is no longer obvious that choosing the lecture with the earliest
+         finishing time is best &mdash; and in fact it isn't:</p>
+      <table class="results">
+        <thead><tr><th>Schedule</th><th>Lectures</th><th>Enjoyment</th></tr></thead>
+        <tbody>
+          <tr><td class="q">Earliest-finish greedy</td><td>$b, d, f, i$</td><td>$3+6+8+7 = 24$</td></tr>
+          <tr class="hlrow"><td class="q">Optimal</td><td>$a, e, g, i$</td><td>$5+10+5+7 = \mathbf{27}$</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller">The exchange breaks: swapping $a$ (score 5) out for the
+         earlier-finishing $b$ (score 3) <em>does</em> make the value worse.
+         No theorem, no greedy.</p>
+    </section>
+
+    <section>
+      <h2>Weighted: Back to DP</h2>
+      <p class="smaller">When the greedy choice collapses, the dynamic choices return.
+         Sort by finishing time. Let $\mathrm{OPT}(i)$ be the best enjoyment of a
+         non-overlapping schedule drawn from lectures $1,\dots,i$, and let $p(i)$ be the
+         last lecture finishing by the time lecture $i$ starts:</p>
+      <div class="box"><span class="tag">Recurrence</span>
+        $\mathrm{OPT}(i) = \max\bigl(\, \mathrm{OPT}(i-1),\; w_i + \mathrm{OPT}(p(i)) \,\bigr)$
+        &mdash; skip lecture $i$, or take it.</div>
+    </section>
+
+    <section>
+      <h2>Weighted: Running Time</h2>
+      <p>Filling the table is $O(n)$ once every $p(i)$ is known. But finding $p(i)$ by
+         scanning back from lecture $i$ for the last finishing time $\le s_i$ costs $O(i)$
+         &mdash; giving an <span class="hl">$O(n^2)$</span> algorithm.</p>
+      <div class="box warn fragment"><span class="tag">Challenge</span>
+        Come up with an $O(n \log n)$ time algorithm.
+        (Hint: how fast can you find $p(i)$ in a sorted array?)</div>
+    </section>
+
+    <!-- ================= PART 6: MAKING CHANGE ============================ -->
+    <section class="center">
+      <h1>Making Change</h1>
+    </section>
+
+    <section>
+      <h2>Making Change</h2>
+      <p>We are given a set of coin denominations and a target amount.</p>
+      <div class="box fragment"><span class="tag">Problem</span>
+        Given denominations $d_1 &lt; d_2 &lt; \dots &lt; d_n$ (with $d_1 = 1$) and a
+        target $T$, find the <strong>minimum number of coins</strong> summing to exactly
+        $T$. Each denomination may be used as often as we like.</div>
+      <p class="fragment smaller">Example: with denominations $1, 5, 25$ and $T = 67$ we can
+         hand over $25 + 25 + 5 + 5 + 5 + 1 + 1$ &mdash; seven coins.</p>
+      <p class="fragment">What is the dynamic programming algorithm for this?</p>
+    </section>
+
+    <section>
+      <h2>The Dynamic Program</h2>
+      <p class="smaller">The dynamic choice here: <em>which coin goes into the change
+         first?</em> We do not know which is best &mdash; so we optimise over all of them.</p>
+      <div class="box fragment"><span class="tag">Recurrence</span>
+        Let $C(t)$ be the minimum number of coins summing to $t$. Then $C(0)=0$ and
+        $$C(t) = 1 + \min_{i \,:\, d_i \le t} C(t - d_i).$$</div>
+      <p class="fragment smaller">Fill in $C(0), C(1), \dots, C(T)$ left to right:
+         $O(nT)$ time.</p>
+      <p class="fragment smaller">This is the Week 1 reflex again &mdash; a
+         <em>shortest</em> path in a DAG with vertices $0, \dots, T$ and an edge
+         $t - d_i \to t$ for every coin $d_i$.</p>
+    </section>
+
+    <section>
+      <h2>The Greedy Algorithm</h2>
+      <p>How does a shopkeeper actually make change?</p>
+      <ul>
+        <li class="fragment">Start with the largest denomination and take as many of those
+            coins as possible while staying within the target amount.</li>
+        <li class="fragment">Repeat with the remaining amount and the next largest
+            denomination.</li>
+      </ul>
+      <p class="fragment smaller">On $T = 67$ with denominations $1, 5, 25$: two quarters
+         ($67 \to 17$), three nickels ($17 \to 2$), two pennies &mdash; the same seven
+         coins as before, found with no table.</p>
+      <p class="fragment">Is this always optimal?</p>
+    </section>
+
+    <section>
+      <h2>When Greedy Fails</h2>
+      <p class="smaller">This strategy does not always work. Take denominations
+         $1, 9, 10$ and target $T = 18$:</p>
+      <figure>
+        <svg width="640" viewBox="0 0 760 205">
+          <text x="115" y="66" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a">greedy</text>
+          <circle cx="170" cy="60" r="24" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="224" cy="60" r="24" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="278" cy="60" r="24" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="332" cy="60" r="24" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="386" cy="60" r="24" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="440" cy="60" r="24" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="494" cy="60" r="24" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="548" cy="60" r="24" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="602" cy="60" r="24" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <text x="170" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a">10</text>
+          <text x="224" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a">1</text>
+          <text x="278" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a">1</text>
+          <text x="332" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a">1</text>
+          <text x="386" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a">1</text>
+          <text x="440" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a">1</text>
+          <text x="494" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a">1</text>
+          <text x="548" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a">1</text>
+          <text x="602" y="66" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a">1</text>
+          <text x="650" y="66" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" fill="#2a2a2a">= 9 coins</text>
+          <text x="115" y="151" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">optimal</text>
+          <circle cx="170" cy="145" r="24" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <circle cx="224" cy="145" r="24" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <text x="170" y="151" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#1f3520">9</text>
+          <text x="224" y="151" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#1f3520">9</text>
+          <text x="272" y="151" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" fill="#2c4329">= 2 coins</text>
+        </svg>
+        <figcaption>Greedy grabs the 10 and can only finish with eight pennies.</figcaption>
+      </figure>
+      <p class="fragment smaller">Greedy uses <span class="hl">9 coins</span> where
+         <span class="hl">2 coins</span> suffice &mdash; the biggest-looking first step is
+         exactly the wrong move.</p>
+    </section>
+
+    <section>
+      <h2>When Greedy Works</h2>
+      <p class="smaller">For other coin systems the greedy strategy <em>does</em> always
+         work &mdash; for example $\{1, 5, 25\}$. Behind it, as always, a theorem:</p>
+      <div class="box fragment"><span class="tag">Exchange</span>
+        An optimal solution never contains $5$ pennies (swap them for a nickel) and
+        never contains $5$ nickels (swap them for a quarter).</div>
+      <p class="fragment smaller">So in an optimal solution the pennies and nickels together
+         are worth at most $4 \cdot 1 + 4 \cdot 5 = 24$.</p>
+    </section>
+
+    <section>
+      <h2>When Greedy Works</h2>
+      <p class="smaller">Pennies and nickels reach at most $24$. So for a remaining
+         amount $t$:</p>
+      <ul class="smaller">
+        <li class="fragment">$t \ge 25$: every optimal solution must use a quarter &mdash;
+            greedy's move is forced.</li>
+        <li class="fragment">$5 \le t \le 24$: a quarter would overshoot, and at most $4$
+            pennies cannot finish alone &mdash; a nickel is forced.</li>
+        <li class="fragment">$t \le 4$: pennies are all that is left.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Conclusion</span>
+        At every step the greedy choice agrees with <em>some</em> optimal solution.
+        By induction, greedy is optimal for $\{1, 5, 25\}$.</div>
+    </section>
+
+    <section>
+      <h2>Which Coin Systems Are Greedy?</h2>
+      <p>There is no simple rule for when the greedy algorithm is optimal for a
+         coin system.</p>
+      <div class="box fragment"><span class="tag">Theorem</span>
+        Given the $n$ denominations, one can decide in $O(n^3)$ time whether the greedy
+        algorithm is optimal for <em>every</em> target amount.</div>
+      <p class="fragment smaller">Remarkably, the running time does not depend on the target
+         amounts at all: if any counterexample exists, one exists among just $O(n^2)$
+         candidate values.</p>
+      <p class="credit fragment">D. Pearson, &ldquo;A polynomial-time algorithm for the
+         change-making problem&rdquo;, Operations Research Letters 33 (2005).</p>
+    </section>
+
+    <!-- ============================== CLOSING ============================= -->
+    <section>
+      <h2>Recap</h2>
+      <ul style="line-height:1.45;">
+        <li>Greedy = DP where the choices collapse: we <em>know</em> the best move.</li>
+        <li class="fragment">Maximum matching on a tree: grab leaf edges, correct by an
+            <strong>exchange argument</strong>.</li>
+        <li class="fragment">Activity selection: earliest finishing time, by exchange plus
+            induction; $O(n \log n)$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Recap</h2>
+      <ul style="line-height:1.45;">
+        <li>Weighted activity selection: greedy fails, DP gives $O(n^2)$
+            &mdash; $O(n \log n)$ is your challenge.</li>
+        <li class="fragment">Making change: the DP always works; greedy only for special
+            coin systems &mdash; and telling which is its own algorithmic problem.</li>
+        <li class="fragment"><b>Behind every greedy algorithm is a theorem</b>
+            &mdash; certificates of optimality return in Week 10.</li>
+      </ul>
+    </section>
+
+  </div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [ RevealMath.MathJax3 ],
+
+    mathjax3: {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        macros: {
+          tO:   ['{\\widetilde{O}}'],
+          R:    ['{\\mathbb{R}}'],
+          E:    ['{\\mathbb{E}}']
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+</script>
+</body>
+</html>
