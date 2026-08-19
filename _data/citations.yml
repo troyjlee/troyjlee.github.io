@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-08-12'
+  last_updated: '2026-08-19'
 papers:
   iSjOah4AAAAJ:-95Q15plzcUC:
     citations: 0
@@ -110,7 +110,7 @@ papers:
     title: On the query complexity of connectivity with global queries
     year: '2021'
   iSjOah4AAAAJ:6G1OFF11MdUC:
-    citations: 327
+    citations: 328
     title: Quantum attacks on Bitcoin, and how to protect against them
     year: '2017'
   iSjOah4AAAAJ:7cqQt8SKcR0C:
@@ -222,7 +222,7 @@ papers:
     title: A composition theorem for randomized query complexity
     year: '2017'
   iSjOah4AAAAJ:GnPB-g6toBAC:
-    citations: 35
+    citations: 36
     title: Some upper and lower bounds on PSD-rank
     year: '2017'
   iSjOah4AAAAJ:H1aCVKaixnMC:
