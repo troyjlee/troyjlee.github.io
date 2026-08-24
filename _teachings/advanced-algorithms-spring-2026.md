@@ -72,6 +72,15 @@ schedule:
     description: >-
       The graphic matroid · every cut's minimum weight edge is in an MST ·
       implementing Kruskal with union-find
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week05.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week05.pdf
+      - name: "Animation: Kruskal's Algorithm"
+        url: /assets/courses/advanced-algorithms-2026/animations/kruskal.html
+      - name: "Animation: Union-Find"
+        url: /assets/courses/advanced-algorithms-2026/animations/union_find.html
   - week: 6
     topic: Prim's Algorithm
     description: >-

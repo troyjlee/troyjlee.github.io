@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 5: Kruskal's Algorithm — Advanced Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <style>
+    :root { --accent: #1f6feb; --muted: #6a737d; }
+
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--accent); letter-spacing: -0.01em; }
+    .reveal h1 { font-size: 2.0em; }
+    /* Theme styling (uppercase headings, small-caps tags) garbles MathJax output. */
+    .reveal mjx-container { text-transform: none; font-variant: normal; letter-spacing: normal; }
+    .reveal h2 { text-align: center; }
+    .reveal section { font-size: 0.92em; }
+    .reveal a { color: var(--accent); }
+
+    /* Left-align most slides; titles stay centered via their own class. */
+    .reveal .slides section { text-align: left; }
+    .reveal .slides section.center { text-align: center; }
+
+    /* Boxes for theorems / definitions / takeaways. */
+    .box {
+      border-left: 5px solid var(--accent);
+      background: #f4f8ff;
+      padding: 0.5em 0.8em; margin: 0.4em 0; border-radius: 4px;
+    }
+    .box .tag { font-variant: small-caps; font-weight: 700; color: var(--accent);
+                letter-spacing: 0.04em; margin-right: 0.4em; }
+    .box.warn { border-left-color: #d29922; background: #fff8ec; }
+    .box.warn .tag { color: #b07400; }
+
+    /* Result highlight pill. */
+    .hl { background: #fff3b0; padding: 0.05em 0.25em; border-radius: 3px; }
+
+    /* Results table. */
+    .reveal table.results { margin: 0.7em auto; border-collapse: collapse; }
+    .reveal table.results th, .reveal table.results td {
+      padding: 0.4em 1.1em; border: none; text-align: left; }
+    .reveal table.results thead th { color: var(--accent);
+      border-bottom: 2px solid var(--accent); font-variant: small-caps; letter-spacing: 0.03em; }
+    .reveal table.results tbody tr { border-bottom: 1px solid #e7ebf0; }
+    .reveal table.results td.q { font-weight: 700; }
+    .reveal table.results tr.hlrow { background: #fff8d6; }
+
+    /* Two-column layout helper:  <div class="cols"> <div>..</div> <div>..</div> </div> */
+    .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+    .cols > * { flex: 1; min-width: 0; }
+
+    /* Sorted-edge ticker shown along the bottom of the worked-example slides. */
+    .reveal .edgelist { font-size: 0.56em; line-height: 1.7; text-align: center;
+                        margin: 0; }
+    /* Keep punctuation glued to the inline math it follows (MathJax containers are
+       inline boxes, so a bare "." after one is a legal wrap point). */
+    .nb { white-space: nowrap; }
+    .edgelist .done { opacity: 0.28; }
+    .edgelist .cur { color: var(--accent); }
+    /* Worked-example slides share a height so the ticker sits still while we walk. */
+    /* reveal's centred mode forces min-height:0 !important, hence the override. */
+    .reveal .slides section.wex { min-height: 680px !important; }
+    .reveal section.wex > .edgelist { position: absolute; bottom: 0; left: 0; right: 0; }
+
+    /* Pseudocode / algorithm blocks. */
+    .reveal pre.algo {
+      font-size: 0.5em; line-height: 1.35; box-shadow: none;
+      border: 1px solid #d0d7de; border-radius: 6px; background: #fbfcfd;
+      width: 100%;
+    }
+    .reveal pre.algo code { padding: 0.8em 1em; }
+    .algo .kw { color: var(--accent); font-weight: 700; }
+    .algo .cm { color: var(--muted); font-style: italic; }
+
+    .reveal .credit { color: var(--muted); font-size: 0.8em; }
+    .reveal .smaller { font-size: 0.82em; }
+    .reveal figure { margin: 0; text-align: center; }
+    .reveal figcaption { font-size: 0.7em; color: var(--muted); margin-top: 0.3em; }
+    .reveal .footnote { position: absolute; bottom: 0.2em; left: 0.6em;
+                        font-size: 0.55em; color: var(--muted); }
+
+    /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
+    .reveal figure svg { max-width: 100%; height: auto; }
+
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== TITLE ============================== -->
+    <section class="center">
+      <h1>Week 5: Kruskal's Algorithm</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Advanced Algorithms</p>
+    </section>
+
+    <!-- ============================== ROADMAP ============================ -->
+    <section>
+      <h2>Roadmap</h2>
+      <ol style="line-height:1.9; margin-top:0.6em;">
+        <li><strong>Cuts and Safe Edges</strong></li>
+        <li><strong>Kruskal's Algorithm</strong></li>
+        <li><strong>The Graphic Matroid</strong> &mdash; a second proof</li>
+        <li><strong>Union-Find</strong></li>
+      </ol>
+    </section>
+
+    <!-- ==================== MST PROBLEM SETUP ==================== -->
+    <section>
+      <h2>Spanning Trees</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A <strong>spanning tree</strong> of a <span style="color:var(--accent)">connected</span>
+        graph $G=(V,E)$ is a subgraph of $G$ that is a tree and whose
+        vertex set is $V$ — a tree that connects all the vertices of <span class="nb">$G$.</span>
+      </div>
+      <div class="cols" style="margin-top:0.4em; align-items:center;">
+        <figure>
+          <svg width="290" viewBox="0 0 380 300" role="img" aria-label="4 by 4 grid graph with a spanning tree highlighted">
+            <!-- grid edges (non-tree) -->
+            <g stroke="#8d8678" stroke-width="2">
+              <line x1="130" y1="40" x2="130" y2="115"/><line x1="220" y1="40" x2="220" y2="115"/><line x1="310" y1="40" x2="310" y2="115"/>
+              <line x1="130" y1="115" x2="130" y2="190"/><line x1="220" y1="115" x2="220" y2="190"/><line x1="310" y1="115" x2="310" y2="190"/>
+              <line x1="130" y1="190" x2="130" y2="265"/><line x1="220" y1="190" x2="220" y2="265"/><line x1="310" y1="190" x2="310" y2="265"/>
+              <line x1="40" y1="115" x2="130" y2="115"/><line x1="130" y1="115" x2="220" y2="115"/><line x1="220" y1="115" x2="310" y2="115"/>
+              <line x1="40" y1="190" x2="130" y2="190"/><line x1="130" y1="190" x2="220" y2="190"/><line x1="220" y1="190" x2="310" y2="190"/>
+              <line x1="40" y1="265" x2="130" y2="265"/><line x1="130" y1="265" x2="220" y2="265"/><line x1="220" y1="265" x2="310" y2="265"/>
+            </g>
+            <!-- spanning tree edges -->
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="40" y1="40" x2="130" y2="40"/><line x1="130" y1="40" x2="220" y2="40"/><line x1="220" y1="40" x2="310" y2="40"/>
+              <line x1="40" y1="40" x2="40" y2="115"/><line x1="40" y1="115" x2="40" y2="190"/><line x1="40" y1="190" x2="40" y2="265"/>
+              <line x1="40" y1="115" x2="130" y2="115"/><line x1="130" y1="115" x2="220" y2="115"/><line x1="220" y1="115" x2="310" y2="115"/>
+              <line x1="40" y1="190" x2="130" y2="190"/><line x1="130" y1="190" x2="220" y2="190"/><line x1="220" y1="190" x2="310" y2="190"/>
+              <line x1="40" y1="265" x2="130" y2="265"/><line x1="130" y1="265" x2="220" y2="265"/><line x1="220" y1="265" x2="310" y2="265"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="middle">
+              <circle cx="40" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="40" y="45">0</text>
+              <circle cx="130" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="130" y="45">1</text>
+              <circle cx="220" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="220" y="45">2</text>
+              <circle cx="310" cy="40" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="310" y="45">3</text>
+              <circle cx="40" cy="115" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="40" y="120">4</text>
+              <circle cx="130" cy="115" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="130" y="120">5</text>
+              <circle cx="220" cy="115" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="220" y="120">6</text>
+              <circle cx="310" cy="115" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="310" y="120">7</text>
+              <circle cx="40" cy="190" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="40" y="195">8</text>
+              <circle cx="130" cy="190" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="130" y="195">9</text>
+              <circle cx="220" cy="190" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="220" y="195">10</text>
+              <circle cx="310" cy="190" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="310" y="195">11</text>
+              <circle cx="40" cy="265" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="40" y="270">12</text>
+              <circle cx="130" cy="265" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="130" y="270">13</text>
+              <circle cx="220" cy="265" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="220" y="270">14</text>
+              <circle cx="310" cy="265" r="15" fill="#fbf7ed" stroke="#2a2a2a"/><text x="310" y="270">15</text>
+            </g>
+          </svg>
+          <figcaption>A spanning tree (green) of the $4\times 4$ grid graph.</figcaption>
+        </figure>
+        <div class="smaller">
+          <p class="fragment">DFS or BFS finds <em>a</em> spanning tree in time $O(|E|)$ —
+          this one is from BFS at vertex 0.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Minimum Spanning Tree</h2>
+      <p>Today we have a different goal in finding a spanning tree.</p>
+      <div class="box"><span class="tag">Problem</span>
+        Find a spanning tree of $G$ where the <strong>sum of the weights</strong> of the edges in the tree
+        is as small as possible: a <strong>minimum spanning tree (MST)</strong>.
+      </div>
+      <p class="fragment">MST is one of the oldest problems in combinatorial optimisation: the first
+      algorithm was given in <span class="hl">1926 by Borůvka</span>, to plan an electrical network
+      for Moravia.</p>
+      <p class="fragment">This week: Kruskal's algorithm (1956). Next week: Prim's algorithm — and
+      Borůvka's original one.</p>
+    </section>
+
+    <section>
+      <h2>Example: Linking Cities by Cable</h2>
+      <div class="cols" style="align-items:center;">
+        <div class="smaller">
+          <p>Vertices are cities. Edges show where cable can be laid, weighted by distance (km).</p>
+          <p class="fragment" data-fragment-index="1">Goal: link all cities with the least total cable.
+          That is exactly a minimum spanning tree.</p>
+          <p class="fragment" data-fragment-index="2">Here the MST (green) needs
+          <span class="hl">9280 km</span> of cable.</p>
+        </div>
+        <figure>
+          <svg width="430" viewBox="0 0 640 520" role="img" aria-label="Cities graph with MST highlighted">
+            <g stroke="#8d8678" stroke-width="2">
+              <line x1="60" y1="330" x2="480" y2="470"/>   <!-- P-M 3600 -->
+              <line x1="350" y1="40" x2="600" y2="260"/>   <!-- D-B 1900 -->
+              <line x1="60" y1="330" x2="570" y2="360"/>   <!-- P-S 3000 -->
+              <line x1="570" y1="360" x2="545" y2="480"/>  <!-- S-H 1000 -->
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="60" y1="330" x2="350" y2="40"/>    <!-- P-D 2600 -->
+              <line x1="350" y1="40" x2="560" y2="120"/>   <!-- D-C 2800 -->
+              <line x1="560" y1="120" x2="600" y2="260"/>  <!-- C-B 1400 -->
+              <line x1="600" y1="260" x2="570" y2="360"/>  <!-- B-S 900 -->
+              <line x1="570" y1="360" x2="480" y2="470"/>  <!-- S-M 880 -->
+              <line x1="480" y1="470" x2="545" y2="480"/>  <!-- M-H 700 -->
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#b85a26">
+              <text x="175" y="165">2600</text>
+              <text x="450" y="60">2800</text>
+              <text x="240" y="425">3600</text>
+              <text x="595" y="190">1400</text>
+              <text x="455" y="175">1900</text>
+              <text x="300" y="330">3000</text>
+              <text x="600" y="320">900</text>
+              <text x="500" y="415">880</text>
+              <text x="480" y="505">700</text>
+              <text x="573" y="440">1000</text>
+            </g>
+            <g fill="#fbf7ed" stroke="#2a2a2a">
+              <circle cx="350" cy="40" r="9"/><circle cx="560" cy="120" r="9"/>
+              <circle cx="600" cy="260" r="9"/><circle cx="570" cy="360" r="9"/>
+              <circle cx="480" cy="470" r="9"/><circle cx="545" cy="480" r="9"/>
+              <circle cx="60" cy="330" r="9"/>
+            </g>
+          </svg>
+          <figcaption>Ten candidate cable routes; the six green ones form the MST.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Warm-up: Unweighted Graphs</h2>
+      <p>Suppose all edge weights are one. What is the total weight of an MST in an
+      unweighted $n$-vertex connected graph?</p>
+      <p class="fragment">Every spanning tree has exactly $n-1$ edges, so <em>any</em> spanning tree
+      is a minimum spanning tree, and has weight <span class="nb">$n-1$.</span></p>
+      <p class="fragment">So the unweighted case is solved by depth- or breadth-first search.
+      The interesting case is general weights.</p>
+    </section>
+
+    <section>
+      <h2>Assumption: Unique Weights</h2>
+      <p>We will assume that <span style="color:var(--accent)">no two edge weights compare as equal</span>.</p>
+      <p class="fragment">Easy to ensure: break ties between equal-weight edges by lexicographic
+      order of endpoint names.</p>
+      <div class="box fragment"><span class="tag">Fact</span>
+        If no two edge weights compare as equal, the minimum spanning tree is <strong>unique</strong>.
+      </div>
+      <p class="fragment smaller credit">This keeps statements like "the MST must contain edge $e$" clean.</p>
+    </section>
+
+    <!-- ==================== PART 1: CUTS ==================== -->
+    <section class="center">
+      <h1>Cuts and Safe Edges</h1>
+    </section>
+
+    <section>
+      <h2>Cuts</h2>
+      <div class="cols" style="align-items:center;">
+      <figure>
+        <svg width="280" viewBox="0 0 280 280" role="img" aria-label="Cut defined by top two vertices">
+            <ellipse cx="140" cy="42" rx="122" ry="34" fill="#cad9ee" opacity="0.55" stroke="#2e588f" stroke-dasharray="7 5"/>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="70" y1="42" x2="210" y2="42"/>
+              <line x1="70" y1="135" x2="210" y2="135"/>
+              <line x1="210" y1="135" x2="70" y2="228"/>
+              <line x1="70" y1="228" x2="210" y2="228"/>
+              <line x1="210" y1="135" x2="210" y2="228"/>
+            </g>
+            <g stroke="#b85a26" stroke-width="5">
+              <line x1="70" y1="42" x2="70" y2="135"/>
+              <line x1="70" y1="42" x2="210" y2="135"/>
+              <line x1="210" y1="42" x2="210" y2="135"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="70" cy="42" r="14" fill="#cad9ee" stroke="#2e588f"/><text x="70" y="47" fill="#1d3c66">a</text>
+              <circle cx="210" cy="42" r="14" fill="#cad9ee" stroke="#2e588f"/><text x="210" y="47" fill="#1d3c66">b</text>
+              <circle cx="70" cy="135" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="140">c</text>
+              <circle cx="210" cy="135" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="140">d</text>
+              <circle cx="70" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="233">e</text>
+              <circle cx="210" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="233">f</text>
+              <text x="262" y="40" fill="#1d3c66" font-style="italic" font-size="19">S</text>
+            </g>
+        </svg>
+        <figcaption><span class="nb">$S=\{a,b\}$:</span> the cut has three edges (orange).</figcaption>
+      </figure>
+      <div class="smaller">
+        <p>Cuts are the key to thinking about minimum spanning trees.</p>
+        <div class="box"><span class="tag">Definition</span>
+          A <strong>cut</strong> is defined by a non-empty subset of vertices <span class="nb">$S \subset V$,</span> <span class="nb">$S \ne V$.</span>
+          The cut is the set of edges with <strong>exactly one endpoint in $S$</strong>.
+        </div>
+        <p>Here the graph has edges $ab, ac, ad, bd, cd, de, ef, df$ — the same
+        example graph we use on the next slides.</p>
+      </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Cuts</h2>
+      <p class="smaller">A cut can also be defined by a single vertex.</p>
+      <figure style="margin-top:0.4em;">
+        <svg width="280" viewBox="0 0 280 280" role="img" aria-label="Cut defined by single vertex d">
+            <circle cx="210" cy="135" r="32" fill="#cad9ee" opacity="0.55" stroke="#2e588f" stroke-dasharray="7 5"/>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="70" y1="42" x2="210" y2="42"/>
+              <line x1="70" y1="42" x2="70" y2="135"/>
+              <line x1="70" y1="228" x2="210" y2="228"/>
+            </g>
+            <g stroke="#b85a26" stroke-width="5">
+              <line x1="70" y1="42" x2="210" y2="135"/>
+              <line x1="210" y1="42" x2="210" y2="135"/>
+              <line x1="70" y1="135" x2="210" y2="135"/>
+              <line x1="210" y1="135" x2="70" y2="228"/>
+              <line x1="210" y1="135" x2="210" y2="228"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="70" cy="42" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="47">a</text>
+              <circle cx="210" cy="42" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="47">b</text>
+              <circle cx="70" cy="135" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="140">c</text>
+              <circle cx="210" cy="135" r="14" fill="#cad9ee" stroke="#2e588f"/><text x="210" y="140" fill="#1d3c66">d</text>
+              <circle cx="70" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="233">e</text>
+              <circle cx="210" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="233">f</text>
+              <text x="255" y="122" fill="#1d3c66" font-style="italic" font-size="19">S</text>
+            </g>
+          </svg>
+          <figcaption><span class="nb">$S=\{d\}$:</span> all five edges at $d$ are cut edges.</figcaption>
+        </figure>
+    </section>
+
+    <section>
+      <h2>Removing a Cut Disconnects the Graph</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="250" viewBox="0 0 280 280">
+            <ellipse cx="140" cy="42" rx="122" ry="34" fill="#cad9ee" opacity="0.55" stroke="#2e588f" stroke-dasharray="7 5"/>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="70" y1="42" x2="210" y2="42"/>
+              <line x1="70" y1="135" x2="210" y2="135"/>
+              <line x1="210" y1="135" x2="70" y2="228"/>
+              <line x1="70" y1="228" x2="210" y2="228"/>
+              <line x1="210" y1="135" x2="210" y2="228"/>
+            </g>
+            <g stroke="#b03a2e" stroke-width="4" stroke-dasharray="7 5">
+              <line x1="70" y1="42" x2="70" y2="135"/>
+              <line x1="70" y1="42" x2="210" y2="135"/>
+              <line x1="210" y1="42" x2="210" y2="135"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="70" cy="42" r="14" fill="#cad9ee" stroke="#2e588f"/><text x="70" y="47" fill="#1d3c66">a</text>
+              <circle cx="210" cy="42" r="14" fill="#cad9ee" stroke="#2e588f"/><text x="210" y="47" fill="#1d3c66">b</text>
+              <circle cx="70" cy="135" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="140">c</text>
+              <circle cx="210" cy="135" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="140">d</text>
+              <circle cx="70" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="233">e</text>
+              <circle cx="210" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="233">f</text>
+            </g>
+          </svg>
+          <figcaption>Delete the cut edges (dashed red) &hellip;</figcaption>
+        </figure>
+        <figure class="fragment">
+          <svg width="250" viewBox="0 0 280 280">
+            <ellipse cx="140" cy="42" rx="122" ry="34" fill="#cad9ee" opacity="0.55" stroke="#2e588f" stroke-dasharray="7 5"/>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="70" y1="42" x2="210" y2="42"/>
+              <line x1="70" y1="135" x2="210" y2="135"/>
+              <line x1="210" y1="135" x2="70" y2="228"/>
+              <line x1="70" y1="228" x2="210" y2="228"/>
+              <line x1="210" y1="135" x2="210" y2="228"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="70" cy="42" r="14" fill="#cad9ee" stroke="#2e588f"/><text x="70" y="47" fill="#1d3c66">a</text>
+              <circle cx="210" cy="42" r="14" fill="#cad9ee" stroke="#2e588f"/><text x="210" y="47" fill="#1d3c66">b</text>
+              <circle cx="70" cy="135" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="140">c</text>
+              <circle cx="210" cy="135" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="140">d</text>
+              <circle cx="70" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="233">e</text>
+              <circle cx="210" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="233">f</text>
+            </g>
+          </svg>
+          <figcaption>&hellip; and no edge connects $S$ to the rest.</figcaption>
+        </figure>
+      </div>
+      <p class="fragment smaller">Removing the edges of any cut disconnects the graph: there is no
+      longer any edge between $S$ and <span class="nb">$V \setminus S$.</span></p>
+    </section>
+
+    <section>
+      <h2>Fact 1: Spanning Trees Meet Every Cut</h2>
+      <div class="box"><span class="tag">Fact 1</span>
+        A spanning tree must contain at least one edge from every cut.
+      </div>
+      <div class="cols" style="align-items:center;">
+        <div class="smaller">
+          <p class="fragment">If there were a cut from which the tree contained no edge,
+          removing that cut would not touch the tree — yet it separates $S$
+          from <span class="nb">$V\setminus S$.</span> Then the tree could not be connected. $\blacksquare$</p>
+        </div>
+        <figure>
+          <svg width="240" viewBox="0 0 280 280">
+            <ellipse cx="140" cy="42" rx="122" ry="34" fill="#cad9ee" opacity="0.55" stroke="#2e588f" stroke-dasharray="7 5"/>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="70" y1="42" x2="70" y2="135"/>
+              <line x1="70" y1="42" x2="210" y2="135"/>
+              <line x1="70" y1="135" x2="210" y2="135"/>
+              <line x1="210" y1="135" x2="70" y2="228"/>
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="70" y1="42" x2="210" y2="42"/>
+              <line x1="210" y1="42" x2="210" y2="135"/>
+              <line x1="210" y1="135" x2="210" y2="228"/>
+              <line x1="70" y1="228" x2="210" y2="228"/>
+              <line x1="210" y1="135" x2="70" y2="135"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="70" cy="42" r="14" fill="#cad9ee" stroke="#2e588f"/><text x="70" y="47" fill="#1d3c66">a</text>
+              <circle cx="210" cy="42" r="14" fill="#cad9ee" stroke="#2e588f"/><text x="210" y="47" fill="#1d3c66">b</text>
+              <circle cx="70" cy="135" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="140">c</text>
+              <circle cx="210" cy="135" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="140">d</text>
+              <circle cx="70" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="70" y="233">e</text>
+              <circle cx="210" cy="228" r="14" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="233">f</text>
+            </g>
+          </svg>
+          <figcaption>This spanning tree (green) crosses the cut of $S=\{a,b\}$ via edge <span class="nb">$bd$.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Fact 2: The Cut Rule</h2>
+      <div class="box smaller"><span class="tag">Fact 1</span>
+        A spanning tree must contain an edge from every cut.
+      </div>
+      <p class="fragment" data-fragment-index="1">For a <em>minimum</em> spanning tree we can say more.</p>
+      <div class="box fragment" data-fragment-index="2"><span class="tag">Fact 2</span>
+        A minimum spanning tree must contain the <strong>minimum-weight edge</strong> from every cut.
+      </div>
+      <p class="fragment" data-fragment-index="3"><span class="hl">Fact 2 is the basis of every minimum spanning
+      tree algorithm</span> — Kruskal, Prim, and Borůvka all follow from it.</p>
+    </section>
+
+    <section>
+      <h2>Proof of Fact 2 (1/3)</h2>
+      <div class="cols" style="align-items:center;">
+        <div class="smaller">
+          <p>Take any cut <span class="nb">$S$;</span> here <span class="nb">$S=\{4,5,6\}$,</span> with cut edges
+          $\{0,5\}$ of weight 5 and $\{3,4\}$ of weight 6.</p>
+          <p class="fragment" data-fragment-index="1">By Fact 1 a spanning tree contains at least one cut edge.
+          Suppose, for contradiction, a spanning tree $T$ (green) does <em>not</em> contain the minimum-weight
+          cut edge $\{0,5\}$ — it crosses the cut only via <span class="nb">$\{3,4\}$.</span></p>
+        </div>
+        <figure>
+          <svg width="390" viewBox="0 0 430 355" role="img" aria-label="Spanning tree avoiding the minimum weight edge of a cut">
+            <ellipse cx="150" cy="262" rx="128" ry="80" fill="#cad9ee" opacity="0.45" stroke="#2e588f" stroke-dasharray="7 5"/>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="85" y1="100" x2="335" y2="230"/>   <!-- 0-3 -->
+              <line x1="85" y1="100" x2="75" y2="235"/>    <!-- 0-5 min cut edge -->
+              <line x1="75" y1="235" x2="210" y2="315"/>   <!-- 5-4 -->
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="85" y1="100" x2="210" y2="35"/>    <!-- 0-1 -->
+              <line x1="210" y1="35" x2="335" y2="100"/>   <!-- 1-2 -->
+              <line x1="335" y1="100" x2="335" y2="230"/>  <!-- 2-3 -->
+              <line x1="335" y1="230" x2="210" y2="315"/>  <!-- 3-4 -->
+              <line x1="210" y1="315" x2="180" y2="225"/>  <!-- 4-6 -->
+              <line x1="75" y1="235" x2="180" y2="225"/>   <!-- 5-6 -->
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="40">1</text>
+              <circle cx="85" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="85" y="105">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="75" y="240" fill="#1d3c66">5</text>
+              <circle cx="180" cy="225" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="180" y="230" fill="#1d3c66">6</text>
+              <circle cx="210" cy="315" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="210" y="320" fill="#1d3c66">4</text>
+              <text x="45" y="330" fill="#1d3c66" font-style="italic" font-size="19">S</text>
+            </g>
+          </svg>
+          <figcaption>Tree $T$ in green; cut <span class="nb">$S=\{4,5,6\}$;</span> min-weight cut edge $\{0,5\}$ not in <span class="nb">$T$.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Proof of Fact 2 (2/3)</h2>
+      <div class="cols" style="align-items:center;">
+        <div class="smaller">
+          <p>Add the minimum-weight cut edge $\{0,5\}$ (orange) to <span class="nb">$T$.</span>
+          This creates a <span style="color:#b03a2e">cycle</span>:
+          <span class="nb">$0\!-\!1\!-\!2\!-\!3\!-\!4\!-\!6\!-\!5\!-\!0$.</span></p>
+          <p class="fragment" data-fragment-index="1">The cycle crosses the cut an even number of times, so it
+          contains <em>another</em> cut edge besides $\{0,5\}$ — here $\{3,4\}$ — and that edge is
+          heavier (weight $6 > 5$).</p>
+        </div>
+        <figure>
+          <svg width="390" viewBox="0 0 430 355" role="img" aria-label="Adding the minimum cut edge creates a cycle">
+            <ellipse cx="150" cy="262" rx="128" ry="80" fill="#cad9ee" opacity="0.45" stroke="#2e588f" stroke-dasharray="7 5"/>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="85" y1="100" x2="335" y2="230"/>   <!-- 0-3 -->
+              <line x1="75" y1="235" x2="210" y2="315"/>   <!-- 5-4 -->
+            </g>
+            <!-- cycle edges (tree part), drawn red -->
+            <g stroke="#b03a2e" stroke-width="5">
+              <line x1="85" y1="100" x2="210" y2="35"/>
+              <line x1="210" y1="35" x2="335" y2="100"/>
+              <line x1="335" y1="100" x2="335" y2="230"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+            </g>
+            <!-- newly added min cut edge -->
+            <line x1="85" y1="100" x2="75" y2="235" stroke="#b85a26" stroke-width="6"/>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="40">1</text>
+              <circle cx="85" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="85" y="105">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="75" y="240" fill="#1d3c66">5</text>
+              <circle cx="180" cy="225" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="180" y="230" fill="#1d3c66">6</text>
+              <circle cx="210" cy="315" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="210" y="320" fill="#1d3c66">4</text>
+              <text x="45" y="330" fill="#1d3c66" font-style="italic" font-size="19">S</text>
+            </g>
+          </svg>
+          <figcaption>The cycle (red) must cross the cut again — swap out the heavier crossing edge.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Proof of Fact 2 (3/3)</h2>
+      <div class="cols" style="align-items:center;">
+        <div class="smaller">
+          <p>Swap: remove $\{3,4\}$ and keep
+          <span style="white-space:nowrap">$\{0,5\}$ in its place.</span>
+          The result is still a spanning tree, and it is
+          <span class="hl">lighter by $6-5=1$</span>.</p>
+          <p class="fragment" data-fragment-index="1">So $T$ was not minimum after all — a contradiction.
+          A minimum spanning tree must contain the minimum-weight edge of every cut. $\blacksquare$</p>
+        </div>
+        <figure>
+          <svg width="390" viewBox="0 0 430 355" role="img" aria-label="The lighter spanning tree after swapping in the minimum cut edge">
+            <ellipse cx="150" cy="262" rx="128" ry="80" fill="#cad9ee" opacity="0.45" stroke="#2e588f" stroke-dasharray="7 5"/>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="85" y1="100" x2="335" y2="230"/>   <!-- 0-3 -->
+              <line x1="75" y1="235" x2="210" y2="315"/>   <!-- 5-4 -->
+              <line x1="335" y1="230" x2="210" y2="315"/>  <!-- 3-4 swapped out -->
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="85" y1="100" x2="210" y2="35"/>    <!-- 0-1 -->
+              <line x1="210" y1="35" x2="335" y2="100"/>   <!-- 1-2 -->
+              <line x1="335" y1="100" x2="335" y2="230"/>  <!-- 2-3 -->
+              <line x1="210" y1="315" x2="180" y2="225"/>  <!-- 4-6 -->
+              <line x1="75" y1="235" x2="180" y2="225"/>   <!-- 5-6 -->
+              <line x1="85" y1="100" x2="75" y2="235"/>    <!-- 0-5 swapped in -->
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="40">1</text>
+              <circle cx="85" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="85" y="105">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="75" y="240" fill="#1d3c66">5</text>
+              <circle cx="180" cy="225" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="180" y="230" fill="#1d3c66">6</text>
+              <circle cx="210" cy="315" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="210" y="320" fill="#1d3c66">4</text>
+              <text x="45" y="330" fill="#1d3c66" font-style="italic" font-size="19">S</text>
+            </g>
+          </svg>
+          <figcaption>The new tree (green): $\{0,5\}$ in, $\{3,4\}$ out — total weight <span class="nb">$17 \to 16$.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ==================== PART 2: KRUSKAL ==================== -->
+    <section class="center">
+      <h1>Kruskal's Algorithm</h1>
+    </section>
+
+    <section>
+      <h2>Kruskal: The Plan</h2>
+      <ul>
+        <li class="fragment">Maintain a <strong>partition</strong> of the vertices into sets
+          <span class="nb">$S_1,\dots,S_k$,</span> starting with $n$ singletons, and a set $A$ of chosen edges,
+          starting empty.</li>
+        <li class="fragment">$A$ always forms a tree on each set $S_i$ — a forest —
+          and every edge of $A$ is part of the MST.</li>
+        <li class="fragment">Go over the edges <strong>from lightest to heaviest</strong>, taking
+          an edge exactly when its endpoints lie in <em>different</em> sets &mdash; then merge
+          those two sets.</li>
+      </ul>
+      <p class="fragment smaller credit">Sets merge only when we add an edge, so the partition is always
+      exactly the connected components of <span class="nb">$A$.</span></p>
+    </section>
+
+    <section class="wex">
+      <h2>Worked Example: Setup</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- the partition: seven singleton sets, same shading as the later rounds -->
+            <g fill="#f1c79f" opacity="0.4">
+              <circle cx="210" cy="35" r="32"/><circle cx="85" cy="100" r="32"/>
+              <circle cx="335" cy="100" r="32"/><circle cx="335" cy="230" r="32"/>
+              <circle cx="75" cy="235" r="32"/><circle cx="180" cy="225" r="32"/>
+              <circle cx="210" cy="315" r="32"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="85" y1="100" x2="210" y2="35"/><line x1="210" y1="35" x2="335" y2="100"/>
+              <line x1="335" y1="100" x2="335" y2="230"/><line x1="85" y1="100" x2="335" y2="230"/>
+              <line x1="85" y1="100" x2="75" y2="235"/><line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="180" y1="225" x2="210" y2="315"/><line x1="75" y1="235" x2="210" y2="315"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="40">1</text>
+              <circle cx="85" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="85" y="105">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="75" y="240">5</text>
+              <circle cx="180" cy="225" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="180" y="230">6</text>
+              <circle cx="210" cy="315" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="320">4</text>
+            </g>
+          </svg>
+          <figcaption>Each vertex starts in its own set of the partition.</figcaption>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>Initially every set of the partition is a single vertex:
+          <span class="nb">$\{\{0\},\{1\},\dots,\{6\}\}$,</span> and <span class="nb">$A=\emptyset$.</span></p>
+          <p class="fragment" data-fragment-index="0">Kruskal walks the edges in sorted order, shown along the
+          bottom of the next slides. The edge under consideration is
+          <span style="color:var(--accent)">blue</span> — in the list and in the picture;
+          faded edges are already dealt with.</p>
+        </div>
+      </div>
+      <p class="edgelist fragment" data-fragment-index="0">$\{4,6\}_{1} \prec$
+        $\{5,6\}_{1.5} \prec$
+        $\{0,1\}_{2} \prec$
+        $\{4,5\}_{2.5} \prec$
+        $\{2,3\}_{3} \prec$
+        $\{1,2\}_{3.5} \prec$
+        $\{0,3\}_{4} \prec$
+        $\{0,5\}_{5} \prec$
+        $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 1: Edge $\{4,6\}$, Weight 1</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <circle cx="85" cy="100" r="32"/>
+              <circle cx="210" cy="35" r="32"/>
+              <circle cx="335" cy="100" r="32"/>
+              <circle cx="335" cy="230" r="32"/>
+              <circle cx="210" cy="315" r="32"/>
+              <circle cx="75" cy="235" r="32"/>
+              <circle cx="180" cy="225" r="32"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="75" y1="235" x2="180" y2="225"/><line x1="85" y1="100" x2="210" y2="35"/>
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="335" y1="100" x2="335" y2="230"/>
+              <line x1="210" y1="35" x2="335" y2="100"/><line x1="85" y1="100" x2="335" y2="230"/>
+              <line x1="85" y1="100" x2="75" y2="235"/><line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <line x1="210" y1="315" x2="180" y2="225" stroke="#1f6feb" stroke-width="5"/>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="40">1</text>
+              <circle cx="85" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="85" y="105">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="75" y="240">5</text>
+              <circle cx="180" cy="225" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="180" y="230">6</text>
+              <circle cx="210" cy="315" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="320">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>The lightest edge in the whole graph is $\{4,6\}$ (blue).
+          Its endpoints lie in different sets of the partition.</p>
+          <p class="fragment">It is the minimum-weight edge in the cut defined by vertex $4$
+          (or by vertex $6$). By Fact 2 it must be in the MST.</p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="cur">$\{4,6\}_{1} \prec$</span>
+          $\{5,6\}_{1.5} \prec$
+          $\{0,1\}_{2} \prec$
+          $\{4,5\}_{2.5} \prec$
+          $\{2,3\}_{3} \prec$
+          $\{1,2\}_{3.5} \prec$
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 1: Edge $\{4,6\}$, Weight 1</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <circle cx="85" cy="100" r="32"/>
+              <circle cx="210" cy="35" r="32"/>
+              <circle cx="335" cy="100" r="32"/>
+              <circle cx="335" cy="230" r="32"/>
+              <circle cx="75" cy="235" r="32"/>
+              <path d="M180,225 L210,315" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="75" y1="235" x2="180" y2="225"/><line x1="85" y1="100" x2="210" y2="35"/>
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="335" y1="100" x2="335" y2="230"/>
+              <line x1="210" y1="35" x2="335" y2="100"/><line x1="85" y1="100" x2="335" y2="230"/>
+              <line x1="85" y1="100" x2="75" y2="235"/><line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="40">1</text>
+              <circle cx="85" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="85" y="105">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="75" y="240">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>Add $\{4,6\}$ to $A$ and merge the sets $\{4\}$ and <span class="nb">$\{6\}$.</span></p>
+          <p class="fragment">Now $A = \{\{4,6\}\}$ and the partition is
+          <span class="nb">$\{\{0\},\{1\},\{2\},\{3\},\{5\},\{4,6\}\}$.</span></p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="cur">$\{4,6\}_{1} \prec$</span>
+          $\{5,6\}_{1.5} \prec$
+          $\{0,1\}_{2} \prec$
+          $\{4,5\}_{2.5} \prec$
+          $\{2,3\}_{3} \prec$
+          $\{1,2\}_{3.5} \prec$
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 2: Edge $\{5,6\}$, Weight 1.5</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <circle cx="85" cy="100" r="32"/>
+              <circle cx="210" cy="35" r="32"/>
+              <circle cx="335" cy="100" r="32"/>
+              <circle cx="335" cy="230" r="32"/>
+              <circle cx="75" cy="235" r="32"/>
+              <path d="M180,225 L210,315" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="85" y1="100" x2="210" y2="35"/><line x1="210" y1="315" x2="75" y2="235"/>
+              <line x1="335" y1="100" x2="335" y2="230"/><line x1="210" y1="35" x2="335" y2="100"/>
+              <line x1="85" y1="100" x2="335" y2="230"/><line x1="85" y1="100" x2="75" y2="235"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <line x1="75" y1="235" x2="180" y2="225" stroke="#1f6feb" stroke-width="5"/>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="40">1</text>
+              <circle cx="85" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="85" y="105">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="75" y="240">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>The next lightest edge, <span class="nb">$\{5,6\}$,</span> has endpoints in <em>distinct</em> sets:
+          $\{5\}$ and <span class="nb">$\{4,6\}$.</span></p>
+          <p class="fragment">It is the minimum-weight edge in the cut defined by $\{5\}$ — or
+          the cut defined by <span class="nb">$\{4,6\}$.</span> By Fact 2 it is in the MST.</p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="cur">$\{5,6\}_{1.5} \prec$</span>
+          $\{0,1\}_{2} \prec$
+          $\{4,5\}_{2.5} \prec$
+          $\{2,3\}_{3} \prec$
+          $\{1,2\}_{3.5} \prec$
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 2: Edge $\{5,6\}$, Weight 1.5</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <circle cx="85" cy="100" r="32"/>
+              <circle cx="210" cy="35" r="32"/>
+              <circle cx="335" cy="100" r="32"/>
+              <circle cx="335" cy="230" r="32"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="85" y1="100" x2="210" y2="35"/><line x1="210" y1="315" x2="75" y2="235"/>
+              <line x1="335" y1="100" x2="335" y2="230"/><line x1="210" y1="35" x2="335" y2="100"/>
+              <line x1="85" y1="100" x2="335" y2="230"/><line x1="85" y1="100" x2="75" y2="235"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="40">1</text>
+              <circle cx="85" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="85" y="105">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>Add $\{5,6\}$ to $A$ and merge $\{5\}$ with <span class="nb">$\{4,6\}$.</span></p>
+          <p class="fragment"><span class="nb">$A = \{\{4,6\},\{5,6\}\}$;</span> partition
+          <span class="nb">$\{\{0\},\{1\},\{2\},\{3\},\{4,5,6\}\}$.</span></p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="cur">$\{5,6\}_{1.5} \prec$</span>
+          $\{0,1\}_{2} \prec$
+          $\{4,5\}_{2.5} \prec$
+          $\{2,3\}_{3} \prec$
+          $\{1,2\}_{3.5} \prec$
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 3: Edge $\{0,1\}$, Weight 2</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <circle cx="85" cy="100" r="32"/>
+              <circle cx="210" cy="35" r="32"/>
+              <circle cx="335" cy="100" r="32"/>
+              <circle cx="335" cy="230" r="32"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="335" y1="100" x2="335" y2="230"/>
+              <line x1="210" y1="35" x2="335" y2="100"/><line x1="85" y1="100" x2="335" y2="230"/>
+              <line x1="85" y1="100" x2="75" y2="235"/><line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <line x1="85" y1="100" x2="210" y2="35" stroke="#1f6feb" stroke-width="5"/>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="210" y="40">1</text>
+              <circle cx="85" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="85" y="105">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>$\{0,1\}$ (weight 2) joins two singletons — its endpoints are in distinct sets.</p>
+          <p class="fragment">It is the lightest edge across the cut defined by <span class="nb">$\{0\}$,</span>
+          so it is in the MST.</p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="cur">$\{0,1\}_{2} \prec$</span>
+          $\{4,5\}_{2.5} \prec$
+          $\{2,3\}_{3} \prec$
+          $\{1,2\}_{3.5} \prec$
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 3: Edge $\{0,1\}$, Weight 2</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <path d="M85,100 L210,35" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="335" cy="100" r="32"/>
+              <circle cx="335" cy="230" r="32"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="335" y1="100" x2="335" y2="230"/>
+              <line x1="210" y1="35" x2="335" y2="100"/><line x1="85" y1="100" x2="335" y2="230"/>
+              <line x1="85" y1="100" x2="75" y2="235"/><line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="85" y1="100" x2="210" y2="35"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="40" fill="#2c4329">1</text>
+              <circle cx="85" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="85" y="105" fill="#2c4329">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>Add $\{0,1\}$ and merge $\{0\}$ with <span class="nb">$\{1\}$.</span></p>
+          <p class="fragment">Partition: <span class="nb">$\{\{0,1\},\{2\},\{3\},\{4,5,6\}\}$.</span></p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="cur">$\{0,1\}_{2} \prec$</span>
+          $\{4,5\}_{2.5} \prec$
+          $\{2,3\}_{3} \prec$
+          $\{1,2\}_{3.5} \prec$
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 4: Edge $\{4,5\}$, Weight 2.5</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <path d="M85,100 L210,35" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="335" cy="100" r="32"/>
+              <circle cx="335" cy="230" r="32"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="335" y1="100" x2="335" y2="230"/><line x1="210" y1="35" x2="335" y2="100"/>
+              <line x1="85" y1="100" x2="335" y2="230"/><line x1="85" y1="100" x2="75" y2="235"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <line x1="210" y1="315" x2="75" y2="235" stroke="#b03a2e" stroke-width="4" stroke-dasharray="7 5"/>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="85" y1="100" x2="210" y2="35"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="40" fill="#2c4329">1</text>
+              <circle cx="85" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="85" y="105" fill="#2c4329">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>Something different happens: $\{4,5\}$ (weight 2.5, dashed red) has
+          <em>both endpoints in the same set</em>. Adding it would create the cycle
+          <span class="nb">$4\!-\!5\!-\!6\!-\!4$.</span></p>
+          <p class="fragment">This edge cannot be part of the MST. We take no action:
+          $A$ and the partition are unchanged.</p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="done">$\{0,1\}_{2} \prec$</span>
+          <span class="cur">$\{4,5\}_{2.5} \prec$</span>
+          $\{2,3\}_{3} \prec$
+          $\{1,2\}_{3.5} \prec$
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 5: Edge $\{2,3\}$, Weight 3</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <path d="M85,100 L210,35" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="335" cy="100" r="32"/>
+              <circle cx="335" cy="230" r="32"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="210" y1="35" x2="335" y2="100"/>
+              <line x1="85" y1="100" x2="335" y2="230"/><line x1="85" y1="100" x2="75" y2="235"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <line x1="335" y1="100" x2="335" y2="230" stroke="#1f6feb" stroke-width="5"/>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="85" y1="100" x2="210" y2="35"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="40" fill="#2c4329">1</text>
+              <circle cx="85" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="85" y="105" fill="#2c4329">0</text>
+              <circle cx="335" cy="100" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="105">2</text>
+              <circle cx="335" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="335" y="235">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>$\{2,3\}$ (weight 3) joins two singletons — the lightest edge across
+          the cut defined by <span class="nb">$\{2\}$,</span> so it is in the MST.</p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="done">$\{0,1\}_{2} \prec$</span>
+          <span class="done">$\{4,5\}_{2.5} \prec$</span>
+          <span class="cur">$\{2,3\}_{3} \prec$</span>
+          $\{1,2\}_{3.5} \prec$
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 5: Edge $\{2,3\}$, Weight 3</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <path d="M85,100 L210,35" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <path d="M335,100 L335,230" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="210" y1="35" x2="335" y2="100"/>
+              <line x1="85" y1="100" x2="335" y2="230"/><line x1="85" y1="100" x2="75" y2="235"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="85" y1="100" x2="210" y2="35"/>
+              <line x1="335" y1="100" x2="335" y2="230"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="40" fill="#2c4329">1</text>
+              <circle cx="85" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="85" y="105" fill="#2c4329">0</text>
+              <circle cx="335" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="105" fill="#2c4329">2</text>
+              <circle cx="335" cy="230" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="235" fill="#2c4329">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>Add $\{2,3\}$ and merge $\{2\}$ with <span class="nb">$\{3\}$.</span></p>
+          <p class="fragment">Partition: <span class="nb">$\{\{0,1\},\{2,3\},\{4,5,6\}\}$.</span></p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="done">$\{0,1\}_{2} \prec$</span>
+          <span class="done">$\{4,5\}_{2.5} \prec$</span>
+          <span class="cur">$\{2,3\}_{3} \prec$</span>
+          $\{1,2\}_{3.5} \prec$
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 6: Edge $\{1,2\}$, Weight 3.5</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <path d="M85,100 L210,35" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <path d="M335,100 L335,230" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="85" y1="100" x2="335" y2="230"/>
+              <line x1="85" y1="100" x2="75" y2="235"/><line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <line x1="210" y1="35" x2="335" y2="100" stroke="#1f6feb" stroke-width="5"/>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="85" y1="100" x2="210" y2="35"/>
+              <line x1="335" y1="100" x2="335" y2="230"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="40" fill="#2c4329">1</text>
+              <circle cx="85" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="85" y="105" fill="#2c4329">0</text>
+              <circle cx="335" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="105" fill="#2c4329">2</text>
+              <circle cx="335" cy="230" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="235" fill="#2c4329">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>$\{1,2\}$ (weight 3.5) has endpoints in $\{0,1\}$ and $\{2,3\}$ —
+          the lightest edge between distinct sets, so it is in the MST.</p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="done">$\{0,1\}_{2} \prec$</span>
+          <span class="done">$\{4,5\}_{2.5} \prec$</span>
+          <span class="done">$\{2,3\}_{3} \prec$</span>
+          <span class="cur">$\{1,2\}_{3.5} \prec$</span>
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 6: Edge $\{1,2\}$, Weight 3.5</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <path d="M85,100 L210,35 L335,100 L335,230 Q250,120 85,100 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="85" y1="100" x2="335" y2="230"/>
+              <line x1="85" y1="100" x2="75" y2="235"/><line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="85" y1="100" x2="210" y2="35"/>
+              <line x1="335" y1="100" x2="335" y2="230"/>
+              <line x1="210" y1="35" x2="335" y2="100"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="40" fill="#2c4329">1</text>
+              <circle cx="85" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="85" y="105" fill="#2c4329">0</text>
+              <circle cx="335" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="105" fill="#2c4329">2</text>
+              <circle cx="335" cy="230" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="235" fill="#2c4329">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>Add $\{1,2\}$ and merge $\{0,1\}$ with <span class="nb">$\{2,3\}$.</span></p>
+          <p class="fragment">$A = \{\{4,6\},\{5,6\},\{0,1\},$ <span class="nb">$\{2,3\},\{1,2\}\}$;</span>
+          partition <span class="nb">$\{\{0,1,2,3\},\{4,5,6\}\}$.</span></p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="done">$\{0,1\}_{2} \prec$</span>
+          <span class="done">$\{4,5\}_{2.5} \prec$</span>
+          <span class="done">$\{2,3\}_{3} \prec$</span>
+          <span class="cur">$\{1,2\}_{3.5} \prec$</span>
+          $\{0,3\}_{4} \prec$
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 7: Edge $\{0,3\}$, Weight 4</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <path d="M85,100 L210,35 L335,100 L335,230 Q250,120 85,100 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="85" y1="100" x2="75" y2="235"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <line x1="85" y1="100" x2="335" y2="230" stroke="#b03a2e" stroke-width="4" stroke-dasharray="7 5"/>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="85" y1="100" x2="210" y2="35"/>
+              <line x1="335" y1="100" x2="335" y2="230"/>
+              <line x1="210" y1="35" x2="335" y2="100"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="40" fill="#2c4329">1</text>
+              <circle cx="85" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="85" y="105" fill="#2c4329">0</text>
+              <circle cx="335" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="105" fill="#2c4329">2</text>
+              <circle cx="335" cy="230" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="235" fill="#2c4329">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>$\{0,3\}$ (weight 4, dashed red) has both endpoints in $\{0,1,2,3\}$ —
+          it would create a cycle. Skip.</p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="done">$\{0,1\}_{2} \prec$</span>
+          <span class="done">$\{4,5\}_{2.5} \prec$</span>
+          <span class="done">$\{2,3\}_{3} \prec$</span>
+          <span class="done">$\{1,2\}_{3.5} \prec$</span>
+          <span class="cur">$\{0,3\}_{4} \prec$</span>
+          $\{0,5\}_{5} \prec$
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 8: Edge $\{0,5\}$, Weight 5</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <path d="M85,100 L210,35 L335,100 L335,230 Q250,120 85,100 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+              <path d="M75,235 L180,225 L210,315 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="85" y1="100" x2="335" y2="230"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <line x1="85" y1="100" x2="75" y2="235" stroke="#1f6feb" stroke-width="5"/>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="85" y1="100" x2="210" y2="35"/>
+              <line x1="335" y1="100" x2="335" y2="230"/>
+              <line x1="210" y1="35" x2="335" y2="100"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="40" fill="#2c4329">1</text>
+              <circle cx="85" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="85" y="105" fill="#2c4329">0</text>
+              <circle cx="335" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="105" fill="#2c4329">2</text>
+              <circle cx="335" cy="230" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="235" fill="#2c4329">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>$\{0,5\}$ (weight 5) is the lightest edge joining $\{0,1,2,3\}$ and
+          $\{4,5,6\}$ — by Fact 2 it is in the MST.</p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="done">$\{0,1\}_{2} \prec$</span>
+          <span class="done">$\{4,5\}_{2.5} \prec$</span>
+          <span class="done">$\{2,3\}_{3} \prec$</span>
+          <span class="done">$\{1,2\}_{3.5} \prec$</span>
+          <span class="done">$\{0,3\}_{4} \prec$</span>
+          <span class="cur">$\{0,5\}_{5} \prec$</span>
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section class="wex">
+      <h2>Round 8: Edge $\{0,5\}$, Weight 5</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="380" viewBox="0 0 430 355">
+            <!-- partition sets: 32px padded hulls -->
+            <g fill="#f1c79f" opacity="0.4">
+              <path d="M210,35 L335,100 L335,230 L210,315 L75,235 L85,100 Z" stroke="#f1c79f" stroke-width="64" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="210" y1="315" x2="75" y2="235"/><line x1="85" y1="100" x2="335" y2="230"/>
+              <line x1="335" y1="230" x2="210" y2="315"/>
+            </g>
+            <g stroke="#4d7349" stroke-width="5">
+              <line x1="210" y1="315" x2="180" y2="225"/>
+              <line x1="75" y1="235" x2="180" y2="225"/>
+              <line x1="85" y1="100" x2="210" y2="35"/>
+              <line x1="335" y1="100" x2="335" y2="230"/>
+              <line x1="210" y1="35" x2="335" y2="100"/>
+              <line x1="85" y1="100" x2="75" y2="235"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#b85a26">
+              <text x="128" y="52">2</text><text x="290" y="52">3.5</text><text x="352" y="168">3</text>
+              <text x="218" y="152">4</text><text x="55" y="172">5</text><text x="115" y="217">1.5</text>
+              <text x="207" y="265">1</text><text x="118" y="297">2.5</text><text x="288" y="290">6</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="210" cy="35" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="40" fill="#2c4329">1</text>
+              <circle cx="85" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="85" y="105" fill="#2c4329">0</text>
+              <circle cx="335" cy="100" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="105" fill="#2c4329">2</text>
+              <circle cx="335" cy="230" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="335" y="235" fill="#2c4329">3</text>
+              <circle cx="75" cy="235" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="75" y="240" fill="#2c4329">5</text>
+              <circle cx="180" cy="225" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="180" y="230" fill="#2c4329">6</text>
+              <circle cx="210" cy="315" r="16" fill="#c5d6c2" stroke="#4d7349"/><text x="210" y="320" fill="#2c4329">4</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="smaller" style="flex:1.5;">
+          <p>Add $\{0,5\}$ and merge. The partition is now one set:
+          <span class="hl">Kruskal is done!</span></p>
+          <p class="fragment">The MST has weight <span class="nb">$1+1.5+2+3+3.5+5 = 16$;</span>
+          edge $\{3,4\}$ is never needed.</p>
+        </div>
+      </div>
+      <p class="edgelist"><span class="done">$\{4,6\}_{1} \prec$</span>
+          <span class="done">$\{5,6\}_{1.5} \prec$</span>
+          <span class="done">$\{0,1\}_{2} \prec$</span>
+          <span class="done">$\{4,5\}_{2.5} \prec$</span>
+          <span class="done">$\{2,3\}_{3} \prec$</span>
+          <span class="done">$\{1,2\}_{3.5} \prec$</span>
+          <span class="done">$\{0,3\}_{4} \prec$</span>
+          <span class="cur">$\{0,5\}_{5} \prec$</span>
+          $\{3,4\}_{6}$</p>
+    </section>
+
+    <section>
+      <h2>Kruskal: Summary</h2>
+      <div class="box"><span class="tag">Initialisation</span>
+        Partition the vertices into $n$ singleton sets. The forest-edge set $A$ starts empty.
+      </div>
+      <div class="box fragment"><span class="tag">Invariant</span>
+        A partition of the vertices into sets <span class="nb">$S_1,\dots,S_k$;</span> the edges $A$ form a tree on
+        each <span class="nb">$S_i$,</span> and every edge of $A$ is in the MST.
+      </div>
+      <div class="box fragment"><span class="tag">Round $i$</span>
+        Take the $i^{\text{th}}$ lightest edge <span class="nb">$e$.</span> Endpoints in the same set: do nothing.
+        Otherwise $A \leftarrow A \cup \{e\}$ and merge the two sets.
+      </div>
+    </section>
+
+    <section>
+      <h2>Why It Works</h2>
+      <p><strong>Every added edge is safe.</strong>
+      In round <span class="nb">$i$,</span> if $e$ has endpoints in distinct sets of the partition, it must be the
+      <span style="color:var(--accent)">lightest</span> edge with this property:</p>
+      <ul class="smaller">
+        <li class="fragment">every lighter edge either merged two sets earlier, or already had both
+          endpoints in one set;</li>
+        <li class="fragment">so $e$ is the minimum-weight edge in the cut defined by the set containing
+          either endpoint — by Fact 2 it belongs to the MST.</li>
+      </ul>
+      <p class="fragment smaller">So the invariant holds after every round: $A$ is a forest, a tree on each
+      set of the partition, and $A \subseteq$ MST.</p>
+    </section>
+
+    <section>
+      <h2>Termination</h2>
+      <p>Suppose the algorithm terminates with at least two sets $S_1, S_2$ remaining in
+      the partition.</p>
+      <ul>
+        <li class="fragment">Then the algorithm considered <em>all</em> the edges of the graph and never
+          found an edge in the cut defined by <span class="nb">$S_1$.</span></li>
+        <li class="fragment">This implies the graph is not connected — a contradiction.</li>
+      </ul>
+      <p class="fragment">So the partition ends as a single set.</p>
+    </section>
+
+    <section>
+      <h2>The Output Is an MST</h2>
+      <p>$A$ ends with $n-1$ safe edges forming a spanning tree, and every edge of $A$ is in
+      the MST. So $A$ <em>is</em> the minimum spanning tree.</p>
+      <div class="box warn fragment"><span class="tag">Careful</span>
+        On a <em>disconnected</em> graph Kruskal ends with several sets — it computes the minimum
+        spanning <strong>forest</strong>.
+      </div>
+    </section>
+
+    <!-- ==================== PART 3: GRAPHIC MATROID ==================== -->
+    <section class="center">
+      <h1>The Graphic Matroid</h1>
+      <p style="font-size:1.05em; margin-top:0.2em;">A second proof</p>
+    </section>
+
+    <section>
+      <h2>A Second Proof</h2>
+      <p>The cut rule shows why Kruskal's algorithm is correct — but it is an argument
+      about graphs and cuts, tailored to this one problem.</p>
+      <p class="fragment">Now we place the algorithm in a more general context: <em>when do greedy
+      algorithms succeed?</em> That context is
+      <span style="color:var(--accent)"><strong>matroids</strong></span>.</p>
+      <p class="fragment">Greedy is optimal over any matroid — so it is enough to show that
+      the forests of $G$ form one.</p>
+    </section>
+
+    <section>
+      <h2>Forests</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A set of edges that does not contain a cycle is called a <strong>forest</strong>.
+        A forest is a collection of trees.
+      </div>
+      <p class="fragment">Let $G$ be a connected, weighted, undirected graph.
+      Call a subset of edges of $G$
+      <span style="color:var(--accent)"><strong>admissible</strong></span> if it is a forest.</p>
+      <p class="fragment">The sets $A$ built by Kruskal are exactly admissible sets.
+      Let's check the axioms.</p>
+    </section>
+
+    <section>
+      <h2>The Independence Axioms</h2>
+      <p class="smaller">Admissible sets = forests of <span class="nb">$G$.</span> They satisfy:</p>
+      <div class="box fragment"><span class="tag">P0</span>
+        The empty set is admissible.
+      </div>
+      <div class="box fragment"><span class="tag">P1 (Hereditary)</span>
+        Any subset of an admissible set is admissible.
+        <span class="smaller credit">(Removing edges cannot create a cycle.)</span>
+      </div>
+      <div class="box fragment"><span class="tag">P2 (Exchange Property)</span>
+        If $A$ and $B$ are admissible sets with <span class="nb">$|A| &lt; |B|$,</span> then there is an
+        $e \in B \setminus A$ such that $A \cup \{e\}$ is admissible.
+      </div>
+    </section>
+
+    <section>
+      <h2>Why the Exchange Property Holds</h2>
+      <p class="smaller">Key observation: every time we add an edge that does not create a cycle,
+      the number of connected components goes down by one.</p>
+      <div class="cols" style="align-items:flex-end; margin-top:0.5em;">
+        <figure>
+          <svg width="170" viewBox="0 0 130 165">
+            <g fill="#2a2a2a">
+              <circle cx="25" cy="25" r="7"/><circle cx="95" cy="25" r="7"/>
+              <circle cx="25" cy="85" r="7"/><circle cx="95" cy="85" r="7"/>
+              <circle cx="60" cy="140" r="7"/>
+            </g>
+          </svg>
+          <figcaption>5 components</figcaption>
+        </figure>
+        <figure class="fragment" data-fragment-index="1">
+          <svg width="170" viewBox="0 0 130 165">
+            <line x1="25" y1="25" x2="25" y2="85" stroke="#4d7349" stroke-width="4"/>
+            <g fill="#2a2a2a">
+              <circle cx="25" cy="25" r="7"/><circle cx="95" cy="25" r="7"/>
+              <circle cx="25" cy="85" r="7"/><circle cx="95" cy="85" r="7"/>
+              <circle cx="60" cy="140" r="7"/>
+            </g>
+          </svg>
+          <figcaption>4 components</figcaption>
+        </figure>
+        <figure class="fragment" data-fragment-index="2">
+          <svg width="170" viewBox="0 0 130 165">
+            <line x1="25" y1="25" x2="25" y2="85" stroke="#4d7349" stroke-width="4"/>
+            <line x1="25" y1="85" x2="60" y2="140" stroke="#4d7349" stroke-width="4"/>
+            <g fill="#2a2a2a">
+              <circle cx="25" cy="25" r="7"/><circle cx="95" cy="25" r="7"/>
+              <circle cx="25" cy="85" r="7"/><circle cx="95" cy="85" r="7"/>
+              <circle cx="60" cy="140" r="7"/>
+            </g>
+          </svg>
+          <figcaption>3 components</figcaption>
+        </figure>
+      </div>
+      <p class="fragment smaller" data-fragment-index="3">So a forest with $k$ edges on $n$ vertices has exactly
+      $n-k$ connected components.</p>
+    </section>
+
+    <section>
+      <h2>Exchange Property: Proof</h2>
+      <p>Let $A, B$ be forests with <span class="nb">$|A| &lt; |B|$.</span></p>
+      <ul>
+        <li class="fragment">Since components <span class="nb">$= n - |{\rm edges}|$:</span>&ensp;
+          $B$ has <em>fewer</em> connected components than <span class="nb">$A$.</span></li>
+        <li class="fragment">So there must be vertices $u, v$ lying in <em>different</em> components of $A$
+          with <span class="nb">$\{u,v\} \in B$.</span>
+          <span class="smaller credit">(If every $B$-edge stayed inside one $A$-component, each $B$-component
+          would sit inside an $A$-component, giving $B$ at least as many components.)</span></li>
+        <li class="fragment">Adding $\{u,v\}$ to $A$ connects two different components,
+          so it does not create a cycle.</li>
+        <li class="fragment">Hence there is $e \in B\setminus A$ with $A \cup \{e\}$ admissible. $\blacksquare$</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The Graphic Matroid</h2>
+      <div class="box"><span class="tag">Definition</span>
+        The forests of a graph satisfy P0, P1, P2: they form a <strong>matroid</strong>,
+        the <strong>graphic matroid</strong>.
+      </div>
+      <div class="box fragment"><span class="tag">Theorem</span>
+        In any matroid, the <strong>generic greedy algorithm</strong> finds a maximum-size
+        admissible set of optimal weight.
+      </div>
+      <pre class="algo fragment"><code><span class="cm">// generic greedy in a matroid (minimisation)</span>
+<span class="kw">sort</span> the elements by weight, smallest first
+A &larr; &empty;
+<span class="kw">for each</span> element e in sorted order:
+    <span class="kw">if</span> A &cup; {e} is admissible:   <span class="cm">// adding e keeps A a forest</span>
+        A &larr; A &cup; {e}</code></pre>
+    </section>
+
+    <section>
+      <h2>Kruskal Is the Generic Greedy</h2>
+      <p>Instantiate the generic greedy on the graphic matroid: sort the edges, and add $e$
+      whenever $A \cup \{e\}$ is still a forest.</p>
+      <p class="fragment">"Keeps $A$ a forest" is exactly "endpoints in different sets of the
+      partition" &mdash; this <em>is</em> <span class="hl">Kruskal's algorithm</span>.</p>
+      <div class="box fragment"><span class="tag">Second proof</span>
+        The greedy theorem for matroids applies: Kruskal returns a minimum-weight maximal
+        admissible set &mdash; a minimum spanning tree.
+      </div>
+      <p class="fragment smaller credit">And the same proof covers every matroid, not just graphs.</p>
+    </section>
+
+    <!-- ==================== PART 4: UNION-FIND ==================== -->
+    <section class="center">
+      <h1>Union-Find</h1>
+    </section>
+
+    <section>
+      <h2>Implementing Kruskal</h2>
+      <p class="smaller">How do we implement Kruskal's algorithm?
+      Each round needs to do three tasks:</p>
+      <ol class="smaller">
+        <li class="fragment" data-fragment-index="1">identify the $i^{\text{th}}$ lightest edge;</li>
+        <li class="fragment" data-fragment-index="2">determine if its endpoints are in the same set of the partition;</li>
+        <li class="fragment" data-fragment-index="3">(potentially) merge the sets containing its endpoints.</li>
+      </ol>
+      <div class="box fragment" data-fragment-index="4"><span class="tag">Task 1</span>
+        Sort the edges by weight! Time $O(|E| \log |E|)$ —
+        the bottleneck step of the whole algorithm.
+      </div>
+      <p class="fragment smaller" data-fragment-index="5">Tasks 2 and 3 leave graphs behind entirely:
+      maintain a partition of $\{0,\dots,n-1\}$ under <em>same-set queries</em> and <em>merges</em>.
+      We need a new data structure!</p>
+    </section>
+
+    <section>
+      <h2>The Union-Find Data Structure</h2>
+      <p class="smaller">Also called the <em>disjoint-set</em> data structure. It maintains a partition and
+      supports two operations:</p>
+      <div class="box fragment"><span class="tag">find</span>
+        <code>int find(int p)</code> — returns the <em>set identifier</em> of element <span class="nb">$p$.</span>
+        Then $p$ and $q$ lie in the same set if and only if
+        <span class="nb">$\texttt{find}(p) == \texttt{find}(q)$.</span> <span class="credit">(Task 2.)</span>
+      </div>
+      <div class="box fragment"><span class="tag">union</span>
+        <code>void union(int p, int q)</code> — merges the set containing $p$ with the set
+        containing <span class="nb">$q$.</span> <span class="credit">(Task 3.)</span>
+      </div>
+      <p class="fragment smaller">Example: partition <span class="nb">$\{1,7,8\},\ \{3\},\ \{0,4,5\},\ \{2,6,9,10\}$.</span>
+      After <code>union(3,5)</code> the sets $\{3\}$ and $\{0,4,5\}$ become <span class="nb">$\{0,3,4,5\}$.</span></p>
+    </section>
+
+    <section>
+      <h2>High-Level Idea: Each Set Is a Tree</h2>
+      <figure>
+        <svg width="640" viewBox="0 0 540 235" role="img" aria-label="Union-find forest of four trees">
+          <defs>
+            <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0L10 5L0 10z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" marker-end="url(#arrA)">
+            <line x1="37" y1="112" x2="62" y2="62"/>
+            <line x1="103" y1="112" x2="78" y2="62"/>
+            <line x1="232" y1="112" x2="257" y2="62"/>
+            <line x1="298" y1="112" x2="273" y2="62"/>
+            <line x1="362" y1="112" x2="391" y2="62"/>
+            <line x1="438" y1="112" x2="409" y2="62"/>
+            <line x1="478" y1="192" x2="452" y2="141"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+            <circle cx="70" cy="45" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="70" y="50" fill="#1d3c66">7</text>
+            <circle cx="30" cy="125" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="30" y="130">1</text>
+            <circle cx="110" cy="125" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="110" y="130">8</text>
+            <circle cx="180" cy="45" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="180" y="50" fill="#1d3c66">3</text>
+            <circle cx="265" cy="45" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="265" y="50" fill="#1d3c66">5</text>
+            <circle cx="225" cy="125" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="225" y="130">0</text>
+            <circle cx="305" cy="125" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="305" y="130">4</text>
+            <circle cx="400" cy="45" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="400" y="50" fill="#1d3c66">9</text>
+            <circle cx="355" cy="125" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="355" y="130">6</text>
+            <circle cx="445" cy="125" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="445" y="130">2</text>
+            <circle cx="485" cy="205" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="485" y="210">10</text>
+          </g>
+        </svg>
+        <figcaption>The partition $\{1,7,8\},\{3\},\{0,4,5\},\{2,6,9,10\}$ as a forest.
+        Arrows point from child to parent; roots are blue.</figcaption>
+      </figure>
+      <ul class="smaller">
+        <li class="fragment">Each set is represented by a tree of its elements, stored as a
+          <code>parent</code> array.</li>
+        <li class="fragment">The <strong>identifier of a set is the number at the root</strong> of its tree.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Find</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="330" viewBox="0 0 250 235" role="img" aria-label="Find operation tracing a path to the root">
+            <defs>
+              <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" fill="#b85a26"/>
+              </marker>
+              <marker id="arrB2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" fill="#8d8678"/>
+              </marker>
+            </defs>
+            <line x1="72" y1="112" x2="101" y2="62" stroke="#8d8678" stroke-width="2.5" marker-end="url(#arrB2)"/>
+            <g stroke="#b85a26" stroke-width="4" marker-end="url(#arrB)">
+              <line x1="188" y1="192" x2="162" y2="141"/>
+              <line x1="148" y1="112" x2="119" y2="62"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="110" cy="45" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="110" y="50" fill="#1d3c66">9</text>
+              <circle cx="65" cy="125" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="65" y="130">6</text>
+              <circle cx="155" cy="125" r="16" fill="#f1c79f" stroke="#b85a26"/><text x="155" y="130" fill="#6e3416">2</text>
+              <circle cx="195" cy="205" r="16" fill="#f1c79f" stroke="#b85a26"/><text x="195" y="210" fill="#6e3416">10</text>
+            </g>
+          </svg>
+          <figcaption><code>find(10)</code>: follow parents <span class="nb">$10 \to 2 \to 9$,</span> return 9.</figcaption>
+        </figure>
+        <div class="smaller">
+          <p><code>find(p)</code>: trace our way up the tree from $p$ to the root, and return the root.</p>
+          <p class="fragment">The time taken is proportional to the <strong>height of the tree</strong>.</p>
+          <p class="fragment">So the game is: keep the trees shallow.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Union by Size</h2>
+      <p class="smaller"><code>union(p,q)</code>: find the two roots; if they differ, link one root to the other.</p>
+      <figure>
+        <div style="display:flex; gap:1.1em; align-items:center; justify-content:center;">
+          <svg width="380" viewBox="0 20 380 230" role="img" aria-label="Two separate trees before the union">
+            <defs>
+              <marker id="arrC0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" fill="#8d8678"/>
+              </marker>
+            </defs>
+            <g stroke="#8d8678" stroke-width="2.5" marker-end="url(#arrC0)">
+              <line x1="72" y1="112" x2="101" y2="62"/>
+              <line x1="148" y1="112" x2="119" y2="62"/>
+              <line x1="188" y1="192" x2="162" y2="141"/>
+              <line x1="265" y1="177" x2="288" y2="122"/>
+              <line x1="325" y1="177" x2="302" y2="122"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="110" cy="45" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="110" y="50" fill="#1d3c66">9</text>
+              <circle cx="65" cy="125" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="65" y="130">6</text>
+              <circle cx="155" cy="125" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="155" y="130">2</text>
+              <circle cx="195" cy="205" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="195" y="210">10</text>
+              <circle cx="295" cy="105" r="16" fill="#e8d6a8" stroke="#9a7a26"/><text x="295" y="110" fill="#5f4910">5</text>
+              <circle cx="260" cy="190" r="16" fill="#e8d6a8" stroke="#9a7a26"/><text x="260" y="195" fill="#5f4910">0</text>
+              <circle cx="330" cy="190" r="16" fill="#e8d6a8" stroke="#9a7a26"/><text x="330" y="195" fill="#5f4910">4</text>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-style="italic" fill="#6a737d" text-anchor="middle">
+              <text x="130" y="243">size 4</text>
+              <text x="295" y="243">size 3</text>
+            </g>
+          </svg>
+          <div class="fragment" data-fragment-index="2" style="display:flex; gap:1.1em; align-items:center;">
+            <span style="color:#6a737d; font-size:1.3em;">&#x27F9;</span>
+            <svg width="300" viewBox="0 20 300 220" role="img" aria-label="Union of two trees, smaller hangs under larger root">
+            <defs>
+              <marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" fill="#8d8678"/>
+              </marker>
+              <marker id="arrC2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" fill="#9a7a26"/>
+              </marker>
+            </defs>
+            <g stroke="#8d8678" stroke-width="2.5" marker-end="url(#arrC)">
+              <line x1="82" y1="117" x2="126" y2="52"/>
+              <line x1="145" y1="120" x2="145" y2="60"/>
+              <line x1="127" y1="197" x2="141" y2="139"/>
+              <line x1="205" y1="197" x2="219" y2="139"/>
+              <line x1="265" y1="197" x2="235" y2="136"/>
+            </g>
+            <line x1="222" y1="112" x2="160" y2="50" stroke="#9a7a26" stroke-width="4" marker-end="url(#arrC2)"/>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="145" cy="42" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="145" y="47" fill="#1d3c66">9</text>
+              <circle cx="75" cy="130" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="75" y="135">6</text>
+              <circle cx="145" cy="130" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="145" y="135">2</text>
+              <circle cx="230" cy="125" r="16" fill="#e8d6a8" stroke="#9a7a26"/><text x="230" y="130" fill="#5f4910">5</text>
+              <circle cx="123" cy="210" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="123" y="215">10</text>
+              <circle cx="200" cy="210" r="16" fill="#e8d6a8" stroke="#9a7a26"/><text x="200" y="215" fill="#5f4910">0</text>
+              <circle cx="270" cy="210" r="16" fill="#e8d6a8" stroke="#9a7a26"/><text x="270" y="215" fill="#5f4910">4</text>
+            </g>
+            </svg>
+          </div>
+        </div>
+        <figcaption><code>union(4,2)</code>: the roots are 5 and 9.<span class="fragment" data-fragment-index="2"> The smaller tree (tan) hangs under 9.</span></figcaption>
+      </figure>
+      <div class="box smaller fragment" data-fragment-index="1"><span class="tag">Rule</span>
+        The root of the <strong>larger</strong> tree becomes the parent of the
+        <strong>smaller</strong> tree's root.
+      </div>
+      <p class="smaller fragment" data-fragment-index="3">Cost: two finds plus one pointer update — again proportional to tree height.</p>
+    </section>
+
+    <section>
+      <h2>Why Trees Stay Shallow</h2>
+      <div class="box"><span class="tag">Claim</span>
+        With union by size, the height of every tree is <span class="nb">$O(\log n)$.</span>
+      </div>
+      <ul class="smaller">
+        <li class="fragment">A node's depth only increases when its root is linked under another root —
+          and that happens only when its tree is merged with one <em>at least as large</em>.</li>
+        <li class="fragment">So each time an element gets one level deeper, the size of its tree
+          at least <strong>doubles</strong>.</li>
+        <li class="fragment">Sizes cannot exceed <span class="nb">$n$,</span> so depth <span class="nb">$\le \log_2 n$.</span></li>
+      </ul>
+      <div class="box fragment"><span class="tag">Consequence</span>
+        Simple union-find: <code>find</code> and <code>union</code> both run in time <span class="nb">$O(\log n)$.</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Union-Find: Code</h2>
+      <pre class="algo"><code><span class="kw">struct</span> UnionFind:
+    parent[i] &larr; i  <span class="kw">for all</span> i          <span class="cm">// each element its own root</span>
+    size[i]   &larr; 1  <span class="kw">for all</span> i
+
+    <span class="kw">function</span> find(p):
+        <span class="kw">while</span> parent[p] &ne; p:            <span class="cm">// walk up to the root</span>
+            p &larr; parent[p]
+        <span class="kw">return</span> p
+
+    <span class="kw">function</span> union(p, q):
+        rp &larr; find(p);  rq &larr; find(q)
+        <span class="kw">if</span> rp == rq: <span class="kw">return</span>              <span class="cm">// already in the same set</span>
+        <span class="kw">if</span> size[rp] &lt; size[rq]: <span class="kw">swap</span>(rp, rq)
+        parent[rq] &larr; rp                  <span class="cm">// smaller root under larger root</span>
+        size[rp] &larr; size[rp] + size[rq]</code></pre>
+    </section>
+
+    <section>
+      <h2>Path Compression</h2>
+      <div class="cols" style="align-items:center;">
+        <figure>
+          <svg width="150" viewBox="0 0 120 250">
+            <defs>
+              <marker id="arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" fill="#8d8678"/>
+              </marker>
+            </defs>
+            <g stroke="#8d8678" stroke-width="2.5" marker-end="url(#arrD)">
+              <line x1="60" y1="119" x2="60" y2="62"/>
+              <line x1="60" y1="199" x2="60" y2="142"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="60" cy="45" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="60" y="50" fill="#1d3c66">9</text>
+              <circle cx="60" cy="130" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="60" y="135">2</text>
+              <circle cx="60" cy="215" r="16" fill="#fbf7ed" stroke="#2a2a2a"/><text x="60" y="220">10</text>
+            </g>
+          </svg>
+          <figcaption>Before <code>find(10)</code></figcaption>
+        </figure>
+        <figure class="fragment" data-fragment-index="1">
+          <svg width="200" viewBox="0 0 180 250">
+            <defs>
+              <marker id="arrE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" fill="#9a7a26"/>
+              </marker>
+            </defs>
+            <g stroke="#9a7a26" stroke-width="3" marker-end="url(#arrE)">
+              <line x1="55" y1="119" x2="82" y2="62"/>
+              <line x1="125" y1="119" x2="98" y2="62"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+              <circle cx="90" cy="45" r="16" fill="#cad9ee" stroke="#2e588f"/><text x="90" y="50" fill="#1d3c66">9</text>
+              <circle cx="48" cy="130" r="16" fill="#e8d6a8" stroke="#9a7a26"/><text x="48" y="135" fill="#5f4910">2</text>
+              <circle cx="132" cy="130" r="16" fill="#e8d6a8" stroke="#9a7a26"/><text x="132" y="135" fill="#5f4910">10</text>
+            </g>
+          </svg>
+          <figcaption>After: every visited node points directly at the root</figcaption>
+        </figure>
+        <div class="smaller">
+          <p><strong>Path compression:</strong> after a <code>find</code> walks to the root, re-point
+          every node on the path directly at the root — flattening the tree for all future operations.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Path Compression</h2>
+      <div class="box"><span class="tag">Theorem</span>
+        With path compression, any sequence of $m$ union and find operations takes time
+        <span class="nb">$O(m \cdot \alpha(n))$,</span> where $\alpha$ is the <strong>inverse Ackermann function</strong>.
+      </div>
+      <p class="fragment smaller">$\alpha(n)$ is non-constant but extremely slow growing:
+      <span class="nb">$\alpha\!\left(2^{2^{2^{2^{16}}}}\right) \le 5$.</span> Note this is an <em>amortised</em> bound —
+      not every single operation is guaranteed to take time <span class="nb">$\alpha(n)$.</span></p>
+    </section>
+
+    <section>
+      <h2>Aside: How Fast Can MST Be?</h2>
+      <p class="smaller">The advanced union-find shows the bottleneck in Kruskal's algorithm is
+      <em>sorting the edges</em>, not maintaining the partition.</p>
+      <ul class="smaller">
+        <li class="fragment">Chazelle gave an MST algorithm running in time $O(|E| \cdot \alpha(n))$
+          <span class="credit">— "A Minimum Spanning Tree Algorithm with Inverse-Ackermann Type
+          Complexity".</span></li>
+        <li class="fragment">It is <span class="hl">still open</span> whether MST can be solved in time
+          $O(|E|)$ deterministically.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Kruskal with Union-Find</h2>
+      <pre class="algo"><code><span class="cm">// Kruskal's algorithm with union-find</span>
+<span class="kw">sort</span> edges by weight, smallest first          <span class="cm">// O(E log E)</span>
+UnionFind uf(n)
+A &larr; &empty;
+<span class="kw">for</span> (u, v) <span class="kw">in</span> sorted edges:                  <span class="cm">// at most E rounds</span>
+    <span class="kw">if</span> uf.find(u) &ne; uf.find(v):              <span class="cm">// task 2: O(log n)</span>
+        A &larr; A &cup; {u, v}
+        uf.union(u, v)                        <span class="cm">// task 3: O(log n)</span>
+<span class="kw">return</span> A</code></pre>
+    </section>
+
+    <section>
+      <h2>Kruskal: Running Time</h2>
+      <table class="results smaller">
+        <thead><tr><th>step</th><th>cost</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td class="q">sort edges</td><td>$O(|E|\log|E|)$</td></tr>
+          <tr class="fragment"><td class="q">$\le 2|E|$ finds + $\le n-1$ unions</td><td>$O(|E|\log n)$</td></tr>
+          <tr class="fragment hlrow"><td class="q">total</td><td>$O(|E|\log|E|) = O(|E|\log n)$</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller credit">Since <span class="nb">$|E| \le n^2$,</span> <span class="nb">$\log|E| \le 2\log n$</span>.</p>
+    </section>
+
+    <section>
+      <h2>Summary</h2>
+      <ul>
+        <li class="fragment"><strong>Fact 2 (cut rule)</strong>: the MST contains the minimum-weight edge of
+          every cut — proved by a cycle-swap exchange argument.</li>
+        <li class="fragment"><strong>Kruskal</strong>: sort edges; add each edge whose endpoints lie in
+          different components — safe by the cut rule.</li>
+        <li class="fragment">Second proof: forests form the <strong>graphic matroid</strong>
+          (P0, P1, P2), and Kruskal is the generic greedy on it.</li>
+        <li class="fragment"><strong>Union-find</strong> maintains the components: $O(\log n)$ by
+          union by size, amortised $O(\alpha(n))$ with path compression.</li>
+        <li class="fragment">Total: <span class="hl">$O(|E| \log |E|)$, dominated by sorting</span>.</li>
+      </ul>
+    </section>
+
+  </div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [ RevealMath.MathJax3 ],
+
+    mathjax3: {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        macros: {
+          tO:   ['{\\widetilde{O}}'],
+          R:    ['{\\mathbb{R}}'],
+          E:    ['{\\mathbb{E}}']
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+</script>
+</body>
+</html>
