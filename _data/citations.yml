@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-08-19'
+  last_updated: '2026-08-24'
 papers:
   iSjOah4AAAAJ:-95Q15plzcUC:
     citations: 0
@@ -218,7 +218,7 @@ papers:
     title: On the sum-of-squares degree of symmetric quadratic functions
     year: '2016'
   iSjOah4AAAAJ:GdooyxxgJVwC:
-    citations: 20
+    citations: 21
     title: A composition theorem for randomized query complexity
     year: '2017'
   iSjOah4AAAAJ:GnPB-g6toBAC:
@@ -238,7 +238,7 @@ papers:
     title: Synthesis of aligned self-joint carbon nanotubes
     year: '2004'
   iSjOah4AAAAJ:HbR8gkJAVGIC:
-    citations: 119
+    citations: 120
     title: Separations in query complexity based on pointer functions
     year: '2017'
   iSjOah4AAAAJ:HhcuHIWmDEUC:
@@ -350,11 +350,11 @@ papers:
     title: 2011 IEEE 52nd Annual Symposium on Foundations of Computer Science
     year: '2011'
   iSjOah4AAAAJ:PNc4OtJD23oC:
-    citations: 16
+    citations: 17
     title: A composition theorem for randomized query complexity via max conflict complexity
     year: '2018'
   iSjOah4AAAAJ:PyEswDtIyv0C:
-    citations: 27
+    citations: 29
     title: Separations in communication complexity using cheat sheets and information complexity
     year: '2016'
   iSjOah4AAAAJ:Q7hiZQKJ-pAC:
@@ -478,7 +478,7 @@ papers:
     title: Design and Flow Analysis for the Supercritical CO {sub 2} Turbomachinery
     year: '2007'
   iSjOah4AAAAJ:W7OEmFMy1HYC:
-    citations: 16
+    citations: 17
     title: A new rank technique for formula size lower bounds
     year: '2007'
   iSjOah4AAAAJ:WF5omc3nYNoC:
@@ -546,7 +546,7 @@ papers:
     title: Development of a novel botanical drug (DA-9701), as a new prokinetic agent
     year: '2011'
   iSjOah4AAAAJ:_axFR9aDTf0C:
-    citations: 70
+    citations: 71
     title: Improved quantum query algorithms for triangle detection and associativity testing
     year: '2017'
   iSjOah4AAAAJ:_kc_bZDykSQC:
@@ -782,7 +782,7 @@ papers:
     title: Effects of flaking processing of grains on growth performance and nutrient digestibilities for growing Korean native cattle
     year: '1994'
   iSjOah4AAAAJ:mVmsd5A6BfQC:
-    citations: 207
+    citations: 209
     title: Quantum query complexity of state conversion
     year: '2011'
   iSjOah4AAAAJ:mWEH9CqjF64C:
@@ -926,7 +926,7 @@ papers:
     title: The quantum adversary method and classical formula size lower bounds
     year: '2006'
   iSjOah4AAAAJ:u5HHmVD_uO8C:
-    citations: 251
+    citations: 252
     title: Negative weights make adversaries stronger
     year: '2007'
   iSjOah4AAAAJ:uLbwQdceFCQC:
