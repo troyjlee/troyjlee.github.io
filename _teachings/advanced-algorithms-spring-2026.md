@@ -86,6 +86,13 @@ schedule:
     description: >-
       Review of Dijkstra's algorithm · Prim as Dijkstra with bottleneck
       distance · Borůvka's MST algorithm
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week06.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week06.pdf
+      - name: "Animation: Prim & Borůvka"
+        url: /assets/courses/advanced-algorithms-2026/animations/prim.html
   - week: 7
     topic: Minimum Cut
     description: >-
