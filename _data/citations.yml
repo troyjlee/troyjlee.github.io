@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-08-24'
+  last_updated: '2026-08-28'
 papers:
   iSjOah4AAAAJ:-95Q15plzcUC:
     citations: 0
@@ -110,7 +110,7 @@ papers:
     title: On the query complexity of connectivity with global queries
     year: '2021'
   iSjOah4AAAAJ:6G1OFF11MdUC:
-    citations: 328
+    citations: 329
     title: Quantum attacks on Bitcoin, and how to protect against them
     year: '2017'
   iSjOah4AAAAJ:7cqQt8SKcR0C:
@@ -494,7 +494,7 @@ papers:
     title: E-007 Urgent recanalization with stent for severe intracranial stenosis in patients with transient ischemic attack or minor stroke
     year: '2012'
   iSjOah4AAAAJ:Y0pCki6q_DkC:
-    citations: 25
+    citations: 26
     title: Optimal quantum adversary lower bounds for ordered search
     year: '2008'
   iSjOah4AAAAJ:YClPFpxzHmwC:
@@ -782,7 +782,7 @@ papers:
     title: Effects of flaking processing of grains on growth performance and nutrient digestibilities for growing Korean native cattle
     year: '1994'
   iSjOah4AAAAJ:mVmsd5A6BfQC:
-    citations: 209
+    citations: 210
     title: Quantum query complexity of state conversion
     year: '2011'
   iSjOah4AAAAJ:mWEH9CqjF64C:
@@ -926,7 +926,7 @@ papers:
     title: The quantum adversary method and classical formula size lower bounds
     year: '2006'
   iSjOah4AAAAJ:u5HHmVD_uO8C:
-    citations: 252
+    citations: 253
     title: Negative weights make adversaries stronger
     year: '2007'
   iSjOah4AAAAJ:uLbwQdceFCQC:
