@@ -104,8 +104,6 @@
         <li><strong>Prim's algorithm</strong></li>
         <li><strong>Borůvka's algorithm</strong></li>
       </ol>
-      <p class="fragment" style="margin-top:0.8em;">One idea powers everything today:
-        <span class="hl">the MST contains a minimum-weight edge of every cut</span> (Week 5).</p>
     </section>
 
     <!-- ====================================================================
@@ -194,8 +192,7 @@
         <figcaption>The shortest-path tree from vertex 0 (highlighted).</figcaption>
       </figure>
       <p><strong>Question:</strong> is this a minimum spanning tree?</p>
-      <p class="fragment">No! This tree has weight $32$; the MST has weight $21$.
-        But the two problems are close cousins, as we will see today.</p>
+      <p class="fragment">No! This tree has weight $32$; the MST has weight $21$.</p>
     </section>
 
     <section>
@@ -533,8 +530,7 @@
       <p><strong>Inductive step:</strong> suppose the claim holds for all processed
         vertices, and let $v$ be the unprocessed vertex with smallest <code>dist_to</code> — the next
         to be processed.</p>
-      <p class="fragment">We must show $d(0,v) = \texttt{dist_to}[v]$ — the proof sketch is on the
-        next slides.</p>
+      <p class="fragment">We must show $d(0,v) = \texttt{dist_to}[v]$.</p>
     </section>
 
     <section>
@@ -571,37 +567,115 @@
           </g>
           <text x="140" y="262" font-size="19" fill="#2e588f" font-style="italic" text-anchor="middle">processed</text>
         </svg>
-        <figcaption>A hypothetical shorter path (green) to $v$; $u$ is its first unprocessed vertex,
-          reached from processed $x$.</figcaption>
+        <figcaption>The green path: shortest to $v$, with first unprocessed vertex $u$, reached from
+          the processed vertex $x$.</figcaption>
       </figure>
-      <p class="smaller">Suppose for contradiction some path from the source to $v$ is shorter than
-        $\texttt{dist_to}[v]$. Let $u$ be the <em>first unprocessed</em> vertex on that path.</p>
+      <p class="smaller">Take a <em>shortest</em> path from the source to $v$ (green). Since $v$ itself is
+        unprocessed, the path has a <em>first unprocessed</em> vertex $u$; its predecessor $x$ is processed.</p>
     </section>
 
     <section>
       <h2>Key Claim: Proof Sketch</h2>
-      <p>By the inductive hypothesis, $d(0,x) = \texttt{dist_to}[x]$ held when we relaxed the edge
-        $(x,u)$, so $\texttt{dist_to}[u] \le d(0,x) + w(x,u) = d(0,u)$, hence
-        $\texttt{dist_to}[u] = d(0,u)$. Then:</p>
-      <p style="margin:0.6em 0;">
+      <p class="smaller" style="margin:0 0 0.1em;"><strong>Step 1:</strong> relaxing $\{x,u\}$ already
+        upper bounded $\texttt{dist_to}[u]$.</p>
+      <figure>
+        <svg width="380" viewBox="0 0 660 330" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+          <ellipse cx="165" cy="160" rx="150" ry="130" fill="#cad9ee" opacity="0.45"/>
+          <g stroke="#8d8678" stroke-width="1.5">
+            <line x1="230" y1="250" x2="380" y2="300"/><line x1="230" y1="250" x2="400" y2="160"/>
+            <line x1="210" y1="70" x2="400" y2="160"/><line x1="400" y1="160" x2="450" y2="60"/>
+            <line x1="400" y1="160" x2="540" y2="290"/><line x1="450" y1="60" x2="400" y2="160"/>
+          </g>
+          <g stroke="#2c4329" stroke-width="3.5">
+            <line x1="80" y1="160" x2="210" y2="70"/><line x1="210" y1="70" x2="450" y2="60"/>
+            <line x1="450" y1="60" x2="590" y2="150"/><line x1="590" y1="150" x2="540" y2="290"/>
+            <line x1="540" y1="290" x2="380" y2="300"/>
+          </g>
+          <line x1="80" y1="160" x2="230" y2="250" stroke="#2e588f" stroke-width="3.5"/>
+          <g>
+            <circle cx="80" cy="160" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="210" cy="70" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="230" cy="250" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="450" cy="60" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="400" cy="160" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="590" cy="150" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="380" cy="300" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="540" cy="290" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="80" y="166" fill="#1d3c66">0</text>
+            <text x="210" y="76" fill="#1d3c66">x</text>
+            <text x="450" y="66" fill="#2a2a2a">u</text>
+            <text x="380" y="306" fill="#2a2a2a">v</text>
+          </g>
+          <text x="140" y="262" font-size="19" fill="#2e588f" font-style="italic" text-anchor="middle">processed</text>
+        </svg>
+      </figure>
+      <p class="fragment smaller" style="margin:0.2em 0 0;">$x$ is processed, so $\texttt{dist_to}[x] = d(0,x)$,
+        and the edge $\{x,u\}$ was relaxed:</p>
+      <p class="fragment smaller" style="margin:0.1em 0;">
         $$\begin{aligned}
-        d(0,v) &= d(0,u) + d(u,v)\\[2pt]
-        &\ge d(0,u) &&\text{weights are non-negative}\\[2pt]
-        &= \texttt{dist_to}[u]\\[2pt]
+        \texttt{dist_to}[u] &\;\le\; \texttt{dist_to}[x] + w(\{x,u\})\\[2pt]
+        &\;=\; d(0,x) + w(\{x,u\})
+        \end{aligned}$$</p>
+    </section>
+
+    <section>
+      <h2>Key Claim: Proof Sketch</h2>
+      <p class="smaller" style="margin:0 0 0.1em;"><strong>Step 2:</strong> $d(0,v) \ge \texttt{dist_to}[v]$.</p>
+      <figure>
+        <svg width="380" viewBox="0 0 660 330" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+          <ellipse cx="165" cy="160" rx="150" ry="130" fill="#cad9ee" opacity="0.45"/>
+          <g stroke="#8d8678" stroke-width="1.5">
+            <line x1="230" y1="250" x2="380" y2="300"/><line x1="230" y1="250" x2="400" y2="160"/>
+            <line x1="210" y1="70" x2="400" y2="160"/><line x1="400" y1="160" x2="450" y2="60"/>
+            <line x1="400" y1="160" x2="540" y2="290"/><line x1="450" y1="60" x2="400" y2="160"/>
+          </g>
+          <g stroke="#2c4329" stroke-width="3.5">
+            <line x1="80" y1="160" x2="210" y2="70"/><line x1="210" y1="70" x2="450" y2="60"/>
+            <line x1="450" y1="60" x2="590" y2="150"/><line x1="590" y1="150" x2="540" y2="290"/>
+            <line x1="540" y1="290" x2="380" y2="300"/>
+          </g>
+          <line x1="80" y1="160" x2="230" y2="250" stroke="#2e588f" stroke-width="3.5"/>
+          <g>
+            <circle cx="80" cy="160" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="210" cy="70" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="230" cy="250" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="450" cy="60" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="400" cy="160" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="590" cy="150" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="380" cy="300" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="540" cy="290" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="80" y="166" fill="#1d3c66">0</text>
+            <text x="210" y="76" fill="#1d3c66">x</text>
+            <text x="450" y="66" fill="#2a2a2a">u</text>
+            <text x="380" y="306" fill="#2a2a2a">v</text>
+          </g>
+          <text x="140" y="262" font-size="19" fill="#2e588f" font-style="italic" text-anchor="middle">processed</text>
+        </svg>
+      </figure>
+      <p class="fragment smaller" style="margin:0.2em 0 0;">The green path reaches $x$ with length at least
+        $d(0,x)$, then takes $\{x,u\}$, then a tail of length at least $0$, so:</p>
+      <div class="fragment" style="font-size:0.8em; margin:0.3em 0;">
+        $$\begin{aligned}
+        d(0,v) &\ge d(0,x) + w(\{x,u\}) &&\text{the tail has length $\ge 0$}\\[2pt]
+        &\ge \texttt{dist_to}[u] &&\text{Step 1}\\[2pt]
         &\ge \texttt{dist_to}[v] &&\text{$v$ is processed next}
         \end{aligned}$$
-      </p>
+      </div>
     </section>
 
     <section>
       <h2>Key Claim: Proof Sketch</h2>
       <p>So $d(0,v) \ge \texttt{dist_to}[v]$. We always have
         $d(0,v) \le \texttt{dist_to}[v]$ (relaxations only record real path lengths), hence
-        <span class="hl">$d(0,v) = \texttt{dist_to}[v]$</span>. $\blacksquare$</p>
+        $d(0,v) = \texttt{dist_to}[v]$. $\blacksquare$</p>
       <div class="box warn fragment">
         <span class="tag">Careful</span>
-        Non-negativity is used exactly once, in $d(u,v) \ge 0$: the unprocessed tail of the green
-        path can't shorten it.
+        Non-negativity is used exactly once: the tail of the green path has length $\ge 0$,
+        so it can't shorten $d(0,v)$.
       </div>
     </section>
 
@@ -1121,16 +1195,23 @@
 
     <section>
       <h2>LLSP Dijkstra: Correctness</h2>
-      <p>Same induction as before: <em>when a vertex is processed, its <code>dist_to</code> value
-        is its longest-leg distance from the source.</em></p>
-      <p class="fragment">Let $v$ be the next vertex to be processed: unprocessed, with smallest
-        <code>dist_to</code>. Every finite <code>dist_to</code> is the longest leg of some real path,
-        so $d(0,v) \le \texttt{dist_to}[v]$ always.</p>
-      <div class="box warn fragment">
-        <span class="tag">Assumption (for contradiction)</span>
-        $d(0,v) < \texttt{dist_to}[v]$: some path to $v$ has longest leg $d(0,v)$, strictly
-        smaller than $\texttt{dist_to}[v]$.
+      <div class="box">
+        <span class="tag">Claim</span>
+        When a vertex is processed, its <code>dist_to</code> value equals its actual
+        longest-leg distance from the source.
       </div>
+      <p class="fragment">We show this by induction on the number of vertices processed.</p>
+      <p class="fragment"><strong>Base case:</strong> the first vertex processed is the source itself, with
+        $\texttt{dist_to} = 0$. The longest-leg distance to the source is $0$, so the claim holds.</p>
+    </section>
+
+    <section>
+      <h2>LLSP Dijkstra: Correctness</h2>
+      <p><strong>Inductive step:</strong> suppose the claim holds for all processed
+        vertices, and let $v$ be the unprocessed vertex with smallest <code>dist_to</code> — the next
+        to be processed.</p>
+      <p class="fragment">We must show $d(0,v) = \texttt{dist_to}[v]$, where $d$ is now the
+        <em>longest-leg</em> distance.</p>
     </section>
 
     <section>
@@ -1167,27 +1248,117 @@
           </g>
           <text x="140" y="262" font-size="19" fill="#2e588f" font-style="italic" text-anchor="middle">processed</text>
         </svg>
-        <figcaption>A path to $v$ with longest leg $d(0,v)$ (green); $u$ is its first unprocessed
-          vertex, reached from processed $x$.</figcaption>
+        <figcaption>The green path: longest leg $d(0,v)$, with first unprocessed vertex $u$, reached from
+          the processed vertex $x$.</figcaption>
       </figure>
-      <p class="smaller">Every leg of the green path is at most $d(0,v)$ — in particular
-        $w(x,u) \le d(0,v)$. And its prefix up to $x$ is a path to $x$, so $d(0,x) \le d(0,v)$ too.</p>
+      <p class="smaller">Take a path from the source to $v$ whose longest leg is $d(0,v)$ (green). Since $v$
+        itself is unprocessed, the path has a <em>first unprocessed</em> vertex $u$; its predecessor $x$ is
+        processed.</p>
     </section>
 
     <section>
       <h2>LLSP Dijkstra: Correctness</h2>
-      <p>When $x$ was processed, edge $(x,u)$ was relaxed, with $\texttt{dist_to}[x] = d(0,x)$
-        by the inductive hypothesis. So:</p>
-      <div style="font-size:0.8em; margin:0.4em 0;">
+      <p class="smaller" style="margin:0 0 0.1em;"><strong>Step 1:</strong> relaxing $\{x,u\}$ already
+        upper bounded $\texttt{dist_to}[u]$.</p>
+      <figure>
+        <svg width="380" viewBox="0 0 660 330" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+          <ellipse cx="165" cy="160" rx="150" ry="130" fill="#cad9ee" opacity="0.45"/>
+          <g stroke="#8d8678" stroke-width="1.5">
+            <line x1="230" y1="250" x2="380" y2="300"/><line x1="230" y1="250" x2="400" y2="160"/>
+            <line x1="210" y1="70" x2="400" y2="160"/><line x1="400" y1="160" x2="450" y2="60"/>
+            <line x1="400" y1="160" x2="540" y2="290"/><line x1="450" y1="60" x2="400" y2="160"/>
+          </g>
+          <g stroke="#2c4329" stroke-width="3.5">
+            <line x1="80" y1="160" x2="210" y2="70"/><line x1="210" y1="70" x2="450" y2="60"/>
+            <line x1="450" y1="60" x2="590" y2="150"/><line x1="590" y1="150" x2="540" y2="290"/>
+            <line x1="540" y1="290" x2="380" y2="300"/>
+          </g>
+          <line x1="80" y1="160" x2="230" y2="250" stroke="#2e588f" stroke-width="3.5"/>
+          <g>
+            <circle cx="80" cy="160" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="210" cy="70" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="230" cy="250" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="450" cy="60" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="400" cy="160" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="590" cy="150" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="380" cy="300" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="540" cy="290" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="80" y="166" fill="#1d3c66">0</text>
+            <text x="210" y="76" fill="#1d3c66">x</text>
+            <text x="450" y="66" fill="#2a2a2a">u</text>
+            <text x="380" y="306" fill="#2a2a2a">v</text>
+          </g>
+          <text x="140" y="262" font-size="19" fill="#2e588f" font-style="italic" text-anchor="middle">processed</text>
+        </svg>
+      </figure>
+      <p class="fragment smaller" style="margin:0.2em 0 0;">$x$ is processed, so $\texttt{dist_to}[x] = d(0,x)$,
+        and the edge $\{x,u\}$ was relaxed:</p>
+      <p class="fragment smaller" style="margin:0.1em 0;">
         $$\begin{aligned}
-        \texttt{dist_to}[u] &\le \max\big(\texttt{dist_to}[x],\, w(x,u)\big) &&\text{relaxing $(x,u)$}\\[2pt]
-        &= \max\big(d(0,x),\, w(x,u)\big) &&\text{inductive hypothesis}\\[2pt]
-        &\le d(0,v) &&\text{previous slide}\\[2pt]
-        &< \texttt{dist_to}[v] &&\text{assumption}
+        \texttt{dist_to}[u] &\;\le\; \max\big(\texttt{dist_to}[x],\, w(\{x,u\})\big)\\[2pt]
+        &\;=\; \max\big(d(0,x),\, w(\{x,u\})\big)
+        \end{aligned}$$</p>
+    </section>
+
+    <section>
+      <h2>LLSP Dijkstra: Correctness</h2>
+      <p class="smaller" style="margin:0 0 0.1em;"><strong>Step 2:</strong> $d(0,v) \ge \texttt{dist_to}[v]$.</p>
+      <figure>
+        <svg width="380" viewBox="0 0 660 330" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+          <ellipse cx="165" cy="160" rx="150" ry="130" fill="#cad9ee" opacity="0.45"/>
+          <g stroke="#8d8678" stroke-width="1.5">
+            <line x1="230" y1="250" x2="380" y2="300"/><line x1="230" y1="250" x2="400" y2="160"/>
+            <line x1="210" y1="70" x2="400" y2="160"/><line x1="400" y1="160" x2="450" y2="60"/>
+            <line x1="400" y1="160" x2="540" y2="290"/><line x1="450" y1="60" x2="400" y2="160"/>
+          </g>
+          <g stroke="#2c4329" stroke-width="3.5">
+            <line x1="80" y1="160" x2="210" y2="70"/><line x1="210" y1="70" x2="450" y2="60"/>
+            <line x1="450" y1="60" x2="590" y2="150"/><line x1="590" y1="150" x2="540" y2="290"/>
+            <line x1="540" y1="290" x2="380" y2="300"/>
+          </g>
+          <line x1="80" y1="160" x2="230" y2="250" stroke="#2e588f" stroke-width="3.5"/>
+          <g>
+            <circle cx="80" cy="160" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="210" cy="70" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="230" cy="250" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="1.5"/>
+            <circle cx="450" cy="60" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="400" cy="160" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="590" cy="150" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="380" cy="300" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="540" cy="290" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="80" y="166" fill="#1d3c66">0</text>
+            <text x="210" y="76" fill="#1d3c66">x</text>
+            <text x="450" y="66" fill="#2a2a2a">u</text>
+            <text x="380" y="306" fill="#2a2a2a">v</text>
+          </g>
+          <text x="140" y="262" font-size="19" fill="#2e588f" font-style="italic" text-anchor="middle">processed</text>
+        </svg>
+      </figure>
+      <p class="fragment smaller" style="margin:0.2em 0 0;">Every leg of the green path is at most $d(0,v)$,
+        and its prefix is a path to $x$, so:</p>
+      <div class="fragment" style="font-size:0.8em; margin:0.3em 0;">
+        $$\begin{aligned}
+        d(0,v) &\ge \max\big(d(0,x),\, w(\{x,u\})\big) &&\text{both terms are $\le d(0,v)$}\\[2pt]
+        &\ge \texttt{dist_to}[u] &&\text{Step 1}\\[2pt]
+        &\ge \texttt{dist_to}[v] &&\text{$v$ is processed next}
         \end{aligned}$$
       </div>
-      <p class="fragment">So the <em>unprocessed</em> vertex $u$ has a strictly smaller
-        <code>dist_to</code> than $v$ — contradicting the choice of $v$. $\blacksquare$</p>
+    </section>
+
+    <section>
+      <h2>LLSP Dijkstra: Correctness</h2>
+      <p>So $d(0,v) \ge \texttt{dist_to}[v]$. We always have
+        $d(0,v) \le \texttt{dist_to}[v]$ (every finite $\texttt{dist_to}$ is the longest leg of a real
+        path), hence $d(0,v) = \texttt{dist_to}[v]$. $\blacksquare$</p>
+      <div class="box warn fragment">
+        <span class="tag">Note</span>
+        Here we never needed non-negative weights: every leg of a path is at most its longest leg,
+        whatever the weights. LLSP Dijkstra is correct for arbitrary weights.
+      </div>
     </section>
 
     <!-- ====================================================================
@@ -1365,39 +1536,96 @@
           </g>
           <text x="45" y="45" font-size="18" font-style="italic" fill="#2e588f">S</text>
         </svg>
-        <figcaption>$(x,y)$: the smallest-weight edge in the cut defined by $S$ — Prim's choice.</figcaption>
+        <figcaption>$\{x,y\}$: the smallest-weight edge in the cut defined by $S$ — Prim's choice.</figcaption>
       </figure>
       <div class="box">
         <span class="tag">Claim</span>
         $\texttt{dist_to}[y] \le \texttt{dist_to}[v]$ for any $v \notin S$ — so LLSP Dijkstra
         may also process $y$ next.
       </div>
-      <p class="fragment smaller">Two cases, depending on how $w(x,y)$ compares with the bottleneck
+      <p class="fragment smaller">Two cases, depending on how $w(\{x,y\})$ compares with the bottleneck
         distance $d(0,x)$.</p>
     </section>
 
     <section>
-      <h2>Case 1: $w(x,y) \ge d(0,x)$</h2>
-      <p>Then the path to $x$ followed by edge $(x,y)$ has bottleneck $w(x,y)$, and
-        $$d(0,y) = \texttt{dist_to}[y] = w(x,y).$$</p>
-      <p class="fragment">Any path from the source to any $v \notin S$ must contain an edge of the cut
-        defined by $S$, and every cut edge weighs at least $w(x,y)$.</p>
-      <p class="fragment">So every $v \notin S$ has
-        $\texttt{dist_to}[v] \ge w(x,y) = \texttt{dist_to}[y]$. &#10003;</p>
+      <h2>Case 1: $w(\{x,y\}) \ge d(0,x)$</h2>
+      <figure style="margin-bottom:0.2em;">
+        <svg width="320" viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+          <ellipse cx="150" cy="140" rx="130" ry="105" fill="#cad9ee" opacity="0.45"/>
+          <g stroke="#8d8678" stroke-width="1.5">
+            <line x1="90" y1="90" x2="200" y2="100"/><line x1="90" y1="90" x2="110" y2="190"/>
+            <line x1="110" y1="190" x2="190" y2="200"/><line x1="200" y1="100" x2="110" y2="190"/>
+            <line x1="200" y1="100" x2="370" y2="160"/><line x1="190" y1="200" x2="350" y2="240"/>
+            <line x1="190" y1="200" x2="370" y2="160"/>
+          </g>
+          <line x1="200" y1="100" x2="360" y2="55" stroke="#b85a26" stroke-width="4"/>
+          <g>
+            <circle cx="90" cy="90" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <circle cx="110" cy="190" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <circle cx="190" cy="200" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <circle cx="200" cy="100" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <circle cx="360" cy="55" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="370" cy="160" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="350" cy="240" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="200" y="106" fill="#2c4329">x</text>
+            <text x="360" y="61" fill="#2a2a2a">y</text>
+          </g>
+          <text x="45" y="45" font-size="18" font-style="italic" fill="#2e588f">S</text>
+        </svg>
+        <figcaption>$\{x,y\}$: Prim's choice — the smallest-weight edge across the cut.</figcaption>
+      </figure>
+      <p class="smaller">Then the path to $x$ followed by edge $\{x,y\}$ has bottleneck $w(\{x,y\})$, and
+        $$d(0,y) = \texttt{dist_to}[y] = w(\{x,y\}).$$</p>
+      <p class="fragment smaller">Any path from the source to any $v \notin S$ must contain an edge of the cut
+        defined by $S$, and every cut edge weighs at least $w(\{x,y\})$.</p>
+      <p class="fragment smaller">So every $v \notin S$ has
+        $\texttt{dist_to}[v] \ge w(\{x,y\}) = \texttt{dist_to}[y]$. &#10003;</p>
     </section>
 
     <section>
-      <h2>Case 2: $w(x,y) &lt; d(0,x)$</h2>
-      <p>Then appending the cheap edge $(x,y)$ does not raise the bottleneck:
+      <h2>Case 2: $w(\{x,y\}) &lt; d(0,x)$</h2>
+      <figure style="margin-bottom:0.2em;">
+        <svg width="360" viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+          <ellipse cx="150" cy="140" rx="130" ry="105" fill="#cad9ee" opacity="0.45"/>
+          <g stroke="#8d8678" stroke-width="1.5">
+            <line x1="90" y1="90" x2="200" y2="100"/><line x1="90" y1="90" x2="110" y2="190"/>
+            <line x1="110" y1="190" x2="190" y2="200"/><line x1="200" y1="100" x2="110" y2="190"/>
+            <line x1="200" y1="100" x2="370" y2="160"/><line x1="190" y1="200" x2="350" y2="240"/>
+            <line x1="190" y1="200" x2="370" y2="160"/>
+          </g>
+          <line x1="200" y1="100" x2="360" y2="55" stroke="#b85a26" stroke-width="4"/>
+          <g>
+            <circle cx="90" cy="90" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <circle cx="110" cy="190" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <circle cx="190" cy="200" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <circle cx="200" cy="100" r="15" fill="#c5d6c2" stroke="#4d7349" stroke-width="1.5"/>
+            <circle cx="360" cy="55" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="370" cy="160" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+            <circle cx="350" cy="240" r="15" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="200" y="106" fill="#2c4329">x</text>
+            <text x="360" y="61" fill="#2a2a2a">y</text>
+          </g>
+          <text x="45" y="45" font-size="18" font-style="italic" fill="#2e588f">S</text>
+        </svg>
+        <figcaption>$\{x,y\}$: Prim's choice — the smallest-weight edge across the cut.</figcaption>
+      </figure>
+      <p class="smaller">Then appending the cheap edge $\{x,y\}$ does not raise the bottleneck:
         $d(0,y) = d(0,x)$.</p>
-      <p class="fragment">For any unprocessed $v$ we have $\texttt{dist_to}[v] \ge d(0,x)$ —
+      <p class="fragment smaller">For any unprocessed $v$ we have $\texttt{dist_to}[v] \ge d(0,x)$ —
         otherwise $v$ would have been processed <em>before</em> $x$ (Dijkstra processes bottleneck
         distances in nondecreasing order).</p>
-      <p class="fragment">So again $\texttt{dist_to}[v] \ge d(0,x) = \texttt{dist_to}[y]$. &#10003;</p>
-      <div class="box fragment">
+      <p class="fragment smaller">So again $\texttt{dist_to}[v] \ge d(0,x) = \texttt{dist_to}[y]$. &#10003;</p>
+    </section>
+
+    <section>
+      <h2>Prim = LLSP Dijkstra</h2>
+      <div class="box">
         <span class="tag">Conclusion</span>
-        Prim = LLSP Dijkstra. Growing an MST and computing bottleneck distances are the
-        <em>same computation</em>.
+        Growing an MST and computing bottleneck distances are the <em>same computation</em>.
       </div>
     </section>
 
@@ -1405,10 +1633,10 @@
       <h2>Prim vs. Dijkstra: History</h2>
       <ul>
         <li class="fragment">Prim published his spanning tree algorithm in <strong>1957</strong>.</li>
-        <li class="fragment">Dijkstra published his shortest-path algorithm in <strong>1959</strong> —
+        <li class="fragment">Dijkstra published his shortest-path algorithm in <strong>1959</strong> in
           "A Note on Two Problems in Connexion with Graphs".</li>
         <li class="fragment">The <em>same paper</em> also gave an MST algorithm identical to Prim's —
-          his "Problem 1"; shortest paths were "Problem 2".</li>
+          Dijkstra's "Problem 1"; shortest paths were "Problem 2".</li>
         <li class="fragment">In fact, Dijkstra could have given a single algorithm in a more abstract
           setting: his shortest-path algorithm run with the bottleneck distance <em>is</em>
           Prim's algorithm.</li>
