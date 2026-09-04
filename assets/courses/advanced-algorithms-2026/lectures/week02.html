@@ -84,6 +84,18 @@
 
     /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
     .reveal figure svg { max-width: 100%; height: auto; }
+
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
   </style>
 </head>
 
@@ -1462,7 +1474,7 @@ sheeptractor</code></pre>
       <p>Probably the most famous problem in theoretical computer science.</p>
       <p class="fragment">In the SAT problem the input is a formula that is an AND of ORs of
         variables and their negations.</p>
-      <p class="fragment">$$(x_3 \vee x_2 \vee x_4) \wedge (\neg x_4 \vee x_1 \vee \neg x_2)
+      <p class="fragment" style="font-size:0.85em;">$$(x_3 \vee x_2 \vee x_4) \wedge (\neg x_4 \vee x_1 \vee \neg x_2)
         \wedge (\neg x_3 \vee \neg x_4 \vee \neg x_1)$$</p>
       <p class="fragment">Is there a Boolean assignment to the variables that makes the
         formula true?</p>
@@ -1472,7 +1484,7 @@ sheeptractor</code></pre>
 
     <section>
       <h2>3-SAT</h2>
-      <p>$$(x_3 \vee x_2 \vee x_4) \wedge (\neg x_4 \vee x_1 \vee \neg x_2)
+      <p style="font-size:0.85em;">$$(x_3 \vee x_2 \vee x_4) \wedge (\neg x_4 \vee x_1 \vee \neg x_2)
         \wedge (\neg x_3 \vee \neg x_4 \vee \neg x_1)$$</p>
       <p class="fragment">This is an example of a <strong>3-SAT</strong> formula because each
         OR clause involves 3 variables or their negations.</p>
@@ -1574,6 +1586,9 @@ sheeptractor</code></pre>
     plugins: [ RevealMath.MathJax3 ],
 
     mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
       tex: {
         inlineMath: [['\\(', '\\)'], ['$', '$']],
         displayMath: [['\\[', '\\]'], ['$$', '$$']],

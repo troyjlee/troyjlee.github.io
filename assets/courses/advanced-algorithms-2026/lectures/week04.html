@@ -70,6 +70,18 @@
 
     /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
     .reveal figure svg { max-width: 100%; height: auto; }
+
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
   </style>
 </head>
 
@@ -1039,7 +1051,7 @@
       <h2>The Greedy Choice Fails</h2>
       <p class="smaller">It is no longer obvious that choosing the lecture with the earliest
          finishing time is best &mdash; and in fact it isn't:</p>
-      <table class="results">
+      <table class="results" style="font-size:0.85em;">
         <thead><tr><th>Schedule</th><th>Lectures</th><th>Enjoyment</th></tr></thead>
         <tbody>
           <tr><td class="q">Earliest-finish greedy</td><td>$b, d, f, i$</td><td>$3+6+8+7 = 24$</td></tr>
@@ -1236,6 +1248,9 @@
     plugins: [ RevealMath.MathJax3 ],
 
     mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
       tex: {
         inlineMath: [['\\(', '\\)'], ['$', '$']],
         displayMath: [['\\[', '\\]'], ['$$', '$$']],

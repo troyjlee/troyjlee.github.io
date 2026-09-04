@@ -542,9 +542,15 @@
         $$\mathrm{dp}_2(v) \;=\; \sum_{u\,:\,\text{child of } v}
            \max\big(\mathrm{dp}_1(u),\, \mathrm{dp}_2(u)\big)$$
       </div>
-      <p class="fragment" data-fragment-index="3">Note the asymmetry: skipping $v$
-        does <em>not</em> force us to rob the children — we take whichever is better
-        for each child independently.</p>
+    </section>
+
+    <section>
+      <h2>MIS: the Update</h2>
+      <div class="box"><span class="tag">Asymmetry</span>
+        Skipping $v$ does <em>not</em> force us to rob the children — each child
+        independently takes whichever of $\mathrm{dp}_1(u)$, $\mathrm{dp}_2(u)$ is better.</div>
+      <p class="fragment">Robbing $v$ leaves the children no choice: only
+        $\mathrm{dp}_2(u)$ is allowed.</p>
     </section>
 
     <section>
@@ -1629,9 +1635,9 @@ pair&lt;int,int&gt; dfs(int v, int parent) {
 
     <section>
       <h2>Augmenting Paths</h2>
-      <div class="box"><span class="tag">Definition</span>
-        An <b>augmenting path</b> is a path that starts and ends at <em>unmatched</em>
-        vertices and alternates off, on, off, $\dots$, off the matching.</div>
+      <div class="box smaller"><span class="tag">Definition</span>
+        An <b>augmenting path</b> starts and ends at <em>unmatched</em> vertices and
+        alternates off, on, $\dots$, off the matching.</div>
       <ul class="smaller">
         <li class="fragment">Swapping along one always gives a matching with <b>one
           more</b> edge — so a maximum $M$ admits <em>no</em> augmenting path.</li>
@@ -2087,6 +2093,9 @@ pair&lt;int,int&gt; dfs(int v, int parent) {
     plugins: [ RevealMath.MathJax3 ],
 
     mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
       tex: {
         inlineMath: [['\\(', '\\)'], ['$', '$']],
         displayMath: [['\\[', '\\]'], ['$$', '$$']],

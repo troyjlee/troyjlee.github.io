@@ -207,10 +207,10 @@
         $$\texttt{dist_to}[v] = \min\big(\texttt{dist_to}[v],\; \texttt{dist_to}[u] + w(u,v)\big)$$
         </div>
       </div>
-      <p class="fragment smaller">Colour code for the pictures that follow:
-        <span style="background:#c5d6c2; padding:0.05em 0.3em; border-radius:3px;">processed</span>
-        <span style="background:#cad9ee; padding:0.05em 0.3em; border-radius:3px;">in the frontier (finite dist)</span>
-        <span style="background:#f1c79f; padding:0.05em 0.3em; border-radius:3px;">being processed</span></p>
+      <p class="fragment smaller">Colour code:
+        <span style="background:#c5d6c2; padding:0.05em 0.3em; border-radius:3px; white-space:nowrap;">processed</span>
+        <span style="background:#cad9ee; padding:0.05em 0.3em; border-radius:3px; white-space:nowrap;">frontier</span>
+        <span style="background:#f1c79f; padding:0.05em 0.3em; border-radius:3px; white-space:nowrap;">being processed</span></p>
     </section>
 
     <section>
@@ -1977,6 +1977,9 @@
     plugins: [ RevealMath.MathJax3 ],
 
     mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
       tex: {
         inlineMath: [['\\(', '\\)'], ['$', '$']],
         displayMath: [['\\[', '\\]'], ['$$', '$$']],
