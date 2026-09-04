@@ -70,6 +70,18 @@
 
     /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
     .reveal figure svg { max-width: 100%; height: auto; }
+
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
   </style>
 </head>
 
@@ -540,7 +552,11 @@ std::vector&lt;<span class="kw">double</span>&gt; bellmanFord(<span class="kw">i
               <td>Bellman&ndash;Ford</td><td>$O(|V|\cdot|E|)$</td></tr>
         </tbody>
       </table>
-      <p class="fragment smaller">All three are edge relaxation; they differ only in the
+    </section>
+
+    <section>
+      <h2>One Family of Algorithms</h2>
+      <p>All three are edge relaxation; they differ only in the
       <em>order</em> and <em>number of times</em> edges are relaxed — and the DP view tells
       us why each schedule is enough.</p>
       <div class="box fragment"><span class="tag">Animation</span>
@@ -1076,8 +1092,8 @@ std::vector&lt;<span class="kw">double</span>&gt; bellmanFord(<span class="kw">i
     }
     <span class="kw">return</span> best;
 }</code></pre>
-      <div class="box fragment"><span class="tag">Running time</span>
-        $O(n^2)$ — the version we can easily rediscover.</div>
+      <p class="fragment"><span style="color:var(--accent); font-weight:700;">Running time:</span>
+      $O(n^2)$ — the version we can easily rediscover.</p>
     </section>
 
     <section>
@@ -1157,11 +1173,16 @@ std::vector&lt;<span class="kw">double</span>&gt; bellmanFord(<span class="kw">i
         <figcaption>dp&#8242; after processing 0, 4, 7 — leaves are dp&#8242;, each internal node stores
         the max of its subtree. The update dp&#8242;[8] = 4 (gold) refreshes one leaf-to-root path.</figcaption>
       </figure>
-      <p class="fragment smaller">The array values form the leaves of a binary tree, where we
-      take the maximum at each node. A prefix-max query
+    </section>
+
+    <section>
+      <h2>Segment Tree</h2>
+      <p>The array values form the leaves of a binary tree, where we
+      take the maximum at each node.</p>
+      <p class="fragment">A prefix-max query
       $\max_{v &lt; z[i]} \texttt{dp}'[v]$ checks at most $O(\log n)$ nodes; an update
       rewrites the $\log n$ nodes on the path from leaf to root.</p>
-      <p class="fragment smaller">Total: <span class="hl">$O(n \log n)$</span> for LIS.</p>
+      <p class="fragment">Total: <span class="hl">$O(n \log n)$</span> for LIS.</p>
     </section>
 
     <section>
@@ -1307,6 +1328,7 @@ std::vector&lt;<span class="kw">double</span>&gt; bellmanFord(<span class="kw">i
     <!-- ============================== WRAP-UP ============================== -->
     <section>
       <h2>Week 1 Takeaways</h2>
+      <p class="smaller">Paths in graphs:</p>
       <table class="results smaller">
         <thead><tr><th>Problem</th><th>Subproblem</th><th>Time</th></tr></thead>
         <tbody>
@@ -1314,6 +1336,16 @@ std::vector&lt;<span class="kw">double</span>&gt; bellmanFord(<span class="kw">i
               <td>best path <em>into</em> $v$, in topological order</td><td>$O(|V|+|E|)$</td></tr>
           <tr><td class="q">Bellman&ndash;Ford</td>
               <td>shortest walk to $v$ using <em>at most $k$ edges</em></td><td>$O(|V|\cdot|E|)$</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Week 1 Takeaways</h2>
+      <p class="smaller">Sequences and arrays:</p>
+      <table class="results smaller">
+        <thead><tr><th>Problem</th><th>Subproblem</th><th>Time</th></tr></thead>
+        <tbody>
           <tr><td class="q">Max subarray sum</td>
               <td>best sum <em>ending at</em> $i$</td><td>$\Theta(n)$</td></tr>
           <tr><td class="q">Longest increasing subsequence</td>
@@ -1345,6 +1377,9 @@ std::vector&lt;<span class="kw">double</span>&gt; bellmanFord(<span class="kw">i
     plugins: [ RevealMath.MathJax3 ],
 
     mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
       tex: {
         inlineMath: [['\\(', '\\)'], ['$', '$']],
         displayMath: [['\\[', '\\]'], ['$$', '$$']],
