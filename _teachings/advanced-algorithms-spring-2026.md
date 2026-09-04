@@ -97,7 +97,7 @@ schedule:
     topic: Minimum Cut
     description: >-
       Randomised algorithms and basic probability · Karger's randomised
-      contraction algorithm
+      contraction algorithm · the Karger–Stein algorithm
     materials:
       - name: Lecture slides
         url: /assets/courses/advanced-algorithms-2026/lectures/week07.html
