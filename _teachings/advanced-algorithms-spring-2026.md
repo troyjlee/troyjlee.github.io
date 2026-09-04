@@ -98,6 +98,11 @@ schedule:
     description: >-
       Randomised algorithms and basic probability · Karger's randomised
       contraction algorithm
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week07.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week07.pdf
   - week: 8
     topic: Maximum Flow
     description: >-

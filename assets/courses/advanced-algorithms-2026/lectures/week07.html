@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 7: Minimum Cut — Advanced Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <style>
+    :root { --accent: #1f6feb; --muted: #6a737d; }
+
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--accent); letter-spacing: -0.01em; }
+    .reveal h1 { font-size: 2.0em; }
+    /* Theme styling (uppercase headings, small-caps tags) garbles MathJax output. */
+    .reveal mjx-container { text-transform: none; font-variant: normal; letter-spacing: normal; }
+    .reveal h2 { text-align: center; }
+    .reveal section { font-size: 0.92em; }
+    .reveal a { color: var(--accent); }
+
+    /* Left-align most slides; titles stay centered via their own class. */
+    .reveal .slides section { text-align: left; }
+    .reveal .slides section.center { text-align: center; }
+
+    /* Boxes for theorems / definitions / takeaways. */
+    .box {
+      border-left: 5px solid var(--accent);
+      background: #f4f8ff;
+      padding: 0.5em 0.8em; margin: 0.4em 0; border-radius: 4px;
+    }
+    .box .tag { font-variant: small-caps; font-weight: 700; color: var(--accent);
+                letter-spacing: 0.04em; margin-right: 0.4em; }
+    .box.warn { border-left-color: #d29922; background: #fff8ec; }
+    .box.warn .tag { color: #b07400; }
+
+    /* Result highlight pill. */
+    .hl { background: #fff3b0; padding: 0.05em 0.25em; border-radius: 3px; }
+
+    /* Results table. */
+    .reveal table.results { margin: 0.7em auto; border-collapse: collapse; }
+    .reveal table.results th, .reveal table.results td {
+      padding: 0.4em 1.1em; border: none; text-align: left; }
+    .reveal table.results thead th { color: var(--accent);
+      border-bottom: 2px solid var(--accent); font-variant: small-caps; letter-spacing: 0.03em; }
+    .reveal table.results tbody tr { border-bottom: 1px solid #e7ebf0; }
+    .reveal table.results td.q { font-weight: 700; }
+    .reveal table.results tr.hlrow { background: #fff8d6; }
+    /* Compact variant: single-line cells, tighter gutters. */
+    .reveal table.results.compact th, .reveal table.results.compact td {
+      padding: 0.4em 0.7em; white-space: nowrap; }
+
+    /* Two-column layout helper:  <div class="cols"> <div>..</div> <div>..</div> </div> */
+    .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+    .cols > * { flex: 1; min-width: 0; }
+
+    /* Pseudocode / algorithm blocks. */
+    .reveal pre.algo {
+      font-size: 0.5em; line-height: 1.35; box-shadow: none;
+      border: 1px solid #d0d7de; border-radius: 6px; background: #fbfcfd;
+      width: 100%;
+    }
+    .reveal pre.algo code { padding: 0.8em 1em; }
+    .algo .kw { color: var(--accent); font-weight: 700; }
+    .algo .cm { color: var(--muted); font-style: italic; }
+
+    .reveal .credit { color: var(--muted); font-size: 0.8em; }
+    .reveal .smaller { font-size: 0.82em; }
+    .reveal figure { margin: 0; text-align: center; }
+    .reveal figcaption { font-size: 0.7em; color: var(--muted); margin-top: 0.3em; }
+    .reveal .footnote { position: absolute; bottom: 0.2em; left: 0.6em;
+                        font-size: 0.55em; color: var(--muted); }
+
+    /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
+    .reveal figure svg { max-width: 100%; height: auto; }
+
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== TITLE ============================== -->
+    <section class="center">
+      <h1>Week 7: Minimum Cut</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Advanced Algorithms</p>
+    </section>
+
+    <!-- ============================== ROADMAP ============================ -->
+    <section>
+      <h2>Roadmap</h2>
+      <ol style="line-height:1.9; margin-top:0.6em;">
+        <li>Randomised Algorithms</li>
+        <li>Basic Probability</li>
+        <li>Minimum Cut and Edge Contraction</li>
+        <li>Karger's Algorithm</li>
+        <li>The Karger&ndash;Stein Algorithm</li>
+      </ol>
+      <p class="fragment">This week the algorithm gets to <em>flip coins</em> — and we will prove
+        how likely it is to be right.</p>
+    </section>
+
+    <!-- ==================== PART 1: RANDOMISED ALGORITHMS ================= -->
+    <section class="center"><h1>Randomised Algorithms</h1></section>
+
+    <section>
+      <h2>A Motivating Example</h2>
+      <p>Say that we have a vector of size $1{,}000{,}000$ where each entry is zero or one.</p>
+      <p class="fragment">We are <span style="color:var(--accent)">promised</span> that at least
+        $500{,}000$ entries are one.</p>
+      <p class="fragment">The goal is to output the index of an entry that is one.</p>
+      <p class="fragment">Scanning from the left works&hellip; but in the worst case reads
+        $500{,}001$ entries.</p>
+    </section>
+
+    <section>
+      <h2>Using Randomness</h2>
+      <p>A randomised algorithm is allowed to flip coins and use the outcomes to decide on its
+        next action.</p>
+      <p class="fragment">Different runs of a randomised algorithm on an input can produce <em>different</em> outputs.</p>
+      <p class="fragment">We don't require a randomised algorithm to always output the right
+        answer, but instead that it outputs the right answer at least $2/3$ of the time.</p>
+      <p class="fragment smaller">The exact fraction doesn't matter too much — we will see how to
+        boost it.</p>
+    </section>
+
+    <section>
+      <h2>A Randomised Solution</h2>
+      <p>How could we use coin flips to find a one in the input?</p>
+      <p class="fragment">Choose a random entry: since at least half the entries are one, the
+        probability it is a one is at least $1/2$.</p>
+      <p class="fragment">What is the chance we don't see a one after looking at $2$ random
+        entries? This is like the chance of not seeing heads after flipping a coin twice.</p>
+      <p class="fragment" style="text-align:center; font-size:1.15em;">
+        <span class="hl">HH&ensp;HT&ensp;TH</span>&ensp;TT
+      </p>
+      <p class="fragment">Of the four outcomes only one has no head: the chance of failure
+        is $1/4$.</p>
+    </section>
+
+    <section>
+      <h2>Driving Down the Error</h2>
+      <p>Similarly, the chance of not seeing a head after $3$ coin flips is $1/8$ — the only
+        "bad" outcome is TTT.</p>
+      <p class="fragment">By randomly looking at $t$ entries we reduce the failure probability
+        to $1/2^t$.</p>
+      <div class="box warn fragment"><span class="tag">Contrast</span>
+        Any deterministic algorithm must read $n/2 + 1$ entries to always succeed. The
+        randomised algorithm reads $30$ entries and fails with probability $2^{-30}$.</div>
+    </section>
+
+    <section>
+      <h2>Repeat Until Success</h2>
+      <p>Notice that when we query an entry we can <em>see</em> whether it is a one: success is
+        recognisable.</p>
+      <p class="fragment">So there is no need to fix a budget in advance — keep querying random
+        entries until we find a one.</p>
+      <p class="fragment">This algorithm is <span style="color:var(--accent)">never</span>
+        wrong. What varies from run to run is how long it takes.</p>
+      <p class="fragment">Each query finds a one with probability at least $1/2$. We will see that the <em>expected</em> number of queries to see a one is 2.</p>
+    </section>
+
+    <section>
+      <h2>Las Vegas Algorithms</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A randomised algorithm is <em>Las Vegas</em> if it always outputs the correct answer,
+        and its running time is a random variable that we bound in expectation.</div>
+      <p class="fragment">No matter what the random coins, the answer is right; depending on the
+        random coins it may take longer or shorter to get there.</p>
+      <p class="fragment smaller">There is no worst-case bound here: an unlucky run can query
+        for a long time. It halts with probability $1$, and what we control is the
+        <em>expected</em> number of queries.</p>
+    </section>
+
+    <section>
+      <h2>A More General Setting</h2>
+      <p>Now say the input is an array of $n$ integers.</p>
+      <p class="fragment">We want to find the <em>minimum value</em> of the array, and we are
+        guaranteed the minimum value appears at least $d$ times.</p>
+      <p class="fragment">Unlike the previous problem, we don't know when we have succeeded —
+        we can't recognise the minimum when we see it.</p>
+      <p class="fragment">So repeating until success is not an option: we must fix the number of
+        queries in advance and live with the chance of a wrong answer.</p>
+    </section>
+
+    <section>
+      <h2>A Generic Randomised Algorithm</h2>
+      <p>Randomly query $T$ entries and return the smallest value amongst them.</p>
+      <p class="fragment">It only fails if the minimum value is not amongst the entries
+        queried.</p>
+      <p class="fragment">How large should $T$ be to ensure this happens only with small
+        probability?</p>
+    </section>
+
+    <section>
+      <h2>Monte Carlo Algorithms</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A randomised algorithm is <em>Monte Carlo</em> if, on every input, it halts within a
+        worst-case time bound and outputs the correct answer with probability at least
+        $2/3$.</div>
+      <p class="fragment">No matter what the random coins, the algorithm will halt within a
+        specified time; depending on the random coins it may get the right answer or not.</p>
+      <p class="fragment">Karger's algorithm will be exactly of this kind.</p>
+    </section>
+
+    <section>
+      <h2>Two Kinds of Guarantee</h2>
+      <table class="results compact">
+        <thead><tr><th></th><th>Answer</th><th>Running time</th></tr></thead>
+        <tbody>
+          <tr><td class="q">Las Vegas</td><td>always correct</td><td>random</td></tr>
+          <tr><td class="q">Monte Carlo</td><td>may be wrong</td><td>worst-case bound</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ======================= PART 2: BASIC PROBABILITY ================== -->
+    <section class="center"><h1>Basic Probability</h1></section>
+
+    <section>
+      <h2>Coin Flips</h2>
+      <p>Let $p = d/n$. When we randomly choose an entry, the probability it is the minimum
+        value is at least $p$.</p>
+      <p class="fragment">If we have a coin that lands heads with probability $p$, how many
+        times do we have to flip it to see a heads with probability at least $9/10$?</p>
+      <div class="box fragment"><span class="tag">Fact</span>
+        By independence of the flips, if we toss the coin $t$ times the probability we do
+        <em>not</em> see a head is $(1-p)^t$.</div>
+    </section>
+
+    <section>
+      <h2>A Useful Inequality</h2>
+      <div class="cols">
+        <figure>
+          <svg width="400" viewBox="0 0 380 265" xmlns="http://www.w3.org/2000/svg">
+            <!-- axes -->
+            <line x1="15" y1="205" x2="352" y2="205" stroke="#8d8678" stroke-width="1.5"/>
+            <line x1="200" y1="18" x2="200" y2="258" stroke="#8d8678" stroke-width="1.5"/>
+            <!-- y = 1 + x -->
+            <line x1="67" y1="254" x2="333" y2="45" stroke="#2e588f" stroke-width="2"/>
+            <!-- y = e^x -->
+            <polyline fill="none" stroke="#b85a26" stroke-width="2.5"
+              points="25,200.5 42,199 60,197.6 78,195.4 95,192.7 113,189.2 130,184.8 148,179 165,171.6 183,162.2 200,150 218,134.4 235,114.3 253,88.6 270,55.5 281,31.3"/>
+            <text x="292" y="34" font-family="Helvetica,Arial" font-size="16" font-weight="600" fill="#b85a26">y = e&#739;</text>
+            <text x="300" y="72" font-family="Helvetica,Arial" font-size="16" font-weight="600" fill="#2e588f">y = 1 + x</text>
+            <text x="345" y="222" font-family="Helvetica,Arial" font-size="14" fill="#6a737d">x</text>
+          </svg>
+        </figure>
+        <div>
+          <div class="box"><span class="tag">Fact</span> $1 + x \le e^x$ for any real $x$.</div>
+          <p class="fragment smaller">Here $e = 2.718\ldots$ is Euler's constant,
+            $$e = \lim_{n\to\infty}\left(1 + \frac{1}{n}\right)^n.$$</p>
+          <p class="fragment smaller">The line $1+x$ is tangent to $e^x$ at $x=0$ and the
+            curve is convex — that is the whole proof.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Applying the Inequality</h2>
+      <p>Taking $x = -p$ gives $1 - p \le e^{-p}$, and so
+        $$(1-p)^t \le e^{-pt}.$$</p>
+      <p class="fragment">If we take $t = 1/p$ flips, the failure probability is at most
+        $$\frac{1}{e} \le 0.368.$$</p>
+      <p class="fragment">Taking $t = \lceil \ln(10)\rceil/p \le 3/p$ flips pushes the failure
+        probability below $1/10$.</p>
+    </section>
+
+    <section>
+      <h2>Back to Finding the Minimum</h2>
+      <p>An array of $n$ integers whose minimum appears at least $d$ times; output the
+        minimum.</p>
+      <p class="fragment">Each random query lands on the minimum with probability
+        $p \ge d/n$.</p>
+      <div class="box fragment"><span class="tag">Conclusion</span>
+        Query $3n/d$ random entries and return the smallest. This is wrong with probability at
+        most $1/10$.</div>
+      <p class="fragment smaller">This is a Monte Carlo algorithm: a fixed budget of queries,
+        and a small chance of a wrong answer.</p>
+    </section>
+
+    <section>
+      <h2>Amplification</h2>
+      <p>The argument is general, as long as a correct answer can be picked out of a batch
+        of runs whenever one is present &mdash; here, the smallest value returned.</p>
+      <div class="box fragment"><span class="tag">Fact</span>
+        If each run succeeds with probability at least $p$, then $t \ge 3/p$ independent
+        runs contain a successful one with probability at least $9/10$.</div>
+      <p class="fragment">Proof: all $t$ runs fail with probability at most
+        $(1-p)^{t} \le e^{-pt} \le e^{-3} \lt 1/10$.</p>
+      <p class="fragment smaller">We will use this twice more today, for Karger's algorithm
+        and its refinement.</p>
+    </section>
+
+    <section>
+      <h2>Back to Las Vegas</h2>
+      <p>So far we have fixed the number of queries $t$ in advance and bounded the chance of
+        failure by $(1-p)^t$.</p>
+      <p class="fragment">Now let's return to the Las Vegas algorithm for finding a one: query
+        random entries until we see a one.</p>
+      <p class="fragment">This algorithm never fails. What is random is the number of queries
+        it makes &mdash; and we want to bound this on average.</p>
+      <p class="fragment smaller">In coin language: a coin lands heads with probability $p$.
+        How many flips until the first heads, on average? Making "on average" precise is the
+        job of <span style="color:var(--accent)">expectation</span>.</p>
+    </section>
+
+    <section>
+      <h2>Expectation</h2>
+      <p>Let us look at the <span style="color:var(--accent)">expected</span> number of times we
+        have to flip the coin before we see heads. Let $X$ be a variable representing the number
+        of flips until the first heads.</p>
+      <div class="box fragment"><span class="tag">Definition</span>
+        The expectation of $X$ is a weighted average:
+        $$\E[X] = 1\cdot \Pr[X=1] + 2\cdot \Pr[X=2] + \cdots$$</div>
+    </section>
+
+    <section>
+      <h2>The Geometric Distribution</h2>
+      <p>In our case of a coin that is heads with probability $p$ we have
+        $$\Pr[X = i] = (1-p)^{i-1}p.$$</p>
+      <p class="fragment">So
+        $$\E[X] = 1\cdot p + 2\cdot(1-p)p + 3\cdot(1-p)^2p + \cdots$$</p>
+      <p class="fragment">This is tricky, as it is <em>not</em> a geometric series&hellip;</p>
+    </section>
+
+    <section>
+      <h2>Geometric Series</h2>
+      <p>Let's start with an easier case, the geometric series
+        $$p + (1-p)p + (1-p)^2p + (1-p)^3p + \cdots$$</p>
+      <div class="box fragment"><span class="tag">Observation</span>
+        The $i$th term is exactly $\Pr[X = i]$. As the sum of probabilities of disjoint events
+        that cover all outcomes, this series is $1$.</div>
+    </section>
+
+    <section>
+      <h2>Break Down</h2>
+      <p class="smaller">We break $\E[X]$ down as a sum of geometric series — the $i$th row is a
+        geometric series starting at $(1-p)^{i-1}p$, which sums to $(1-p)^{i-1}$:</p>
+      <p style="font-size:0.85em;">
+        $$\begin{alignedat}{5}
+        \E[X] &{}= 1\cdot p && {}+ 2\cdot (1-p)p && {}+ 3\cdot (1-p)^2p && {}+ \cdots &&\\
+              &{}= 1\cdot p && {}+ 1\cdot (1-p)p && {}+ 1\cdot (1-p)^2p && {}+ \cdots
+                 && \quad\color{#1f6feb}{= 1}\\
+              &             && {}+ 1\cdot (1-p)p && {}+ 1\cdot (1-p)^2p && {}+ \cdots
+                 && \quad\color{#1f6feb}{= (1-p)}\\
+              &             &&                   && {}+ 1\cdot (1-p)^2p && {}+ \cdots
+                 && \quad\color{#1f6feb}{= (1-p)^2}
+        \end{alignedat}$$
+      </p>
+    </section>
+
+    <section>
+      <h2>Final Expectation</h2>
+      <p>Summing the rows,
+        $$\E[X] = 1 + (1-p) + (1-p)^2 + (1-p)^3 + \cdots$$</p>
+      <p class="fragment">Multiplying by $p$ turns this into the series that sums to $1$,
+        so $p\cdot \E[X] = 1$.</p>
+      <div class="box fragment"><span class="tag">Fact</span>
+        The expected number of coin flips before we see heads is $\E[X] = 1/p$.</div>
+    </section>
+
+    <section>
+      <h2>Back to the First Example</h2>
+      <p>A vector of $1{,}000{,}000$ entries, at least half of them one; output the index of
+        a one.</p>
+      <p class="fragment">Each random query lands on a one with probability $p \ge 1/2$.</p>
+      <div class="box fragment"><span class="tag">Conclusion</span>
+        The Las Vegas algorithm &mdash; query until we see a one &mdash; is always correct and
+        needs $\E[X] = 1/p \le 2$ queries on average.</div>
+      <p class="fragment smaller">Compare: any deterministic algorithm must read $500{,}001$
+        entries to be sure of finding a one.</p>
+    </section>
+
+    <section>
+      <h2>Putting It Together</h2>
+      <p>Two things to carry forward:</p>
+      <ul>
+        <li class="fragment">independent repetitions drive the failure probability down as
+          $(1-p)^t \le e^{-pt}$ &mdash; this one returns for Karger's algorithm,</li>
+        <li class="fragment">the expected number of trials until the first success is $1/p$.</li>
+      </ul>
+    </section>
+
+    <!-- ============ PART 3: MINIMUM CUT AND EDGE CONTRACTION ============= -->
+    <section class="center"><h1>Minimum Cut and Edge Contraction</h1></section>
+
+    <section>
+      <h2>Cuts</h2>
+      <p>Say that we are given an undirected, unweighted graph $G$ that is connected.</p>
+      <div class="box fragment"><span class="tag">Definition</span>
+        For every subset of vertices $S$ there is an associated cut: the set of edges with
+        <em>exactly one</em> endpoint in $S$. We denote this set of edges by
+        $\operatorname{cut}(S)$.</div>
+      <p class="fragment">Note that $S$ and the complement of $S$ define the same cut.</p>
+    </section>
+
+    <section>
+      <h2>Minimum Cut</h2>
+      <p>The cut defined by the empty set is not interesting and we ignore it.</p>
+      <p class="fragment">When the graph has $n$ vertices there are $2^{n-1} - 1$ interesting
+        cuts: each of the $2^n$ subsets defines a cut, but $S$ and its complement coincide, and
+        we drop $S = \emptyset$.</p>
+    </section>
+
+    <section>
+      <h2>Minimum Cut</h2>
+      <div class="box"><span class="tag">Problem</span>
+        The minimum cut problem is to determine the smallest size of one of these cuts:
+        $$\operatorname{mincut}(G) = \min_{\substack{S\\ 0 \lt |S| \le n/2}} |\operatorname{cut}(S)|$$</div>
+    </section>
+
+    <section>
+      <h2>Orientation</h2>
+      <p>The <span style="color:var(--accent)">degree</span> of a vertex is the number of edges
+        incident to it.</p>
+      <p class="fragment">The cut of a single vertex $\{v\}$ is called a
+        <span style="color:var(--accent)">star cut</span>; its size is the degree of $v$. So the
+        size of a minimum cut is at most the minimum degree of a vertex.</p>
+      <p class="fragment">When there are $n$ vertices, the degree of a vertex is at most $n-1$
+        — so $\operatorname{mincut}(G) \le n - 1$.</p>
+    </section>
+
+    <section>
+      <h2>Brute-Force Algorithm</h2>
+      <p>The brute-force algorithm would iterate over every cut and compute its size — time
+        exponential in the number of vertices.</p>
+      <p class="fragment">In fact, when the graph has $m$ edges and $n$ vertices there is a
+        randomised algorithm that computes the minimum cut in time $O(m\log^2 n)$
+        <span class="credit">[Gawrychowski, Mozes, Weimann, 2019]</span>.</p>
+      <div class="box fragment"><span class="tag">Today</span>
+        A simple randomised algorithm due to <strong>Karger</strong> that works in time
+        $O(n^2 m\log n)$.</div>
+    </section>
+
+    <section>
+      <h2>Edge Contraction</h2>
+      <p class="smaller">The key primitive in Karger's algorithm is
+        <span style="color:var(--accent)">edge contraction</span>: delete the edge, merge its
+        endpoints into one new "super-vertex", and keep all outgoing edges with multiplicity.</p>
+      <figure>
+        <svg width="640" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+          <!-- left triangle -->
+          <line x1="90" y1="150" x2="210" y2="70"  stroke="#8d8678" stroke-width="2"/>
+          <line x1="90" y1="150" x2="210" y2="230" stroke="#8d8678" stroke-width="2"/>
+          <line x1="210" y1="70" x2="210" y2="230" stroke="#8d8678" stroke-width="2"/>
+          <circle cx="90"  cy="150" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <circle cx="210" cy="70"  r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <circle cx="210" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <text x="90"  y="156" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">0</text>
+          <text x="210" y="76"  text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">1</text>
+          <text x="210" y="236" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">2</text>
+          <!-- arrow -->
+          <line x1="285" y1="150" x2="440" y2="150" stroke="#2e588f" stroke-width="4"/>
+          <polygon points="440,140 462,150 440,160" fill="#2e588f"/>
+          <text x="373" y="120" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">contract edge {0, 1}</text>
+          <!-- right: contracted graph, parallel edges -->
+          <path d="M 540 80 Q 512 155 540 230" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 540 80 Q 568 155 540 230" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <circle cx="540" cy="80"  r="18" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2.5"/>
+          <circle cx="540" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <text x="540" y="46"  text-anchor="middle" font-family="Helvetica,Arial" font-size="15" font-weight="600" fill="#5f4910">{0, 1}</text>
+          <text x="540" y="236" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">2</text>
+        </svg>
+      </figure>
+      <p class="fragment smaller">The result can be a <span style="color:var(--accent)">multigraph</span>,
+        i.e.&nbsp;have more than one edge between two vertices. We label the super-vertex with
+        the union of the labels of the original endpoints.</p>
+    </section>
+
+    <section>
+      <h2>Cuts and Edge Contraction</h2>
+      <figure>
+        <svg width="640" viewBox="0 0 700 290" xmlns="http://www.w3.org/2000/svg">
+          <!-- left blob over 0,1 -->
+          <ellipse cx="150" cy="110" rx="112" ry="82" fill="#cad9ee" opacity="0.45"/>
+          <text x="48" y="52" font-family="Helvetica,Arial" font-size="18" font-weight="600" font-style="italic" fill="#1d3c66">S</text>
+          <line x1="90" y1="150" x2="210" y2="70" stroke="#8d8678" stroke-width="2"/>
+          <line x1="90" y1="150" x2="210" y2="230" stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="210" y1="70" x2="210" y2="230" stroke="#b03a2e" stroke-width="2.75"/>
+          <circle cx="90"  cy="150" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="210" cy="70"  r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="210" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <text x="90"  y="156" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">0</text>
+          <text x="210" y="76"  text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">1</text>
+          <text x="210" y="236" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">2</text>
+          <!-- arrow -->
+          <line x1="290" y1="150" x2="430" y2="150" stroke="#2e588f" stroke-width="4"/>
+          <polygon points="430,140 452,150 430,160" fill="#2e588f"/>
+          <text x="363" y="120" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">contract {0, 1}</text>
+          <!-- right -->
+          <ellipse cx="545" cy="80" rx="78" ry="52" fill="#cad9ee" opacity="0.45"/>
+          <text x="628" y="48" font-family="Helvetica,Arial" font-size="18" font-weight="600" font-style="italic" fill="#1d3c66">S&#8242;</text>
+          <path d="M 545 80 Q 517 155 545 230" fill="none" stroke="#b03a2e" stroke-width="2.75"/>
+          <path d="M 545 80 Q 573 155 545 230" fill="none" stroke="#b03a2e" stroke-width="2.75"/>
+          <circle cx="545" cy="80"  r="18" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="545" cy="230" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <text x="545" y="54" text-anchor="middle" font-family="Helvetica,Arial" font-size="14" font-weight="600" fill="#1d3c66">{0,1}</text>
+          <text x="545" y="236" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">2</text>
+        </svg>
+      </figure>
+      <p class="smaller fragment">Any subset $S$ containing both endpoints of the contracted
+        edge maps to a subset $S'$ of the new graph with
+        $|\operatorname{cut}(S)| = |\operatorname{cut}(S')|$ — and every $S'$ in the contracted
+        graph arises this way.</p>
+      <div class="box fragment"><span class="tag">Key Fact</span>
+        Edge contraction cannot decrease the size of a minimum cut.</div>
+    </section>
+
+    <section>
+      <h2>Sequence of Contractions</h2>
+      <figure>
+        <svg width="640" viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="300" cy="165" r="150" fill="#cad9ee" opacity="0.4"/>
+          <!-- edges inside S -->
+          <line x1="175" y1="165" x2="300" y2="60"  stroke="#8d8678" stroke-width="2"/>
+          <line x1="175" y1="165" x2="300" y2="270" stroke="#8d8678" stroke-width="2"/>
+          <line x1="175" y1="165" x2="415" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <line x1="300" y1="60"  x2="415" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <line x1="300" y1="270" x2="415" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <line x1="300" y1="60"  x2="300" y2="270" stroke="#8d8678" stroke-width="2"/>
+          <!-- edges outside S -->
+          <line x1="555" y1="60"  x2="555" y2="270" stroke="#8d8678" stroke-width="2"/>
+          <line x1="555" y1="60"  x2="690" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <line x1="555" y1="270" x2="690" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <!-- cut edges -->
+          <line x1="300" y1="60"  x2="555" y2="60"  stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="300" y1="270" x2="555" y2="270" stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="415" y1="165" x2="555" y2="60"  stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="415" y1="165" x2="555" y2="270" stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="415" y1="165" x2="690" y2="165" stroke="#b03a2e" stroke-width="2.75"/>
+          <!-- nodes in S -->
+          <circle cx="175" cy="165" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="300" cy="60"  r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="300" cy="270" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="415" cy="165" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <!-- nodes outside S -->
+          <circle cx="555" cy="60"  r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <circle cx="555" cy="270" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <circle cx="690" cy="165" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <!-- labels -->
+          <text x="175" y="171" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">0</text>
+          <text x="300" y="66"  text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">2</text>
+          <text x="300" y="276" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">1</text>
+          <text x="415" y="171" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">3</text>
+          <text x="555" y="66"  text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">4</text>
+          <text x="555" y="276" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">5</text>
+          <text x="690" y="171" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">6</text>
+        </svg>
+      </figure>
+      <p class="smaller">The cut defined by $S = \{0,1,2,3\}$ has size <strong>5</strong>
+        (the red edges). Watch this cut as we do a sequence of edge contractions.</p>
+    </section>
+
+    <section>
+      <h2>Contract the Edge $\{0, 2\}$</h2>
+      <figure>
+        <svg width="640" viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="300" cy="170" r="145" fill="#cad9ee" opacity="0.4"/>
+          <!-- edges inside S: {0,2}-1 x2, {0,2}-3 x2, 1-3 -->
+          <path d="M 240 85 Q 249 184 300 270" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 240 85 Q 291 171 300 270" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 240 85 Q 318 145 415 165" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 240 85 Q 337 105 415 165" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <line x1="300" y1="270" x2="415" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <!-- edges outside S -->
+          <line x1="555" y1="60"  x2="555" y2="270" stroke="#8d8678" stroke-width="2"/>
+          <line x1="555" y1="60"  x2="690" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <line x1="555" y1="270" x2="690" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <!-- cut edges -->
+          <line x1="240" y1="85"  x2="555" y2="60"  stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="300" y1="270" x2="555" y2="270" stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="415" y1="165" x2="555" y2="60"  stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="415" y1="165" x2="555" y2="270" stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="415" y1="165" x2="690" y2="165" stroke="#b03a2e" stroke-width="2.75"/>
+          <!-- nodes -->
+          <circle cx="240" cy="85"  r="18" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="300" cy="270" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="415" cy="165" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="555" cy="60"  r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <circle cx="555" cy="270" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <circle cx="690" cy="165" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <!-- labels -->
+          <text x="240" y="53"  text-anchor="middle" font-family="Helvetica,Arial" font-size="15" font-weight="600" fill="#1d3c66">{0, 2}</text>
+          <text x="300" y="276" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">1</text>
+          <text x="415" y="171" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">3</text>
+          <text x="555" y="66"  text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">4</text>
+          <text x="555" y="276" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">5</text>
+          <text x="690" y="171" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">6</text>
+        </svg>
+      </figure>
+      <p class="smaller">Parallel edges appear inside $S$. The cut defined by
+        $\{\{0,2\},1,3\}$ <span class="hl">still has size 5</span>.</p>
+    </section>
+
+    <section>
+      <h2>Contract the Edge $\{4, 5\}$</h2>
+      <figure>
+        <svg width="640" viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="300" cy="170" r="145" fill="#cad9ee" opacity="0.4"/>
+          <!-- edges inside S -->
+          <path d="M 240 85 Q 249 184 300 270" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 240 85 Q 291 171 300 270" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 240 85 Q 318 145 415 165" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 240 85 Q 337 105 415 165" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <line x1="300" y1="270" x2="415" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <!-- edges outside S: {4,5}-6 x2 -->
+          <path d="M 555 85 Q 612 142 690 165" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 555 85 Q 633 108 690 165" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <!-- cut edges -->
+          <line x1="240" y1="85"  x2="555" y2="85"  stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="300" y1="270" x2="555" y2="85"  stroke="#b03a2e" stroke-width="2.75"/>
+          <path d="M 415 165 Q 495 142 555 85" fill="none" stroke="#b03a2e" stroke-width="2.75"/>
+          <path d="M 415 165 Q 475 108 555 85" fill="none" stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="415" y1="165" x2="690" y2="165" stroke="#b03a2e" stroke-width="2.75"/>
+          <!-- nodes -->
+          <circle cx="240" cy="85"  r="18" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="300" cy="270" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="415" cy="165" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="555" cy="85"  r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <circle cx="690" cy="165" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <!-- labels -->
+          <text x="240" y="53"  text-anchor="middle" font-family="Helvetica,Arial" font-size="15" font-weight="600" fill="#1d3c66">{0, 2}</text>
+          <text x="300" y="276" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">1</text>
+          <text x="415" y="171" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">3</text>
+          <text x="555" y="53"  text-anchor="middle" font-family="Helvetica,Arial" font-size="15" font-weight="600" fill="#5f4910">{4, 5}</text>
+          <text x="690" y="171" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">6</text>
+        </svg>
+      </figure>
+      <p class="smaller">Contractions on the <em>other</em> side of the cut are harmless too:
+        the cut defined by $\{\{0,2\},1,3\}$ <span class="hl">still has size 5</span>.</p>
+    </section>
+
+    <section>
+      <h2>Contract the Edge $\{\{4,5\}, 6\}$</h2>
+      <figure>
+        <svg width="640" viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="300" cy="170" r="145" fill="#cad9ee" opacity="0.4"/>
+          <!-- edges inside S -->
+          <path d="M 240 85 Q 249 184 300 270" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 240 85 Q 291 171 300 270" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 240 85 Q 318 145 415 165" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <path d="M 240 85 Q 337 105 415 165" fill="none" stroke="#8d8678" stroke-width="2"/>
+          <line x1="300" y1="270" x2="415" y2="165" stroke="#8d8678" stroke-width="2"/>
+          <!-- cut edges: all to {4,5,6} -->
+          <line x1="240" y1="85"  x2="620" y2="85"  stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="300" y1="270" x2="620" y2="85"  stroke="#b03a2e" stroke-width="2.75"/>
+          <path d="M 415 165 Q 508 101 620 85" fill="none" stroke="#b03a2e" stroke-width="2.75"/>
+          <line x1="415" y1="165" x2="620" y2="85" stroke="#b03a2e" stroke-width="2.75"/>
+          <path d="M 415 165 Q 527 149 620 85" fill="none" stroke="#b03a2e" stroke-width="2.75"/>
+          <!-- nodes -->
+          <circle cx="240" cy="85"  r="18" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="300" cy="270" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="415" cy="165" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+          <circle cx="620" cy="85"  r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+          <!-- labels -->
+          <text x="240" y="53"  text-anchor="middle" font-family="Helvetica,Arial" font-size="15" font-weight="600" fill="#1d3c66">{0, 2}</text>
+          <text x="300" y="276" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">1</text>
+          <text x="415" y="171" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#1d3c66">3</text>
+          <text x="620" y="50"  text-anchor="middle" font-family="Helvetica,Arial" font-size="15" font-weight="600" fill="#5f4910">{4, 5, 6}</text>
+        </svg>
+      </figure>
+      <p class="smaller">The cut defined by $\{\{0,2\},1,3\}$ still has size 5.</p>
+      <div class="box fragment"><span class="tag">Takeaway</span>
+        The cut associated with $S$ keeps its size as long as we never contract an edge of the
+        cut itself — an edge $\{i,j\}$ with $i \in S$ and $j \notin S$.</div>
+    </section>
+
+    <!-- ====================== PART 4: KARGER'S ALGORITHM ================== -->
+    <section class="center"><h1>Karger's Algorithm</h1></section>
+
+    <section>
+      <h2>Karger's Algorithm</h2>
+      <pre class="algo"><code><span class="kw">KargerMinCut</span>(G):
+    <span class="kw">while</span> G has more than 2 vertices:
+        choose an edge {u, v} uniformly at random
+            <span class="cm"># among the remaining multi-edges</span>
+        contract {u, v}
+    <span class="kw">return</span> the number of edges between the two remaining vertices</code></pre>
+      <p class="fragment">The two remaining super-vertices define a cut of the original graph;
+        the parallel edges between them are exactly the edges of that cut.</p>
+    </section>
+
+    <section>
+      <h2>Karger's Algorithm</h2>
+      <p>If we never choose an edge in some fixed minimum cut, the algorithm
+        returns exactly that minimum cut.</p>
+      <div class="box fragment"><span class="tag">Intuition</span>
+        A minimum cut is <em>small</em>, so a random edge is unlikely to come from it.</div>
+    </section>
+
+    <section>
+      <h2>Success Probability: Setup</h2>
+      <p>Say the graph $G$ has $n$ vertices and the size of a minimum cut is $k$.
+        Fix a particular minimum cut $\operatorname{cut}(S)$.</p>
+      <p class="fragment">Every vertex has degree at least $k$ — otherwise its star cut would
+        beat the minimum cut.</p>
+      <div class="box fragment"><span class="tag">Fact</span>
+        Summing the degrees, $G$ has at least $nk/2$ edges.</div>
+    </section>
+
+    <section>
+      <h2>Step 1: The First Contraction</h2>
+      <p>The first contraction is bad if the chosen edge lies in $\operatorname{cut}(S)$.</p>
+      <p class="fragment">Our cut has $k$ edges out of at least $nk/2$ in total, so the
+        probability the random edge is one of ours is at most
+        $$\frac{k}{nk/2} = \frac{2}{n}.$$</p>
+      <p class="fragment">So the first contraction <span style="color:var(--accent)">misses</span>
+        our cut with probability at least $1 - \frac{2}{n} = \frac{n-2}{n}$.</p>
+    </section>
+
+    <section>
+      <h2>Step 2: And the Next One</h2>
+      <p>Suppose we survived the first contraction. The contracted graph has $n-1$ vertices and
+        still has min cut size at least $k$ (contraction cannot decrease the mincut value), so
+        it has at least $k(n-1)/2$ edges.</p>
+      <p class="fragment">The probability the second contraction also misses our cut is at least
+        $$1 - \frac{2k}{k(n-1)} = 1 - \frac{2}{n-1} = \frac{n-3}{n-1}.$$</p>
+    </section>
+
+    <section>
+      <h2>Step 2: And the Next One</h2>
+      <p>So the probability we are still good after two contractions is at least
+        $$\frac{n-2}{n}\cdot\frac{n-3}{n-1}.$$</p>
+    </section>
+
+    <section>
+      <h2>Step 3: In General</h2>
+      <p>After the second contraction there are at least $k(n-2)/2$ edges, so the third
+        contraction misses with probability at least $1 - \frac{2}{n-2} = \frac{n-4}{n-2}$,
+        giving
+        $$\frac{n-2}{n}\cdot\frac{n-3}{n-1}\cdot\frac{n-4}{n-2}$$
+        after three contractions.</p>
+    </section>
+
+    <section>
+      <h2>Step 3: In General</h2>
+      <p>In general, at the $i$th contraction there are $n-i+1$ vertices left,
+        and the success probability of that step is at least
+        $$\frac{n-i-1}{n-i+1}.$$</p>
+    </section>
+
+    <section>
+      <h2>The Telescoping Product</h2>
+      <p>We do $n-2$ contractions to reach 2 vertices. The success probability is at least</p>
+      <div style="font-size:0.85em;">
+        $$\frac{n-2}{n}\cdot\frac{n-3}{n-1}\cdot\frac{n-4}{n-2}\cdot\frac{n-5}{n-3}
+          \cdots\frac{3}{5}\cdot\frac{2}{4}\cdot\frac{1}{3}
+          \;=\; \frac{2}{n(n-1)}.$$
+      </div>
+      <p class="fragment smaller">Every numerator cancels a denominator two steps later — only
+        $n$ and $n-1$ survive below, and $2\cdot 1$ above.</p>
+      <div class="box fragment"><span class="tag">Lemma</span>
+        A single run of Karger's algorithm outputs a fixed minimum cut with probability at least
+        $\dfrac{2}{n(n-1)}$.</div>
+    </section>
+
+    <section>
+      <h2>Amplification by Repetition</h2>
+      <p>Run the algorithm $t$ times independently and return the <em>minimum</em> cut value
+        found. We fail only if <em>every</em> run fails; by independence,</p>
+      <div style="font-size:0.88em;">
+        $$\Pr[\text{all } t \text{ runs fail}]
+          \le \left(1 - \frac{2}{n(n-1)}\right)^{t}
+          \le e^{-2t/(n(n-1))}$$
+      </div>
+      <p>using our inequality $1 + x \le e^x$.</p>
+    </section>
+
+    <section>
+      <h2>Amplification by Repetition</h2>
+      <div class="box"><span class="tag">Theorem</span>
+        With $t = 3n(n-1)/2$ repetitions, the failure probability is at most
+        $e^{-3} \lt 1/10$: we find a minimum cut with probability at least
+        <span style="white-space:nowrap">$9/10$.</span></div>
+      <p class="fragment smaller">This is the amplification fact with $p = 2/(n(n-1))$:
+        $3/p$ repetitions.</p>
+    </section>
+
+    <section>
+      <h2>Implementation of One Run</h2>
+      <p>Rather than randomly choosing a remaining edge at each step, it is easier to take an
+        alternative, but equivalent, viewpoint.</p>
+      <p class="fragment">We first randomly order the edges; this ordering determines the order
+        in which we contract them. Assign the $i$th edge in the ordering weight $i$ and run
+        <strong>Kruskal's MST algorithm</strong> (Week 5!).</p>
+    </section>
+
+    <section>
+      <h2>Implementation of One Run</h2>
+      <p>The partition of vertices into connected components at any stage
+        represents the super-vertices of the contracted graph.</p>
+      <p class="fragment">Before the last edge is added in Kruskal's algorithm there are just
+        two connected components — the edges between these sets are the proposed mincut.</p>
+    </section>
+
+    <section>
+      <h2>Running Time</h2>
+      <p>Via Kruskal with union&ndash;find, one round of Karger's algorithm runs in time
+        $O(m\log n)$ when there are $m$ edges.</p>
+      <div class="box fragment"><span class="tag">Total</span>
+        With $O(n^2)$ repetitions, the overall running time is $O(n^2\, m\log n)$.</div>
+      <p class="fragment smaller">Note that during the algorithm we work with a multigraph. We
+        could also <em>start</em> from a multigraph — the algorithm works on weighted graphs
+        with non-negative integer weights.</p>
+    </section>
+
+    <section>
+      <h2>Cool Consequence</h2>
+      <p>We fixed a minimum cut and argued that the probability <em>this</em> cut is preserved
+        by the algorithm is at least $\frac{2}{n(n-1)}$. This holds for
+        <span style="color:var(--accent)">any</span> minimum cut.</p>
+      <p class="fragment smaller">Different minimum cuts being returned are disjoint events, and
+        the probabilities of disjoint events sum to at most $1$.</p>
+      <div class="box fragment"><span class="tag">Corollary</span>
+        The number of minimum cuts in a graph is at most $\dfrac{n(n-1)}{2}$.</div>
+      <p class="fragment">Remarkably, this bound is exactly tight!</p>
+    </section>
+
+    <section>
+      <h2>Tight Example: the Cycle Graph</h2>
+      <div class="cols">
+        <figure>
+          <svg width="330" viewBox="0 0 360 270" xmlns="http://www.w3.org/2000/svg">
+            <line x1="180" y1="35"  x2="280" y2="108" stroke="#8d8678" stroke-width="2"/>
+            <line x1="280" y1="108" x2="242" y2="225" stroke="#8d8678" stroke-width="2"/>
+            <line x1="242" y1="225" x2="118" y2="225" stroke="#8d8678" stroke-width="2"/>
+            <line x1="118" y1="225" x2="80"  y2="108" stroke="#8d8678" stroke-width="2"/>
+            <line x1="80"  y1="108" x2="180" y2="35"  stroke="#8d8678" stroke-width="2"/>
+            <circle cx="180" cy="35"  r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+            <circle cx="280" cy="108" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+            <circle cx="242" cy="225" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+            <circle cx="118" cy="225" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+            <circle cx="80"  cy="108" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2.5"/>
+            <text x="180" y="41"  text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">1</text>
+            <text x="280" y="114" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">2</text>
+            <text x="242" y="231" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">3</text>
+            <text x="118" y="231" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">4</text>
+            <text x="80"  y="114" text-anchor="middle" font-family="Helvetica,Arial" font-size="17" font-weight="600" fill="#2a2a2a">5</text>
+          </svg>
+        </figure>
+        <div>
+          <p>In a cycle the size of a minimum cut is $2$.</p>
+          <p class="fragment">Removing any two edges disconnects the graph, and there are
+            $\binom{n}{2} = \frac{n(n-1)}{2}$ ways to remove two edges.</p>
+          <p class="fragment">So the cycle graph $C_n$ has exactly $\frac{n(n-1)}{2}$ minimum
+            cuts — matching the bound.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PART 5: KARGER–STEIN ========================= -->
+    <section class="center"><h1>The Karger&ndash;Stein Algorithm</h1></section>
+
+    <section>
+      <h2>High Risk Contractions</h2>
+      <p>Look again at the telescoping product, our lower bound on the probability that
+        no contraction ever picks an edge of a fixed minimum cut:
+        $$\frac{n-2}{n}\cdot\frac{n-3}{n-1}\cdot\frac{n-4}{n-2}\cdots\frac{2}{4}\cdot\frac{1}{3}.$$</p>
+      <p class="fragment">The first factor is $1 - \frac{2}{n}$: the first contraction is almost
+        never bad.</p>
+      <p class="fragment">The last factor is $\frac{1}{3}$: the final contraction is bad one time
+        in three.</p>
+    </section>
+
+    <section>
+      <h2>High Risk Contractions</h2>
+      <div class="box"><span class="tag">Observation</span>
+        The risk is concentrated in the last few contractions.</div>
+      <p class="fragment">Yet repetition treats every contraction alike: it restarts from scratch
+        $\Theta(n^2)$ times, redoing the safe early part every time.</p>
+    </section>
+
+    <section>
+      <h2>Stopping Early</h2>
+      <p>What if we stop once $t$ vertices remain, after $n - t$ contractions?</p>
+      <p class="fragment">The same product, cut short, bounds the probability that our cut
+        survives:
+        $$\frac{n-2}{n}\cdot\frac{n-3}{n-1}\cdots\frac{t-1}{t+1} \;=\; \frac{t(t-1)}{n(n-1)}.$$</p>
+      <p class="fragment smaller">Everything still cancels two steps later; now $t$ and $t-1$
+        survive on top. Sanity check: $t = 2$ gives back $\frac{2}{n(n-1)}$.</p>
+    </section>
+
+    <section>
+      <h2>Early Contractions Are Safe</h2>
+      <p>How far can we contract while keeping the cut with probability at least $1/2$?</p>
+      <p class="fragment">Take $t = \lceil n/\sqrt2\rceil + 1$. Both $t$ and $t-1$ are at least
+        $n/\sqrt2$, so</p>
+      <div class="fragment" style="font-size:0.9em;">
+        $$\frac{t(t-1)}{n(n-1)} \;\ge\; \frac{n^2/2}{n(n-1)} \;\ge\; \frac12.$$
+      </div>
+      <div class="box fragment"><span class="tag">Lemma</span>
+        Contracting down to $t = \lceil n/\sqrt2\rceil + 1$ vertices keeps a fixed minimum
+        cut with probability at least $1/2$.</div>
+    </section>
+
+    <section>
+      <h2>Recycling the Safe Part</h2>
+      <p>For $n = 1000$: the first $291$ of the $998$ contractions keep the cut with probability
+        at least $\frac12$. The danger lives in the remaining $707$.</p>
+      <p class="fragment">Better: contract down to $t$ vertices <em>once</em>, then find a minimum
+        cut of the smaller graph &mdash; <span style="color:var(--accent)">recursively</span>.</p>
+    </section>
+
+    <section>
+      <h2>Recycling the Safe Part</h2>
+      <p>Each level of recursion shrinks $n$ by a factor of $\sqrt2$, so there are about
+        $d = 2\log_2 n$ levels.</p>
+      <div class="box warn fragment"><span class="tag">Problem</span>
+        Each level keeps the cut with probability only $\frac12$, and the losses compound:
+        $\left(\frac12\right)^{2\log_2 n} = \frac{1}{n^2}$. We are back where we started.</div>
+      <p class="fragment smaller">No surprise: contracting all the way down in stages is still
+        just one run of Karger's algorithm.</p>
+    </section>
+
+    <section>
+      <h2>Two Tries at Every Level</h2>
+      <p>A factor of $\frac12$ per level is a coin flip per level. Where we risk a coin flip,
+        give ourselves a second one.</p>
+      <p class="fragment">At each level, contract to $t$ vertices <em>twice</em>, independently,
+        and recurse on both smaller graphs. Return the smaller of the two answers.</p>
+      <p class="fragment smaller">Why not three or four tries? We will see that the time budget
+        allows exactly two.</p>
+    </section>
+
+    <section>
+      <h2>The Karger&ndash;Stein Algorithm</h2>
+      <pre class="algo"><code><span class="kw">KargerStein</span>(G):
+    n = number of vertices of G
+    <span class="kw">if</span> n &le; 6: <span class="kw">return</span> a minimum cut of G by brute force
+    t = &lceil;n/&radic;2&rceil; + 1
+    G1 = <span class="kw">Contract</span>(G, t)   <span class="cm"># contract random edges until t vertices remain</span>
+    G2 = <span class="kw">Contract</span>(G, t)   <span class="cm"># independently of G1</span>
+    <span class="kw">return</span> min(KargerStein(G1), KargerStein(G2))</code></pre>
+      <p class="fragment">The recursion tree is a full binary tree of depth $d \approx 2\log_2 n$.
+        <span class="credit">[Karger-Stein, 1996]</span></p>
+    </section>
+
+    <section>
+      <h2>Running Time</h2>
+      <p>Store the multigraph as an $n \times n$ table of edge multiplicities.</p>
+      <p class="fragment">Contracting an edge merges two rows and two columns: $O(n)$ time.</p>
+      <p class="fragment">Choosing a random edge also takes $O(n)$ time: pick an endpoint $u$
+        with probability proportional to its degree, then a neighbour $v$ with probability
+        proportional to the multiplicity of $\{u, v\}$.</p>
+    </section>
+
+    <section>
+      <h2>Running Time</h2>
+      <div class="box"><span class="tag">Fact</span>
+        $\textsf{Contract}(G, t)$ does fewer than $n$ contractions of $O(n)$ time each, so it
+        runs in $O(n^2)$ time.</div>
+      <p class="fragment">Each call does two contractions and two recursive calls on graphs with
+        $t \approx n/\sqrt2$ vertices:
+        $$T(n) \;\le\; 2\,T\!\left(n/\sqrt2\right) + O(n^2).$$</p>
+    </section>
+
+    <section>
+      <h2>The Recursion Tree</h2>
+      <p>Level $i$ has $2^i$ subproblems, each on about $n/(\sqrt2)^i = n/2^{i/2}$ vertices.</p>
+      <p class="fragment">Each costs $O\!\left((n/2^{i/2})^2\right) = O(n^2/2^i)$, so level $i$
+        costs $2^i \cdot O(n^2/2^i) = O(n^2)$ in total.</p>
+      <p class="fragment">Every level costs the same, and there are $d \approx 2\log_2 n$
+        levels.</p>
+      <div class="box fragment"><span class="tag">Theorem</span>
+        One run of Karger&ndash;Stein takes $O(n^2\log n)$ time.</div>
+    </section>
+
+    <section>
+      <h2>Why Exactly Two?</h2>
+      <p>Shrinking to $n/\sqrt2$ was forced by wanting survival probability $\frac12$.</p>
+      <p class="fragment">Two branches of size $n/\sqrt2$ cost $2\cdot\frac{n^2}{2} = n^2$:
+        exactly the cost of the level above.</p>
+      <p class="fragment">With three branches the levels would grow geometrically, and the time
+        would be $n^{\log_{\sqrt2} 3} \approx n^{3.17}$.</p>
+      <div class="box fragment"><span class="tag">Balance</span>
+        Two is the most branching that keeps the cost per level flat.</div>
+    </section>
+
+    <section>
+      <h2>Success Probability</h2>
+      <p>Let $p_k$ be a lower bound on the probability that a call at height $k$ of the
+        recursion tree finds a fixed minimum cut of its input graph.</p>
+      <p class="fragment">Leaves (height $0$) use brute force: $p_0 = 1$.</p>
+      <p class="fragment">To bound $p_{k+1}$, fix a minimum cut $C$ of the input graph of a
+        call at height $k+1$, and ask when one of its two branches finds $C$.</p>
+    </section>
+
+    <section>
+      <h2>One Branch</h2>
+      <p>For a branch to find $C$, two things must happen.</p>
+      <div class="box fragment"><span class="tag">Event 1</span>
+        $\textsf{Contract}$ at height $k+1$ never chooses an edge of $C$. By the Lemma this has
+        probability at least <span style="white-space:nowrap">$\frac12$.</span> Then $C$ is
+        still a minimum cut of the contracted graph.</div>
+      <div class="box fragment"><span class="tag">Event 2</span>
+        $C$ also survives every later round: the recursive call at height $k$ finds $C$.
+        By the definition of $p_k$ this has probability at least $p_k$.</div>
+    </section>
+
+    <section>
+      <h2>Success Probability</h2>
+      <p>The recursive call picks fresh random edges, independent of the contraction, so both
+        events happen with probability at least $\frac12 \cdot p_k$.</p>
+      <p class="fragment">So one branch fails with probability at most $1 - \frac{p_k}{2}$.</p>
+      <p class="fragment">The call fails only if <em>both</em> branches fail, and the two
+        branches are independent:
+        $$p_{k+1} \;\ge\; 1 - \left(1 - \frac{p_k}{2}\right)^2 \;=\; p_k - \frac{p_k^2}{4}.$$</p>
+    </section>
+
+    <section>
+      <h2>Harmonic, Not Geometric</h2>
+      <p>With a single branch we had $p_{k+1} = \frac{p_k}{2}$: halving at every level,
+        down to $2^{-d} = \frac{1}{n^2}$.</p>
+      <p class="fragment">With two, $p_{k+1} \ge p_k - \frac{p_k^2}{4}$. Once $p_k$ is small,
+        the loss $\frac{p_k^2}{4}$ is <em>much</em> smaller than $p_k$ itself.</p>
+      <div class="box fragment"><span class="tag">Claim</span>
+        $p_k \ge \dfrac{1}{k+1}$ for every $k \ge 0$.</div>
+    </section>
+
+    <section>
+      <h2>Harmonic, Not Geometric</h2>
+      <p>Induction on $k$; the base case is $p_0 = 1$.</p>
+      <p class="fragment">The function $x - \frac{x^2}{4}$ is increasing for $x \le 2$, so
+        $p_k \ge \frac{1}{k+1}$ gives
+        $$\begin{aligned}
+          p_{k+1} &\;\ge\; \frac{1}{k+1} - \frac{1}{4(k+1)^2} \\
+                  &\;\ge\; \frac{1}{k+1} - \frac{1}{(k+1)(k+2)} \;=\; \frac{1}{k+2}.
+        \end{aligned}$$</p>
+      <p class="fragment smaller">The middle step uses $4(k+1) \ge k+2$.</p>
+    </section>
+
+    <section>
+      <h2>Putting It Together</h2>
+      <p>The root is at height $d \approx 2\log_2 n$.</p>
+      <div class="box fragment"><span class="tag">Theorem</span>
+        One run of Karger&ndash;Stein finds a fixed minimum cut with probability at least
+        $\frac{1}{d+1} = \Omega(1/\log n)$, in time $O(n^2\log n)$.</div>
+      <p class="fragment">Amplify as before: $3(d+1) = O(\log n)$ independent runs fail with
+        probability at most $e^{-3} \lt \frac{1}{10}$.</p>
+      <div class="box fragment"><span class="tag">Total</span>
+        A minimum cut with probability at least $\frac{9}{10}$ in $O(n^2\log^2 n)$ time.</div>
+    </section>
+
+    <section>
+      <h2>Karger vs. Karger&ndash;Stein</h2>
+      <table class="results compact" style="font-size:0.85em;">
+        <thead><tr><th></th><th>One run</th><th>Success</th><th>Amplified</th></tr></thead>
+        <tbody>
+          <tr><td class="q">Karger</td><td>$O(m\log n)$</td><td>$\Omega(1/n^2)$</td>
+              <td>$O(n^2\, m\log n)$</td></tr>
+          <tr class="hlrow"><td class="q">Karger&ndash;Stein</td><td>$O(n^2\log n)$</td>
+              <td>$\Omega(1/\log n)$</td><td>$O(n^2\log^2 n)$</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment">Same contraction step, same telescoping product &mdash; the gain comes
+        purely from putting the repetitions where the risk is.</p>
+    </section>
+
+    <section>
+      <h2>Notes</h2>
+      <p>Karger's algorithm dates from 1993 and the Karger&ndash;Stein refinement from 1996.
+        A different idea, packing spanning trees, gave $O(m\log^3 n)$ time
+        <span class="credit">[Karger, 2000]</span>.</p>
+      <p class="fragment">The current best randomised algorithm runs in time $O(m\log^2 n)$
+        <span class="credit">[Gawrychowski, Mozes, Weimann, 2019]</span>, and near-linear time
+        deterministic algorithms are also known.</p>
+      <p class="fragment">Next week we meet minimum cuts again, between two designated vertices
+        $s$ and $t$ — and relate them to maximum flows.</p>
+    </section>
+
+  </div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [ RevealMath.MathJax3 ],
+
+    mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        macros: {
+          tO:   ['{\\widetilde{O}}'],
+          R:    ['{\\mathbb{R}}'],
+          E:    ['{\\mathbb{E}}']
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+</script>
+</body>
+</html>
