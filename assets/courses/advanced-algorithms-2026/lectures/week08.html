@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 8: Maximum Flow — Advanced Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <style>
+    :root { --accent: #1f6feb; --muted: #6a737d; }
+
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--accent); letter-spacing: -0.01em; }
+    .reveal h1 { font-size: 2.0em; }
+    /* Theme styling (uppercase headings, small-caps tags) garbles MathJax output. */
+    .reveal mjx-container { text-transform: none; font-variant: normal; letter-spacing: normal; }
+    .reveal h2 { text-align: center; }
+    .reveal section { font-size: 0.92em; }
+    .reveal a { color: var(--accent); }
+
+    /* Left-align most slides; titles stay centered via their own class. */
+    .reveal .slides section { text-align: left; }
+    .reveal .slides section.center { text-align: center; }
+
+    /* Boxes for theorems / definitions / takeaways. */
+    .box {
+      border-left: 5px solid var(--accent);
+      background: #f4f8ff;
+      padding: 0.5em 0.8em; margin: 0.4em 0; border-radius: 4px;
+    }
+    .box .tag { font-variant: small-caps; font-weight: 700; color: var(--accent);
+                letter-spacing: 0.04em; margin-right: 0.4em; }
+    /* The theme makes lists inline-block; inside a box they must start on their own line. */
+    .reveal .box ul, .reveal .box ol { display: block; }
+    .box.warn { border-left-color: #d29922; background: #fff8ec; }
+    .box.warn .tag { color: #b07400; }
+
+    /* Result highlight pill. */
+    .hl { background: #fff3b0; padding: 0.05em 0.25em; border-radius: 3px; }
+
+    /* Results table. */
+    .reveal table.results { margin: 0.7em auto; border-collapse: collapse; }
+    .reveal table.results th, .reveal table.results td {
+      padding: 0.4em 1.1em; border: none; text-align: left; }
+    .reveal table.results thead th { color: var(--accent);
+      border-bottom: 2px solid var(--accent); font-variant: small-caps; letter-spacing: 0.03em; }
+    .reveal table.results tbody tr { border-bottom: 1px solid #e7ebf0; }
+    .reveal table.results td.q { font-weight: 700; }
+    .reveal table.results tr.hlrow { background: #fff8d6; }
+
+    /* Two-column layout helper:  <div class="cols"> <div>..</div> <div>..</div> </div> */
+    .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+    .cols > * { flex: 1; min-width: 0; }
+
+    /* Pseudocode / algorithm blocks. */
+    .reveal pre.algo {
+      font-size: 0.5em; line-height: 1.35; box-shadow: none;
+      border: 1px solid #d0d7de; border-radius: 6px; background: #fbfcfd;
+      width: 100%;
+    }
+    .reveal pre.algo code { padding: 0.8em 1em; }
+    .algo .kw { color: var(--accent); font-weight: 700; }
+    .algo .cm { color: var(--muted); font-style: italic; }
+
+    .reveal .credit { color: var(--muted); font-size: 0.8em; }
+    .reveal .smaller { font-size: 0.82em; }
+    .reveal figure { margin: 0; text-align: center; }
+    .reveal figcaption { font-size: 0.7em; color: var(--muted); margin-top: 0.3em; }
+    .reveal .footnote { position: absolute; bottom: 0.2em; left: 0.6em;
+                        font-size: 0.55em; color: var(--muted); }
+
+    /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
+    .reveal figure svg { max-width: 100%; height: auto; }
+
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== TITLE ============================== -->
+    <section class="center">
+      <h1>Week 8: Maximum Flow</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Advanced Algorithms</p>
+    </section>
+
+    <!-- ============================== ROADMAP ============================ -->
+    <section>
+      <h2>Roadmap</h2>
+      <ol style="line-height:1.8;">
+        <li>The Max-Flow Problem</li>
+        <li>Ford-Fulkerson and Residual Graphs</li>
+        <li>Max-Flow = Min-Cut</li>
+        <li>Edmonds-Karp</li>
+        <li>Applications: Bipartite Matching, Matrix Rounding</li>
+      </ol>
+    </section>
+
+    <!-- ============================ PART 1 =============================== -->
+    <section class="center"><h1>The Max-Flow Problem</h1></section>
+
+    <section>
+      <h2>A Puzzle to Keep in Mind</h2>
+      <div class="cols">
+        <div style="flex:1.1;">
+          <p>Round every entry of this matrix to an integer (here: $0$ or $1$) so that
+          <strong>every row sum and every column sum is unchanged</strong>.</p>
+          <p class="fragment">Row and column sums are already integers — but is such a
+          rounding always possible?</p>
+        </div>
+        <div>
+          <table class="results compact" style="font-size:0.85em;">
+            <tbody>
+              <tr><td>0.7</td><td>0.8</td><td>0.5</td><td style="color:#b03a2e;">2</td></tr>
+              <tr><td>0.3</td><td>0.1</td><td>0.6</td><td style="color:#b03a2e;">1</td></tr>
+              <tr><td>1</td><td>0.1</td><td>0.9</td><td style="color:#b03a2e;">2</td></tr>
+              <tr><td style="color:#b03a2e;">2</td><td style="color:#b03a2e;">1</td><td style="color:#b03a2e;">2</td><td></td></tr>
+            </tbody>
+          </table>
+          <p class="credit" style="text-align:center;">Red: row and column sums.</p>
+        </div>
+      </div>
+      <p class="fragment">By the end of today we will solve this with a
+      <span class="hl">maximum-flow computation</span>.</p>
+    </section>
+
+    <section>
+      <h2>Flow Networks</h2>
+      <div class="box"><span class="tag">Setting</span>
+        A directed graph $G=(V,E)$ with a <em>capacity</em> $c(e) \ge 0$ on each edge,
+        a <em>source</em> $s$ and a <span style="white-space:nowrap;"><em>sink</em> $t$.</span>
+      </div>
+      <figure>
+        <svg width="500" height="266" viewBox="0 0 660 350">
+          <defs>
+            <marker id="mA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mA)">
+            <line x1="64" y1="167" x2="212" y2="83"/>
+            <line x1="64" y1="193" x2="212" y2="277"/>
+            <line x1="230" y1="256" x2="230" y2="94"/>
+            <line x1="250" y1="70" x2="406" y2="70"/>
+            <line x1="416" y1="87" x2="244" y2="273"/>
+            <line x1="250" y1="290" x2="406" y2="290"/>
+            <line x1="430" y1="266" x2="430" y2="94"/>
+            <line x1="446" y1="83" x2="594" y2="167"/>
+            <line x1="446" y1="277" x2="594" y2="193"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#7a2419" font-weight="600">
+            <text x="120" y="105">16</text><text x="120" y="265">13</text>
+            <text x="237" y="180">4</text><text x="322" y="60">12</text>
+            <text x="352" y="180">9</text><text x="322" y="315">14</text>
+            <text x="437" y="185">7</text><text x="520" y="105">20</text>
+            <text x="520" y="265">4</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="180" r="17"/><circle cx="230" cy="70" r="17"/>
+            <circle cx="230" cy="290" r="17"/><circle cx="430" cy="70" r="17"/>
+            <circle cx="430" cy="290" r="17"/><circle cx="610" cy="180" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="186">s</text><text x="230" y="76">1</text>
+            <text x="230" y="296">2</text><text x="430" y="76">3</text>
+            <text x="430" y="296">4</text><text x="610" y="186">t</text>
+          </g>
+        </svg>
+        <figcaption>Edge labels are capacities: how much can flow along each edge.</figcaption>
+      </figure>
+      <p class="fragment">Think of routing water, traffic, or data from $s$ to $t$.</p>
+    </section>
+
+    <section>
+      <h2>st-Flows</h2>
+      <div class="box"><span class="tag">Definition</span>
+        An <strong>st-flow</strong> assigns a value $f(e) \ge 0$ to each edge such that:
+        <ul style="margin:0.3em 0 0 0;">
+          <li><em>Capacity:</em> $f(e) \le c(e)$ for every edge $e$,</li>
+          <li><em>Conservation:</em> for every vertex $v \ne s,t$:
+            $\displaystyle\sum_{e \in \delta^-(v)} f(e) \;=\; \sum_{e \in \delta^+(v)} f(e)$</li>
+        </ul>
+      </div>
+      <p class="smaller">$\delta^-(v)$ = edges entering $v$, &nbsp; $\delta^+(v)$ = edges leaving $v$.
+      Flow in equals flow out, except at the source and the sink.</p>
+      <p class="fragment">One valid flow always exists: the zero flow $f \equiv 0$.
+      We want the opposite extreme.</p>
+    </section>
+
+    <section>
+      <h2>The Value of a Flow</h2>
+      <div class="box"><span class="tag">Definition</span>
+        The <strong>value</strong> of $f$ is the net flow out of the source:
+        $|f| = \displaystyle\sum_{e \in \delta^+(s)} f(e) - \sum_{e \in \delta^-(s)} f(e)$.
+      </div>
+      <div class="box fragment"><span class="tag">Problem</span>
+        <strong>Maximum flow:</strong> find an st-flow of maximum value.
+      </div>
+      <p class="fragment">By conservation, everything leaving $s$ must arrive at $t$
+      (we will prove a sharp version of this later: the value equals the net flow across
+      <em>any</em> st-cut).</p>
+    </section>
+
+    <section>
+      <h2>Example: a Flow of Value 19</h2>
+      <figure>
+        <svg width="620" height="330" viewBox="0 0 660 350">
+          <defs>
+            <marker id="mB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+            <marker id="mBt" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="22" markerHeight="22" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <!-- edge thickness proportional to flow -->
+          <g stroke="#8d8678" fill="none">
+            <line x1="64" y1="167" x2="212" y2="83" stroke-width="6" marker-end="url(#mBt)"/>
+            <line x1="64" y1="193" x2="212" y2="277" stroke-width="3.5" marker-end="url(#mBt)"/>
+            <line x1="230" y1="256" x2="230" y2="94" stroke-width="1.6" marker-end="url(#mB)"/>
+            <line x1="250" y1="70" x2="406" y2="70" stroke-width="6" marker-end="url(#mBt)"/>
+            <line x1="416" y1="87" x2="244" y2="273" stroke-width="1.6" marker-end="url(#mB)"/>
+            <line x1="250" y1="290" x2="406" y2="290" stroke-width="3.5" marker-end="url(#mBt)"/>
+            <line x1="430" y1="266" x2="430" y2="94" stroke-width="3.5" marker-end="url(#mBt)"/>
+            <line x1="446" y1="83" x2="594" y2="167" stroke-width="9.5" marker-end="url(#mBt)"/>
+            <line x1="446" y1="277" x2="594" y2="193" stroke-width="1.6" marker-end="url(#mB)"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#7a2419" font-weight="600">
+            <text x="105" y="103">12/16</text><text x="105" y="268">7/13</text>
+            <text x="237" y="180">0/4</text><text x="303" y="60">12/12</text>
+            <text x="346" y="180">0/9</text><text x="305" y="315">7/14</text>
+            <text x="437" y="185">7/7</text><text x="500" y="103">19/20</text>
+            <text x="505" y="268">0/4</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="180" r="17"/><circle cx="230" cy="70" r="17"/>
+            <circle cx="230" cy="290" r="17"/><circle cx="430" cy="70" r="17"/>
+            <circle cx="430" cy="290" r="17"/><circle cx="610" cy="180" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="186">s</text><text x="230" y="76">1</text>
+            <text x="230" y="296">2</text><text x="430" y="76">3</text>
+            <text x="430" y="296">4</text><text x="610" y="186">t</text>
+          </g>
+        </svg>
+        <figcaption>Labels are <em>flow/capacity</em>. Check conservation at each internal vertex.</figcaption>
+      </figure>
+      <p class="fragment">$|f| = 12 + 7 = 19$. Is this the best possible? How would we even know?</p>
+    </section>
+
+    <section>
+      <h2>Flow Decomposition</h2>
+      <div class="box"><span class="tag">Theorem</span>
+        Any st-flow $f$ can be written as a sum of flows along at most $|E|$
+        <strong>st-paths and cycles</strong>.
+      </div>
+      <p class="fragment">A flow can also contain cycles — flow going round in circles —
+      which contribute nothing to the value.</p>
+    </section>
+
+    <section>
+      <h2>Flow Decomposition</h2>
+      <figure>
+        <svg width="620" height="330" viewBox="0 0 660 350">
+          <defs>
+            <marker id="mL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+            <marker id="mLt" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="22" markerHeight="22" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+            <marker id="mLo" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="22" markerHeight="22" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b85a26"/>
+            </marker>
+            <marker id="mLb" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="22" markerHeight="22" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2e588f"/>
+            </marker>
+          </defs>
+          <!-- start from the thickness view; a path's edges fade as it is coloured in -->
+          <g stroke="#8d8678" fill="none">
+            <line x1="64" y1="167" x2="212" y2="83" stroke-width="6" marker-end="url(#mLt)" class="fragment fade-out" data-fragment-index="1"/>
+            <line x1="64" y1="193" x2="212" y2="277" stroke-width="3.5" marker-end="url(#mLt)" class="fragment fade-out" data-fragment-index="2"/>
+            <line x1="230" y1="256" x2="230" y2="94" stroke-width="1.6" marker-end="url(#mL)"/>
+            <line x1="250" y1="70" x2="406" y2="70" stroke-width="6" marker-end="url(#mLt)" class="fragment fade-out" data-fragment-index="1"/>
+            <line x1="416" y1="87" x2="244" y2="273" stroke-width="1.6" marker-end="url(#mL)"/>
+            <line x1="250" y1="290" x2="406" y2="290" stroke-width="3.5" marker-end="url(#mLt)" class="fragment fade-out" data-fragment-index="2"/>
+            <line x1="430" y1="266" x2="430" y2="94" stroke-width="3.5" marker-end="url(#mLt)" class="fragment fade-out" data-fragment-index="2"/>
+            <line x1="446" y1="83" x2="594" y2="167" stroke-width="9.5" marker-end="url(#mLt)" class="fragment fade-out" data-fragment-index="2"/>
+            <line x1="446" y1="277" x2="594" y2="193" stroke-width="1.6" marker-end="url(#mL)"/>
+          </g>
+          <!-- path 1: s -> 1 -> 3 -> t -->
+          <g class="fragment" data-fragment-index="1" stroke="#b85a26" fill="none">
+            <line x1="64" y1="167" x2="212" y2="83" stroke-width="6" marker-end="url(#mLo)"/>
+            <line x1="250" y1="70" x2="406" y2="70" stroke-width="6" marker-end="url(#mLo)"/>
+            <line x1="446.9" y1="81.5" x2="587.0" y2="161.0" stroke-width="6"/>
+            <polygon points="595.9,168.1 582.2,147.7 571.4,166.8" fill="#b85a26" stroke="none"/>
+          </g>
+          <!-- path 2: s -> 2 -> 4 -> 3 -> t; shares edge 3 -> t with path 1 -->
+          <g class="fragment" data-fragment-index="2" stroke="#2e588f" fill="none">
+            <line x1="64" y1="193" x2="212" y2="277" stroke-width="3.5" marker-end="url(#mLb)"/>
+            <line x1="250" y1="290" x2="406" y2="290" stroke-width="3.5" marker-end="url(#mLb)"/>
+            <line x1="430" y1="266" x2="430" y2="94" stroke-width="3.5" marker-end="url(#mLb)"/>
+            <line x1="444.5" y1="85.6" x2="584.7" y2="165.2" stroke-width="3.5"/>
+            <polygon points="576.2,158.3 571.4,166.8 585.0,167.5" fill="#2e588f" stroke="none"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#7a2419" font-weight="600">
+            <text x="105" y="103">12/16</text><text x="105" y="268">7/13</text>
+            <text x="237" y="180">0/4</text><text x="303" y="60">12/12</text>
+            <text x="346" y="180">0/9</text><text x="305" y="315">7/14</text>
+            <text x="437" y="185">7/7</text><text x="500" y="103">19/20</text>
+            <text x="505" y="268">0/4</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="180" r="17"/><circle cx="230" cy="70" r="17"/>
+            <circle cx="230" cy="290" r="17"/><circle cx="430" cy="70" r="17"/>
+            <circle cx="430" cy="290" r="17"/><circle cx="610" cy="180" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="186">s</text><text x="230" y="76">1</text>
+            <text x="230" y="296">2</text><text x="430" y="76">3</text>
+            <text x="430" y="296">4</text><text x="610" y="186">t</text>
+          </g>
+        </svg>
+      </figure>
+      <p style="margin:0.2em 0 0 0;">Our value-19 flow decomposes as</p>
+      <ul style="margin-top:0.1em;">
+        <li class="fragment" data-fragment-index="1"><span style="color:#b85a26;">$12$ units on the path $s \to 1 \to 3 \to t$,</span></li>
+        <li class="fragment" data-fragment-index="2"><span style="color:#2e588f;">$7$ units on the path $s \to 2 \to 4 \to 3 \to t$.</span></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Flow Decomposition: Proof Sketch</h2>
+      <p><strong>Phase 1.</strong> While $|f| > 0$: starting at $s$, follow positive-flow edges —
+      conservation means we never get stuck before reaching $t$. Subtract the bottleneck value of the
+      st-path found.</p>
+      <p class="fragment"><strong>Phase 2.</strong> When $|f| = 0$ but some edge still carries flow:
+      following positive-flow edges from it must eventually revisit a vertex — a <em>cycle</em>.
+      Subtract its bottleneck.</p>
+    </section>
+
+    <section>
+      <h2>Flow Decomposition: Proof Sketch</h2>
+      <p>Each step zeroes out at least one edge, so there are at most $|E|$ steps.
+      $\blacksquare$</p>
+      <div class="box fragment"><span class="tag">Takeaway</span>
+        Flows look complicated, but they are just <span class="hl">paths plus cycles</span>.
+        Max flow is really about finding good path packings.
+      </div>
+    </section>
+
+    <!-- ============================ PART 2 =============================== -->
+    <section class="center"><h1>Ford-Fulkerson and Residual Graphs</h1></section>
+
+    <section>
+      <h2>A Greedy Attempt</h2>
+      <p class="smaller">Natural idea: repeatedly find an st-path with spare capacity and push
+      as much flow as possible along it. Start with the <strong>widest</strong> path: the one whose
+      <em>bottleneck</em>, its smallest edge capacity, is largest.</p>
+      <figure>
+        <svg width="620" height="340" viewBox="0 0 660 385">
+          <defs>
+            <marker id="mC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+            <marker id="mCh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b85a26"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mC)">
+            <line x1="64" y1="178" x2="216" y2="70"/>
+            <line x1="230" y1="173" x2="230" y2="84"/>
+            <line x1="64" y1="202" x2="216" y2="310"/>
+            <line x1="230" y1="207" x2="230" y2="296"/>
+            <line x1="245" y1="69" x2="416" y2="180"/>
+            <line x1="245" y1="311" x2="416" y2="200"/>
+            <path d="M 247,55 Q 430,5 600,168"/>
+            <path d="M 247,325 Q 430,375 600,212"/>
+            <line x1="67" y1="190" x2="213" y2="190"/>
+            <line x1="247" y1="190" x2="406" y2="190"/>
+            <line x1="447" y1="190" x2="593" y2="190"/>
+          </g>
+          <!-- the widest path: drawn over the grey edges on the first click -->
+          <g class="fragment" data-fragment-index="0" stroke="#b85a26" stroke-width="4" fill="none" marker-end="url(#mCh)">
+            <line x1="67" y1="190" x2="213" y2="190"/>
+            <line x1="247" y1="190" x2="406" y2="190"/>
+            <line x1="447" y1="190" x2="593" y2="190"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#7a2419" font-weight="600">
+            <text x="115" y="108">10</text><text x="130" y="178">8</text>
+            <text x="115" y="285">5</text><text x="238" y="135">3</text>
+            <text x="315" y="178">10</text><text x="238" y="262">3</text>
+            <text x="330" y="105">3</text><text x="330" y="290">3</text>
+            <text x="425" y="38">5</text><text x="512" y="178">8</text>
+            <text x="420" y="368">10</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="190" r="17"/><circle cx="230" cy="60" r="17"/>
+            <circle cx="230" cy="190" r="17"/><circle cx="230" cy="320" r="17"/>
+            <circle cx="430" cy="190" r="17"/><circle cx="610" cy="190" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="196">s</text><text x="230" y="66">1</text>
+            <text x="230" y="196">2</text><text x="230" y="326">4</text>
+            <text x="430" y="196">3</text><text x="610" y="196">t</text>
+          </g>
+        </svg>
+        <figcaption class="fragment" data-fragment-index="0">Widest path: $s \to 2 \to 3 \to t$ with bottleneck $8$.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Greedy Gets Stuck at 18</h2>
+      <p class="smaller">Continue: push $5$ along <span style="color:#2e588f;">$s \to 1 \to t$</span>,
+      then $5$ along <span style="color:#4d7349;">$s \to 4 \to t$</span>.</p>
+      <figure>
+        <svg width="620" height="340" viewBox="0 0 660 385">
+          <defs>
+            <marker id="mD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+            <marker id="mDo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b85a26"/>
+            </marker>
+            <marker id="mDb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2e588f"/>
+            </marker>
+            <marker id="mDg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4d7349"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mD)">
+            <line x1="64" y1="178" x2="216" y2="70"/>
+            <line x1="230" y1="173" x2="230" y2="84"/>
+            <line x1="64" y1="202" x2="216" y2="310"/>
+            <line x1="230" y1="207" x2="230" y2="296"/>
+            <line x1="245" y1="69" x2="416" y2="180"/>
+            <line x1="245" y1="311" x2="416" y2="200"/>
+            <path d="M 247,55 Q 430,5 600,168"/>
+            <path d="M 247,325 Q 430,375 600,212"/>
+          </g>
+          <!-- the widest path, already pushed on the previous slide -->
+          <g stroke="#b85a26" stroke-width="4" fill="none" marker-end="url(#mDo)">
+            <line x1="67" y1="190" x2="213" y2="190"/>
+            <line x1="247" y1="190" x2="406" y2="190"/>
+            <line x1="447" y1="190" x2="593" y2="190"/>
+          </g>
+          <!-- click 1: s -> 1 -> t -->
+          <g class="fragment" data-fragment-index="0" stroke="#2e588f" stroke-width="4" fill="none" marker-end="url(#mDb)">
+            <line x1="64" y1="178" x2="216" y2="70"/>
+            <path d="M 247,55 Q 430,5 600,168"/>
+          </g>
+          <!-- click 2: s -> 4 -> t -->
+          <g class="fragment" data-fragment-index="1" stroke="#4d7349" stroke-width="4" fill="none" marker-end="url(#mDg)">
+            <line x1="64" y1="202" x2="216" y2="310"/>
+            <path d="M 247,325 Q 430,375 600,212"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#7a2419" font-weight="600">
+            <text x="120" y="178">8/8</text>
+            <text x="305" y="178">8/10</text>
+            <text x="500" y="178">8/8</text>
+            <text x="238" y="135">0/3</text><text x="238" y="262">0/3</text>
+            <text x="322" y="105">0/3</text><text x="322" y="290">0/3</text>
+            <text x="105" y="108" class="fragment fade-out" data-fragment-index="0">0/10</text>
+            <text x="105" y="108" class="fragment" data-fragment-index="0">5/10</text>
+            <text x="410" y="38" class="fragment fade-out" data-fragment-index="0">0/5</text>
+            <text x="410" y="38" class="fragment" data-fragment-index="0">5/5</text>
+            <text x="103" y="285" class="fragment fade-out" data-fragment-index="1">0/5</text>
+            <text x="103" y="285" class="fragment" data-fragment-index="1">5/5</text>
+            <text x="405" y="368" class="fragment fade-out" data-fragment-index="1">0/10</text>
+            <text x="405" y="368" class="fragment" data-fragment-index="1">5/10</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="190" r="17"/><circle cx="230" cy="60" r="17"/>
+            <circle cx="230" cy="190" r="17"/><circle cx="230" cy="320" r="17"/>
+            <circle cx="430" cy="190" r="17"/><circle cx="610" cy="190" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="196">s</text><text x="230" y="66">1</text>
+            <text x="230" y="196">2</text><text x="230" y="326">4</text>
+            <text x="430" y="196">3</text><text x="610" y="196">t</text>
+          </g>
+        </svg>
+      </figure>
+      <p class="fragment" data-fragment-index="2">$|f| = 8 + 5 + 5 = 18$. Is there another st-path with spare capacity?</p>
+    </section>
+
+    <section>
+      <h2>Greedy Gets Stuck at 18</h2>
+      <p class="smaller">Four edges are <strong>saturated</strong>, $f(e) = c(e)$: they can carry nothing more,
+      so remove them.</p>
+      <figure>
+        <svg width="620" height="340" viewBox="0 0 660 385">
+          <defs>
+            <marker id="mS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+            <marker id="mSo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b85a26"/>
+            </marker>
+            <marker id="mSb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2e588f"/>
+            </marker>
+            <marker id="mSg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4d7349"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mS)">
+            <line x1="230" y1="173" x2="230" y2="84"/>
+            <line x1="230" y1="207" x2="230" y2="296"/>
+            <line x1="245" y1="69" x2="416" y2="180"/>
+            <line x1="245" y1="311" x2="416" y2="200"/>
+          </g>
+          <!-- the unsaturated parts of the three greedy paths -->
+          <g stroke-width="4" fill="none">
+            <line x1="247" y1="190" x2="406" y2="190" stroke="#b85a26" marker-end="url(#mSo)"/>
+            <line x1="64" y1="178" x2="216" y2="70" stroke="#2e588f" marker-end="url(#mSb)"/>
+            <path d="M 247,325 Q 430,375 600,212" stroke="#4d7349" marker-end="url(#mSg)"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#7a2419" font-weight="600">
+            <text x="105" y="108">5/10</text><text x="120" y="178">8/8</text>
+            <text x="103" y="285">5/5</text><text x="238" y="135">0/3</text>
+            <text x="305" y="178">8/10</text><text x="238" y="262">0/3</text>
+            <text x="322" y="105">0/3</text><text x="322" y="290">0/3</text>
+            <text x="410" y="38">5/5</text><text x="500" y="178">8/8</text>
+            <text x="405" y="368">5/10</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="190" r="17"/><circle cx="230" cy="60" r="17"/>
+            <circle cx="230" cy="190" r="17"/><circle cx="230" cy="320" r="17"/>
+            <circle cx="430" cy="190" r="17"/><circle cx="610" cy="190" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="196">s</text><text x="230" y="66">1</text>
+            <text x="230" y="196">2</text><text x="230" y="326">4</text>
+            <text x="430" y="196">3</text><text x="610" y="196">t</text>
+          </g>
+        </svg>
+      </figure>
+      <p class="fragment">From $s$ we can still reach $1$ and $3$, but not $t$: no st-path is left.
+      Greedy stops at $|f| = 18$.</p>
+    </section>
+
+    <section>
+      <h2>But 18 Is Not Optimal</h2>
+      <div class="box warn"><span class="tag">Careful</span>
+        The maximum flow in this network has value $21$. Greedy path-packing can get stuck at a
+        suboptimal flow — early paths make commitments that later paths cannot work around.
+      </div>
+      <p class="fragment">What went wrong: the $8$ units on edge $2 \to 3$ hog capacity that
+      is needed on $3 \to t$; vertex $4$ would happily take flow from $2$ instead.</p>
+      <p class="fragment"><strong>The fix:</strong> allow a new path to
+      <span class="hl">decrease</span> flow on an edge, i.e. to undo earlier decisions.</p>
+      <p class="fragment">The bookkeeping device for this is the <em>residual network</em>.</p>
+    </section>
+
+    <section>
+      <h2>The Residual Network</h2>
+      <div class="box"><span class="tag">Definition</span>
+        Given a flow $f$ in $G$, the <strong>residual network</strong> $G_f$ has the same vertices, and
+        for each edge $e = (u,v)$ of $G$:
+        <ul style="margin:0.3em 0 0 0;">
+          <li>a <em>forward edge</em> $(u,v)$ with residual capacity $c(e) - f(e)$, if positive;</li>
+          <li>a <em>backward edge</em> $(v,u)$ with residual capacity $f(e)$, if positive.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>The Residual Network</h2>
+      <figure>
+        <svg width="480" height="150" viewBox="0 0 520 160">
+          <defs>
+            <marker id="mE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mE)">
+            <line x1="58" y1="80" x2="180" y2="80"/>
+            <path d="M 338,70 Q 400,45 462,70"/>
+            <path d="M 468,90 Q 400,115 344,90"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600">
+            <text x="98" y="68" fill="#7a2419">8/10</text>
+            <text x="395" y="40" fill="#7a2419">2</text>
+            <text x="395" y="140" fill="#7a2419">8</text>
+            <text x="20" y="40" fill="#2a2a2a" font-style="italic">G</text>
+            <text x="480" y="40" fill="#2a2a2a" font-style="italic">G<tspan dy="5" font-size="11">f</tspan></text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="40" cy="80" r="15"/><circle cx="198" cy="80" r="15"/>
+            <circle cx="325" cy="80" r="15"/><circle cx="483" cy="80" r="15"/>
+          </g>
+        </svg>
+        <figcaption>An edge carrying $8$ of $10$ units becomes: $2$ more can be pushed forward,
+        $8$ can be pushed back (undone).</figcaption>
+      </figure>
+      <p class="fragment smaller">$G_f$ has at most $2|E|$ edges — same order of size as $G$.</p>
+    </section>
+
+    <section>
+      <h2>Residual Network of the Greedy Flow</h2>
+      <figure>
+        <svg width="530" height="309" viewBox="0 0 660 385">
+          <defs>
+            <marker id="mF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+            <marker id="mFh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#b85a26"/>
+            </marker>
+          </defs>
+          <!-- plain residual edges -->
+          <g stroke="#8d8678" stroke-width="2" fill="none" marker-end="url(#mF)">
+            <path d="M 218,74 Q 130,150 66,180"/>            <!-- 1->s back 5 -->
+            <line x1="213" y1="190" x2="67" y2="190"/>        <!-- 2->s back 8 -->
+            <line x1="216" y1="310" x2="64" y2="202"/>        <!-- 4->s back 5 -->
+            <line x1="230" y1="173" x2="230" y2="84"/>        <!-- 2->1 fwd 3 -->
+            <path d="M 250,196 Q 340,205 410,196"/>           <!-- 2->3 fwd 2 -->
+            <line x1="245" y1="311" x2="416" y2="200"/>       <!-- 4->3 fwd 3 -->
+            <path d="M 600,168 Q 430,5 247,55"/>              <!-- t->1 back 5 -->
+            <line x1="593" y1="190" x2="447" y2="190"/>       <!-- t->3 back 8 -->
+            <path d="M 600,212 Q 430,375 247,325"/>           <!-- t->4 back 5 -->
+            <path d="M 62,175 Q 130,110 214,66"/>             <!-- s->1 fwd 5 -->
+            <line x1="245" y1="69" x2="416" y2="180"/>        <!-- 1->3 fwd 3 -->
+            <path d="M 410,184 Q 340,175 250,184"/>           <!-- 3->2 back 8 -->
+            <line x1="230" y1="207" x2="230" y2="296"/>       <!-- 2->4 fwd 3 -->
+            <path d="M 247,325 Q 430,375 600,212" transform="translate(0,-6)"/> <!-- 4->t fwd 5 -->
+          </g>
+          <!-- augmenting path: drawn over the grey edges on the first click -->
+          <g class="fragment" data-fragment-index="0" stroke="#b85a26" stroke-width="4" fill="none" marker-end="url(#mFh)">
+            <path d="M 62,175 Q 130,110 214,66"/>             <!-- s->1 fwd 5 -->
+            <line x1="245" y1="69" x2="416" y2="180"/>        <!-- 1->3 fwd 3 -->
+            <path d="M 410,184 Q 340,175 250,184"/>           <!-- 3->2 back 8 -->
+            <line x1="230" y1="207" x2="230" y2="296"/>       <!-- 2->4 fwd 3 -->
+            <path d="M 247,325 Q 430,375 600,212" transform="translate(0,-6)"/> <!-- 4->t fwd 5 -->
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600">
+            <text x="118" y="96" fill="#6e3416">5</text>
+            <text x="150" y="150" fill="#5f4910">5</text>
+            <text x="130" y="180" fill="#5f4910">8</text>
+            <text x="100" y="290" fill="#5f4910">5</text>
+            <text x="238" y="135" fill="#7a2419">3</text>
+            <text x="320" y="222" fill="#7a2419">2</text>
+            <text x="315" y="165" fill="#6e3416">8</text>
+            <text x="330" y="102" fill="#6e3416">3</text>
+            <text x="330" y="290" fill="#7a2419">3</text>
+            <text x="425" y="30" fill="#5f4910">5</text>
+            <text x="512" y="180" fill="#5f4910">8</text>
+            <text x="238" y="262" fill="#6e3416">3</text>
+            <text x="395" y="302" fill="#6e3416">5</text>
+            <text x="395" y="348" fill="#5f4910">5</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="190" r="17"/><circle cx="230" cy="60" r="17"/>
+            <circle cx="230" cy="190" r="17"/><circle cx="230" cy="320" r="17"/>
+            <circle cx="430" cy="190" r="17"/><circle cx="610" cy="190" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="196">s</text><text x="230" y="66">1</text>
+            <text x="230" y="196">2</text><text x="230" y="326">4</text>
+            <text x="430" y="196">3</text><text x="610" y="196">t</text>
+          </g>
+        </svg>
+        <figcaption>The residual network $G_f$ of the stuck greedy flow.
+        <span class="fragment" data-fragment-index="0" style="display:block;">Orange: an st-path in $G_f$! It uses the <em>backward</em> edge $3 \to 2$.</span></figcaption>
+      </figure>
+      <p class="fragment" data-fragment-index="1">Path $s \to 1 \to 3 \to 2 \to 4 \to t$ has residual capacity
+      $\min(5,3,8,3,5) = 3$.</p>
+    </section>
+
+    <section>
+      <h2>Augmenting to Value 21</h2>
+      <p class="smaller">Push $3$ units along the path: forward edges gain $3$ units of flow, the
+      backward edge $3 \to 2$ <em>removes</em> $3$ units from edge $2 \to 3$.</p>
+      <figure>
+        <svg width="520" height="277" viewBox="0 0 660 385">
+          <defs>
+            <marker id="mG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mG)">
+            <line x1="64" y1="178" x2="216" y2="70"/>
+            <line x1="67" y1="190" x2="213" y2="190"/>
+            <line x1="64" y1="202" x2="216" y2="310"/>
+            <line x1="230" y1="173" x2="230" y2="84"/>
+            <line x1="230" y1="207" x2="230" y2="296"/>
+            <line x1="245" y1="69" x2="416" y2="180"/>
+            <line x1="245" y1="311" x2="416" y2="200"/>
+            <line x1="247" y1="190" x2="406" y2="190"/>
+            <line x1="447" y1="190" x2="593" y2="190"/>
+            <path d="M 247,55 Q 430,5 600,168"/>
+            <path d="M 247,325 Q 430,375 600,212"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#7a2419" font-weight="600">
+            <text x="100" y="108">8/10</text><text x="118" y="178">8/8</text>
+            <text x="103" y="285">5/5</text><text x="238" y="135">0/3</text>
+            <text x="303" y="178">5/10</text><text x="238" y="262">3/3</text>
+            <text x="318" y="103">3/3</text><text x="322" y="290">0/3</text>
+            <text x="410" y="38">5/5</text><text x="500" y="178">8/8</text>
+            <text x="400" y="368">8/10</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="190" r="17"/><circle cx="230" cy="60" r="17"/>
+            <circle cx="230" cy="190" r="17"/><circle cx="230" cy="320" r="17"/>
+            <circle cx="430" cy="190" r="17"/><circle cx="610" cy="190" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="196">s</text><text x="230" y="66">1</text>
+            <text x="230" y="196">2</text><text x="230" y="326">4</text>
+            <text x="430" y="196">3</text><text x="610" y="196">t</text>
+          </g>
+        </svg>
+        <figcaption>The new flow: still feasible, still conserving, and $|f| = 8+8+5 = 21$.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>The New Residual Network</h2>
+      <figure>
+        <svg width="530" height="309" viewBox="0 0 660 385">
+          <defs>
+            <marker id="mN" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2" fill="none" marker-end="url(#mN)">
+            <path d="M 62,175 Q 130,110 214,66"/>             <!-- s->1 fwd 2 -->
+            <path d="M 218,74 Q 130,150 66,180"/>            <!-- 1->s back 8 -->
+            <line x1="213" y1="190" x2="67" y2="190"/>        <!-- 2->s back 8 -->
+            <line x1="216" y1="310" x2="64" y2="202"/>        <!-- 4->s back 5 -->
+            <line x1="230" y1="173" x2="230" y2="84"/>        <!-- 2->1 fwd 3 -->
+            <line x1="230" y1="296" x2="230" y2="207"/>       <!-- 4->2 back 3 -->
+            <line x1="416" y1="180" x2="245" y2="69"/>        <!-- 3->1 back 3 -->
+            <path d="M 250,196 Q 340,205 410,196"/>           <!-- 2->3 fwd 5 -->
+            <path d="M 410,184 Q 340,175 250,184"/>           <!-- 3->2 back 5 -->
+            <line x1="245" y1="311" x2="416" y2="200"/>       <!-- 4->3 fwd 3 -->
+            <path d="M 600,168 Q 430,5 247,55"/>              <!-- t->1 back 5 -->
+            <line x1="593" y1="190" x2="447" y2="190"/>       <!-- t->3 back 8 -->
+            <path d="M 247,325 Q 430,375 600,212" transform="translate(0,-6)"/> <!-- 4->t fwd 2 -->
+            <path d="M 600,212 Q 430,375 247,325"/>           <!-- t->4 back 8 -->
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600">
+            <text x="118" y="96" fill="#7a2419">2</text>
+            <text x="150" y="150" fill="#5f4910">8</text>
+            <text x="130" y="180" fill="#5f4910">8</text>
+            <text x="100" y="290" fill="#5f4910">5</text>
+            <text x="238" y="135" fill="#7a2419">3</text>
+            <text x="238" y="262" fill="#5f4910">3</text>
+            <text x="330" y="102" fill="#5f4910">3</text>
+            <text x="320" y="222" fill="#7a2419">5</text>
+            <text x="315" y="165" fill="#5f4910">5</text>
+            <text x="330" y="290" fill="#7a2419">3</text>
+            <text x="425" y="30" fill="#5f4910">5</text>
+            <text x="512" y="180" fill="#5f4910">8</text>
+            <text x="395" y="302" fill="#7a2419">2</text>
+            <text x="395" y="348" fill="#5f4910">8</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="190" r="17"/><circle cx="230" cy="60" r="17"/>
+            <circle cx="230" cy="190" r="17"/><circle cx="230" cy="320" r="17"/>
+            <circle cx="430" cy="190" r="17"/><circle cx="610" cy="190" r="17"/>
+          </g>
+          <!-- click 1: the vertices reachable from s -->
+          <g class="fragment" data-fragment-index="0" stroke="#2e588f" stroke-width="2.5" fill="#cad9ee">
+            <circle cx="50" cy="190" r="17"/><circle cx="230" cy="60" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="196">s</text><text x="230" y="66">1</text>
+            <text x="230" y="196">2</text><text x="230" y="326">4</text>
+            <text x="430" y="196">3</text><text x="610" y="196">t</text>
+          </g>
+        </svg>
+        <figcaption>$G_f$ after augmenting to $21$.
+        <span class="fragment" data-fragment-index="0" style="display:block;">Only one residual edge leaves $s$,
+        and from $1$ the only way out leads back to $s$: reachable from $s$ is just $\{s, 1\}$.</span></figcaption>
+      </figure>
+      <p class="fragment smaller" data-fragment-index="1">So there is <strong>no</strong> st-path in $G_f$.
+      Coincidence that this means we are optimal? Not at all — that is the next part.</p>
+    </section>
+
+    <section>
+      <h2>Augmenting Paths</h2>
+      <div class="box"><span class="tag">Definition</span>
+        An <strong>augmenting path</strong> for a flow $f$ is an st-path $P$ in the residual network
+        $G_f$. Its <em>residual capacity</em> $c_f(P)$ is the minimum residual capacity of its edges.
+      </div>
+    </section>
+
+    <section>
+      <h2>Augmenting Paths</h2>
+      <div class="box"><span class="tag">Key Fact</span>
+        If $f$ has an augmenting path $P$, then pushing $c_f(P)$ units along $P$
+        (add on forward edges, subtract on backward edges) yields a valid flow of value
+        $$|f| + c_f(P) \;>\; |f|.$$
+      </div>
+      <p class="fragment smaller">Feasibility check: forward edges stay $\le c(e)$ by definition of
+      residual capacity; backward edges stay $\ge 0$; conservation holds because each internal path
+      vertex gets $+$ and $-$ adjustments that cancel.</p>
+    </section>
+
+    <section>
+      <h2>The Ford-Fulkerson Method</h2>
+      <pre class="algo"><code><span class="kw">FordFulkerson</span>(G, s, t, c):
+  <span class="kw">initialise</span> f(e) = 0 <span class="kw">for all</span> e            <span class="cm">// start from the zero flow</span>
+  <span class="kw">while</span> there is an st-path P in G_f:
+      choose an augmenting path P
+      augment f by c_f(P) along P             <span class="cm">// value strictly increases</span>
+  <span class="kw">return</span> f
+</code></pre>
+      <p class="fragment">Called a <em>method</em> rather than an algorithm: it does not specify
+      <em>which</em> augmenting path to choose. Different choices give different running times.</p>
+      <div class="fragment">
+        <p><strong>Two questions we must answer:</strong></p>
+        <ul>
+          <li class="fragment">Does the loop terminate?</li>
+          <li class="fragment">When it stops (no augmenting path), is $f$ actually a
+              <em>maximum</em> flow?</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================ PART 3 =============================== -->
+    <section class="center"><h1>Max-Flow = Min-Cut</h1></section>
+
+    <section>
+      <h2>st-Cuts</h2>
+      <div class="box"><span class="tag">Definition</span>
+        An <strong>st-cut</strong> is a partition $(X, Y)$ of the vertices with $s \in X$ and $t \in Y$.
+        Its <strong>capacity</strong> is $\textstyle\sum_{e \in \delta^+(X)} c(e)$ — the total capacity of edges
+        leaving $X$.
+      </div>
+      <figure>
+        <svg width="400" height="233" viewBox="0 0 660 385">
+          <defs>
+            <marker id="mH" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mH)">
+            <line x1="64" y1="178" x2="216" y2="70"/>
+            <line x1="67" y1="190" x2="213" y2="190"/>
+            <line x1="64" y1="202" x2="216" y2="310"/>
+            <line x1="230" y1="173" x2="230" y2="84"/>
+            <line x1="230" y1="207" x2="230" y2="296"/>
+            <line x1="245" y1="69" x2="416" y2="180"/>
+            <line x1="245" y1="311" x2="416" y2="200"/>
+            <line x1="247" y1="190" x2="406" y2="190"/>
+            <line x1="447" y1="190" x2="593" y2="190"/>
+            <path d="M 247,55 Q 430,5 600,168"/>
+            <path d="M 247,325 Q 430,375 600,212"/>
+          </g>
+          <path d="M 340,25 C 300,100 250,130 180,160 C 130,185 120,230 90,330"
+                fill="none" stroke="#b03a2e" stroke-width="3" stroke-dasharray="9 7"/>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#7a2419" font-weight="600">
+            <text x="112" y="108">10</text><text x="128" y="178">8</text>
+            <text x="112" y="285">5</text><text x="238" y="135">3</text>
+            <text x="313" y="178">10</text><text x="238" y="262">3</text>
+            <text x="328" y="105">3</text><text x="328" y="290">3</text>
+            <text x="423" y="38">5</text><text x="510" y="178">8</text>
+            <text x="418" y="368">10</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="190" r="17"/><circle cx="230" cy="60" r="17"/>
+            <circle cx="230" cy="190" r="17"/><circle cx="230" cy="320" r="17"/>
+            <circle cx="430" cy="190" r="17"/><circle cx="610" cy="190" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="196">s</text><text x="230" y="66">1</text>
+            <text x="230" y="196">2</text><text x="230" y="326">4</text>
+            <text x="430" y="196">3</text><text x="610" y="196">t</text>
+          </g>
+        </svg>
+        <figcaption>The dashed cut $X = \{s, 1\}$ has capacity $8 + 5 + 3 + 5 = 21$
+        (edges $s\!\to\!2$, $s\!\to\!4$, $1\!\to\!3$, $1\!\to\!t$).</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>st-Cuts</h2>
+      <p class="smaller" style="margin-bottom:0.2em;">Other examples:</p>
+      <figure>
+        <svg width="530" height="309" viewBox="0 0 660 385">
+          <defs>
+            <marker id="mP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mP)">
+            <line x1="64" y1="178" x2="216" y2="70"/>
+            <line x1="67" y1="190" x2="213" y2="190"/>
+            <line x1="64" y1="202" x2="216" y2="310"/>
+            <line x1="230" y1="173" x2="230" y2="84"/>
+            <line x1="230" y1="207" x2="230" y2="296"/>
+            <line x1="245" y1="69" x2="416" y2="180"/>
+            <line x1="245" y1="311" x2="416" y2="200"/>
+            <line x1="247" y1="190" x2="406" y2="190"/>
+            <line x1="447" y1="190" x2="593" y2="190"/>
+            <path d="M 247,55 Q 430,5 600,168"/>
+            <path d="M 247,325 Q 430,375 600,212"/>
+          </g>
+          <!-- click 1: X = {s} -->
+          <path class="fragment" data-fragment-index="0" d="M 150,45 Q 175,190 150,285"
+                fill="none" stroke="#b03a2e" stroke-width="3" stroke-dasharray="9 7"/>
+          <!-- click 2: X = {s, 1, 2} -->
+          <path class="fragment" data-fragment-index="1"
+                d="M 350,10 C 350,100 350,160 345,200 C 335,250 280,275 230,280 C 180,285 120,335 20,360"
+                fill="none" stroke="#2e588f" stroke-width="3" stroke-dasharray="9 7"/>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#7a2419" font-weight="600">
+            <text x="112" y="108">10</text><text x="128" y="178">8</text>
+            <text x="112" y="285">5</text><text x="238" y="135">3</text>
+            <text x="313" y="178">10</text><text x="238" y="262">3</text>
+            <text x="328" y="105">3</text><text x="328" y="290">3</text>
+            <text x="423" y="38">5</text><text x="510" y="178">8</text>
+            <text x="418" y="368">10</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="190" r="17"/><circle cx="230" cy="60" r="17"/>
+            <circle cx="230" cy="190" r="17"/><circle cx="230" cy="320" r="17"/>
+            <circle cx="430" cy="190" r="17"/><circle cx="610" cy="190" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="196">s</text><text x="230" y="66">1</text>
+            <text x="230" y="196">2</text><text x="230" y="326">4</text>
+            <text x="430" y="196">3</text><text x="610" y="196">t</text>
+          </g>
+        </svg>
+      </figure>
+      <ul class="smaller" style="margin-top:0.2em;">
+        <li class="fragment" data-fragment-index="0"><span style="color:#b03a2e;">$X = \{s\}$ has capacity $10 + 8 + 5 = 23$.</span></li>
+        <li class="fragment" data-fragment-index="1"><span style="color:#2e588f;">$X = \{s, 1, 2\}$ has capacity $5 + 3 + 3 + 10 + 5 = 26$.</span></li>
+      </ul>
+      <p class="fragment smaller" data-fragment-index="2">Note: edges <em>entering</em> $X$ do not count.</p>
+    </section>
+
+    <section>
+      <h2>Flow Across a Cut</h2>
+      <div class="box"><span class="tag">Flow Fact</span>
+        For any flow $f$ and any st-cut $(X, Y)$:
+        $$|f| \;=\; \sum_{e \in \delta^+(X)} f(e) \;-\; \sum_{e \in \delta^-(X)} f(e).$$
+        The value of the flow equals the net flow crossing <em>any</em> st-cut.
+      </div>
+    </section>
+
+    <section>
+      <h2>Flow Across a Cut</h2>
+      <p><strong>Proof.</strong> Sum the quantity
+      $\sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e)$ over all $v \in X$.</p>
+      <ul>
+        <li class="fragment">By conservation, every $v \ne s$ contributes $0$; the vertex $s$
+            contributes exactly $|f|$.</li>
+        <li class="fragment">Edges with both endpoints in $X$ appear once with $+$ and once with $-$:
+            they cancel.</li>
+        <li class="fragment">What survives: edges leaving $X$ (counted $+$) and edges entering $X$
+            (counted $-$). $\blacksquare$</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Weak Duality: Flow &le; Cut</h2>
+      <p>For every flow $f$ and every st-cut $(X,Y)$:</p>
+      <p>
+        $$\begin{aligned}
+        |f| \;&=\; \sum_{e \in \delta^+(X)} f(e) - \sum_{e \in \delta^-(X)} f(e)\\
+        &\le\; \sum_{e \in \delta^+(X)} f(e)
+        \;\le\; \sum_{e \in \delta^+(X)} c(e).
+        \end{aligned}$$
+      </p>
+      <div class="box fragment"><span class="tag">Corollary</span>
+        $\max$ st-flow $\;\le\;$ $\min$ st-cut capacity.
+      </div>
+    </section>
+
+    <section>
+      <h2>Weak Duality: Flow &le; Cut</h2>
+      <p>So a cut of capacity $21$ <em>certifies</em> that our flow of value $21$
+      is maximum — cuts are optimality certificates for flows.</p>
+      <p class="fragment">Remarkably, a matching cut <strong>always</strong> exists.</p>
+    </section>
+
+    <section>
+      <h2>The Max-Flow Min-Cut Theorem</h2>
+      <div class="box"><span class="tag">Theorem</span>
+        For an st-flow $f$, the following are equivalent:
+        <ol style="margin:0.3em 0 0 0;">
+          <li>$f$ is a maximum flow;</li>
+          <li>there is no augmenting path in $G_f$;</li>
+          <li>there is an st-cut of capacity exactly $|f|$.</li>
+        </ol>
+      </div>
+      <p class="fragment">In particular:
+      <span class="hl">maximum st-flow value $=$ minimum st-cut capacity</span>.</p>
+      <p class="fragment">Plan: $(1) \Rightarrow (2)$ and $(3) \Rightarrow (1)$ are quick;
+      the heart of the proof is $(2) \Rightarrow (3)$.</p>
+    </section>
+
+    <section>
+      <h2>The Two Easy Implications</h2>
+      <div class="box" style="font-size:0.85em;"><span class="tag">Theorem</span>
+        For an st-flow $f$, the following are equivalent:
+        <ol style="margin:0.3em 0 0 0;">
+          <li>$f$ is a maximum flow;</li>
+          <li>there is no augmenting path in $G_f$;</li>
+          <li>there is an st-cut of capacity exactly $|f|$.</li>
+        </ol>
+      </div>
+      <div class="box fragment"><span class="tag">(1) &rArr; (2)</span>
+        Contrapositive: if $G_f$ has an augmenting path $P$, pushing $c_f(P) > 0$ along it gives a
+        strictly larger flow — so $f$ was not maximum.
+      </div>
+    </section>
+
+    <section>
+      <h2>The Two Easy Implications</h2>
+      <div class="box" style="font-size:0.85em;"><span class="tag">Theorem</span>
+        For an st-flow $f$, the following are equivalent:
+        <ol style="margin:0.3em 0 0 0;">
+          <li>$f$ is a maximum flow;</li>
+          <li>there is no augmenting path in $G_f$;</li>
+          <li>there is an st-cut of capacity exactly $|f|$.</li>
+        </ol>
+      </div>
+      <div class="box fragment"><span class="tag">(3) &rArr; (1)</span>
+        By weak duality every flow value is at most the capacity of every cut. If some cut has
+        capacity exactly $|f|$, no flow can beat $f$: it is maximum.
+      </div>
+      <p class="fragment">Remaining: $(2) \Rightarrow (3)$ — from &ldquo;no augmenting path&rdquo; we
+      must <em>construct</em> a cut of capacity $|f|$.</p>
+    </section>
+
+    <section>
+      <h2>(2) &rArr; (3): Reading a Cut off G<sub style="text-transform:none;">f</sub></h2>
+      <p>Suppose $G_f$ has no st-path. Let
+      $X = \{\,v : v \text{ reachable from } s \text{ in } G_f\,\}$ and $Y$ the rest.</p>
+      <ul>
+        <li class="fragment">$s \in X$ by definition, and $t \in Y$ since there is no st-path:
+            $(X,Y)$ is an st-cut.</li>
+        <li class="fragment">No residual edge crosses from $X$ to $Y$ — otherwise the head would be
+            reachable too.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>(2) &rArr; (3): Reading a Cut off G<sub style="text-transform:none;">f</sub></h2>
+      <p class="smaller">Our example after augmenting to $21$: the vertices reachable from $s$ in $G_f$
+      were $X = \{s, 1\}$.</p>
+      <figure>
+        <svg width="480" height="280" viewBox="0 0 660 385">
+          <defs>
+            <marker id="mQ" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mQ)">
+            <line x1="64" y1="178" x2="216" y2="70"/>
+            <line x1="67" y1="190" x2="213" y2="190"/>
+            <line x1="64" y1="202" x2="216" y2="310"/>
+            <line x1="230" y1="173" x2="230" y2="84"/>
+            <line x1="230" y1="207" x2="230" y2="296"/>
+            <line x1="245" y1="69" x2="416" y2="180"/>
+            <line x1="245" y1="311" x2="416" y2="200"/>
+            <line x1="247" y1="190" x2="406" y2="190"/>
+            <line x1="447" y1="190" x2="593" y2="190"/>
+            <path d="M 247,55 Q 430,5 600,168"/>
+            <path d="M 247,325 Q 430,375 600,212"/>
+          </g>
+          <!-- the cut X = {s, 1} -->
+          <path d="M 360,15 C 330,70 310,95 285,120 C 260,145 230,160 200,175 C 160,195 145,260 135,340"
+                fill="none" stroke="#b03a2e" stroke-width="3" stroke-dasharray="9 7"/>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#7a2419" font-weight="600">
+            <text x="100" y="108">8/10</text><text x="118" y="178">8/8</text>
+            <text x="92" y="292">5/5</text><text x="238" y="135">0/3</text>
+            <text x="303" y="178">5/10</text><text x="238" y="262">3/3</text>
+            <text x="318" y="103">3/3</text><text x="322" y="290">0/3</text>
+            <text x="410" y="38">5/5</text><text x="500" y="178">8/8</text>
+            <text x="400" y="368">8/10</text>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="190" r="17" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+            <circle cx="230" cy="60" r="17" fill="#cad9ee" stroke="#2e588f" stroke-width="2.5"/>
+            <circle cx="230" cy="190" r="17"/><circle cx="230" cy="320" r="17"/>
+            <circle cx="430" cy="190" r="17"/><circle cx="610" cy="190" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="196">s</text><text x="230" y="66">1</text>
+            <text x="230" y="196">2</text><text x="230" y="326">4</text>
+            <text x="430" y="196">3</text><text x="610" y="196">t</text>
+          </g>
+        </svg>
+        <figcaption class="fragment">Every edge leaving $X$ is saturated ($8/8$, $5/5$, $3/3$, $5/5$) and the one
+        edge entering $X$ carries $0$. Capacity $8 + 5 + 3 + 5 = 21 = |f|$.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>(2) &rArr; (3): Reading a Cut off G<sub style="text-transform:none;">f</sub></h2>
+      <p>No residual edge leaves $X$ — in $G$ this says two things:</p>
+      <div class="cols" style="margin-top:0.4em;">
+        <div class="box fragment" style="font-size:0.85em;"><span class="tag">(a)</span>
+          No <em>forward</em> residual edge leaves $X$: every edge of $G$ leaving $X$ is
+          <strong>saturated</strong>, $f(e) = c(e)$.
+        </div>
+        <div class="box fragment" style="font-size:0.85em;"><span class="tag">(b)</span>
+          No <em>backward</em> residual edge leaves $X$: every edge of $G$ entering $X$ carries
+          <strong>zero flow</strong>, $f(e) = 0$.
+        </div>
+      </div>
+      <p class="fragment smaller">In our example: after augmenting to $21$, the vertices reachable
+      from $s$ in $G_f$ are exactly $\{s, 1\}$ — the dashed cut from before, with capacity $21$.</p>
+    </section>
+
+    <section>
+      <h2>(2) &rArr; (3): Finishing the Computation</h2>
+      <p>Apply the Flow Fact to the cut $(X, Y)$ we just built:</p>
+      <p>
+        $$\begin{aligned}
+        |f| \;&=\; \sum_{e \in \delta^+(X)} f(e) - \sum_{e \in \delta^-(X)} f(e)\\
+        &\overset{(b)}{=}\; \sum_{e \in \delta^+(X)} f(e)
+        \;\overset{(a)}{=}\; \sum_{e \in \delta^+(X)} c(e).
+        \end{aligned}$$
+      </p>
+      <p class="fragment">So the capacity of $(X,Y)$ is exactly $|f|$ — statement (3). $\blacksquare$</p>
+    </section>
+
+    <section>
+      <h2>(2) &rArr; (3): Finishing the Computation</h2>
+      <div class="box"><span class="tag">Consequence</span>
+        When Ford-Fulkerson stops, the flow is maximum. And the vertices reachable from $s$ in the
+        final residual network hand us a <span class="hl">minimum cut for free</span>.
+      </div>
+    </section>
+
+    <section>
+      <h2>A Second Proof Is Coming</h2>
+      <div class="box"><span class="tag">Preview</span>
+        In <strong>Week 10</strong> we will see a second, completely different proof of
+        max-flow $=$ min-cut, via <strong>LP duality</strong>: flows and cuts are optimal solutions of a
+        primal-dual pair of linear programs.
+      </div>
+      <p class="fragment">Same theorem, two proofs, two generalisations: the residual-graph proof
+      gives algorithms; the LP proof places the theorem inside a much bigger duality landscape.</p>
+    </section>
+
+    <section>
+      <h2>Integral Capacities: Termination</h2>
+      <div class="box"><span class="tag">Theorem</span>
+        If all capacities are integers, Ford-Fulkerson terminates, and it outputs a maximum flow
+        that is <strong>integral</strong> (every $f(e)$ is an integer).
+      </div>
+      <p class="fragment"><strong>Why.</strong> Starting from the zero flow, all capacities in $G_f$ stay
+      integral, so each augmentation is by an integer amount, i.e. increases $|f|$ by at least $1$.
+      With $F = $ max-flow value, the loop runs at most $F$ times.</p>
+    </section>
+
+    <section>
+      <h2>Integral Capacities: Termination</h2>
+      <p>Moreover the flow found is built from integer augmentations, so it is
+      <strong>integral</strong>.</p>
+      <div class="box warn fragment"><span class="tag">Careful</span>
+        With <em>irrational</em> capacities Ford-Fulkerson can actually fail to terminate!
+      </div>
+    </section>
+
+    <section>
+      <h2>How Fast Is Ford-Fulkerson?</h2>
+      <div class="box"><span class="tag">Runtime</span>
+        Each iteration (find a path in $G_f$ by BFS/DFS, augment) takes $O(|E|)$ time, so on integer
+        capacities Ford-Fulkerson runs in $O(F \cdot |E|)$ time.
+      </div>
+      <p class="fragment">Two loose ends:</p>
+      <ul>
+        <li class="fragment">The bound depends on the flow <em>value</em> $F$, which can be
+            exponential in the input size — fixed by <strong>Edmonds-Karp</strong> next.</li>
+        <li class="fragment">Integrality looks like a technicality, but it is exactly what our
+            <strong>applications</strong> will exploit.</li>
+      </ul>
+    </section>
+
+    <!-- ============================ PART 4 =============================== -->
+    <section class="center"><h1>Edmonds-Karp</h1></section>
+
+    <section>
+      <h2>Choosing Paths Wisely</h2>
+      <p>$O(F \cdot |E|)$ is <em>not</em> polynomial in the input size: a capacity of $10^9$ fits in
+      30 bits but may force $10^9$ augmentations if paths are chosen badly.</p>
+      <div class="box fragment"><span class="tag">Edmonds-Karp (1970)</span>
+        Run Ford-Fulkerson, always choosing an augmenting path with the
+        <strong>fewest edges</strong>. The running time is $O(|V| \cdot |E|^2)$ —
+        independent of the capacities.
+      </div>
+    </section>
+
+    <section>
+      <h2>Choosing Paths Wisely</h2>
+      <ul>
+        <li class="fragment">A fewest-edges st-path in $G_f$ is found by <strong>BFS</strong>
+            (ignore capacities) in $O(|E|)$ time per round.</li>
+        <li class="fragment">So it suffices to show:
+            <span class="hl">the number of rounds is $O(|V| \cdot |E|)$</span>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>BFS Levels of G<sub style="text-transform:none;">f</sub></h2>
+      <p class="smaller">Fix the current $G_f$ and let $L_i$ be the vertices at distance $i$ from $s$
+      (BFS layers), with $t \in L_d$.</p>
+      <figure>
+        <svg width="440" height="322" viewBox="0 0 520 380">
+          <defs>
+            <marker id="mI" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mI)">
+            <line x1="74" y1="208" x2="216" y2="100"/>
+            <line x1="77" y1="220" x2="213" y2="220"/>
+            <line x1="74" y1="232" x2="216" y2="340"/>
+            <line x1="230" y1="203" x2="230" y2="114"/>
+            <line x1="230" y1="237" x2="230" y2="326"/>
+            <line x1="246" y1="98" x2="414" y2="152"/>
+            <line x1="247" y1="215" x2="414" y2="166"/>
+            <line x1="246" y1="332" x2="414" y2="168"/>
+            <line x1="242" y1="102" x2="417" y2="268"/>
+            <line x1="246" y1="348" x2="414" y2="288"/>
+            <line x1="430" y1="177" x2="430" y2="263"/>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="60" cy="220" r="17" fill="#cad9ee" stroke="#2e588f"/>
+            <circle cx="230" cy="90" r="17"/><circle cx="230" cy="220" r="17"/>
+            <circle cx="230" cy="350" r="17"/>
+            <circle cx="430" cy="160" r="17"/><circle cx="430" cy="280" r="17" fill="#c5d6c2" stroke="#4d7349"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="60" y="226">s</text><text x="230" y="96">1</text>
+            <text x="230" y="226">2</text><text x="230" y="356">4</text>
+            <text x="430" y="166">3</text><text x="430" y="286">t</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="600" font-style="italic" fill="#1d3c66" text-anchor="middle">
+            <text x="60" y="38">L<tspan dy="7" font-size="17" font-style="normal">0</tspan></text>
+            <text x="230" y="38">L<tspan dy="7" font-size="17" font-style="normal">1</tspan></text>
+            <text x="430" y="38">L<tspan dy="7" font-size="17" font-style="normal">2</tspan></text>
+          </g>
+        </svg>
+        <figcaption>Levels for our example at $f = 0$: $L_1 = \{1,2,4\}$, $L_2 = \{3, t\}$, so $d = 2$.</figcaption>
+      </figure>
+      <p class="fragment smaller">Every edge of $G_f$ goes at most one level forward
+      (BFS property), so a shortest st-path is $s - v_1 - \dots - v_{d-1} - t$ with $v_i \in L_i$.</p>
+    </section>
+
+    <section>
+      <h2>Distances Never Decrease</h2>
+      <p>What can one shortest-path augmentation change in $G_f$?</p>
+      <ul>
+        <li class="fragment">Augmenting on $(v_i, v_{i+1})$ may <em>delete</em> that edge (if saturated)
+            and may <em>create</em> the reverse edge $(v_{i+1}, v_i)$.</li>
+        <li class="fragment">So every <strong>new</strong> edge points from some $L_{i+1}$ back to $L_i$
+            — one level <em>backwards</em>.</li>
+        <li class="fragment">A path using a backward edge wastes at least two steps: adding such
+            edges cannot create an st-path shorter than $d$.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Key Fact</span>
+        Under shortest-path augmentation, the st-distance in $G_f$ never decreases.
+      </div>
+    </section>
+
+    <section>
+      <h2>Counting the Rounds</h2>
+      <ul>
+        <li class="fragment">Each augmentation <strong>saturates</strong> at least one edge of the path
+            (the bottleneck), deleting an $L_i \to L_{i+1}$ edge from $G_f$.</li>
+        <li class="fragment">While the distance stays equal to $d$, shortest paths only use
+            $L_i \to L_{i+1}$ edges — and new edges never have this form. There are at most
+            $|E|$ such edges: each edge of $G$ yields two opposite residual edges, at most one of
+            which is level-forward. So after at most $|E|$ augmentations, no shortest path of
+            length $d$ remains: the <strong>distance strictly increases</strong>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Counting the Rounds</h2>
+      <ul>
+        <li>The distance is an integer between $1$ and $|V| - 1$, so it can increase
+            at most $|V|$ times.</li>
+        <li class="fragment">At most $|E|$ augmentations per distance value, at most $|V|$ distance values.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Theorem</span>
+        Edmonds-Karp performs $O(|V| \cdot |E|)$ augmentations; with $O(|E|)$ BFS per round the total
+        running time is $O(|V| \cdot |E|^2)$ — for arbitrary real capacities.
+      </div>
+    </section>
+
+    <section>
+      <h2>Progress on Max-Flow</h2>
+      <table class="results" style="font-size:0.62em;">
+        <thead><tr><th>Algorithm</th><th>Year</th><th>Time</th></tr></thead>
+        <tbody>
+          <tr class="hlrow"><td class="q">Edmonds-Karp</td><td>1970</td><td>$O(VE^2)$</td></tr>
+          <tr><td class="q">Dinitz</td><td>1970</td><td>$O(V^2E)$</td></tr>
+          <tr><td class="q">Binary blocking flow (Goldberg-Rao)</td><td>1998</td>
+              <td>$O(E \min\{V^{2/3}, E^{1/2}\} \log\frac{V^2}{E}\log U)$</td></tr>
+          <tr><td class="q">BLNPSSSW / BLLSSSW</td><td>2020</td><td>$\tO((E + V^{3/2})\log U)$</td></tr>
+          <tr><td class="q">Chen, Kyng, Liu, Peng, Probst&nbsp;Gutenberg, Sachdeva</td><td>2022</td>
+              <td>$O(E^{1+o(1)} \log U)$</td></tr>
+        </tbody>
+      </table>
+      <p class="credit" style="margin-top:0.2em; font-size:0.6em;">$U$ is the largest (integer) capacity,
+      so $\log U$ is the number of bits per capacity.</p>
+      <p class="fragment smaller">Using very different techniques (continuous optimisation, dynamic
+      graph data structures), we now have <strong>nearly optimal</strong> algorithms for max flow —
+      almost linear in the number of edges.</p>
+    </section>
+
+    <section>
+      <h2>Check Your Understanding</h2>
+      <p>Discuss at your table.</p>
+      <p class="fragment"><strong>Q1.</strong> Given a maximum st-flow, how do you compute a minimum
+      st-cut in $O(|E|)$ time?</p>
+      <p class="fragment"><strong>Q2.</strong> Given a minimum st-cut, can you compute a maximum
+      st-flow quickly?</p>
+    </section>
+
+    <!-- ============================ PART 5 =============================== -->
+    <section class="center"><h1>Applications</h1></section>
+
+    <section>
+      <h2>Application 1: Matching</h2>
+      <div class="cols">
+        <div style="flex:1.5;">
+          <div class="box" style="font-size:0.85em;"><span class="tag">Definition</span>
+            A <strong>matching</strong> is a set of edges $M$ such that each vertex touches at most one
+            edge of $M$. A matching covering <em>all</em> vertices is <strong>perfect</strong>.
+          </div>
+          <p class="fragment smaller">In Weeks 3-4 we solved maximum matching on <em>trees</em> by DP
+          and greedy. In a <strong>bipartite</strong> graph (parts $L$, $R$, all edges between) it
+          models assigning jobs to applicants.</p>
+        </div>
+        <figure>
+        <svg width="300" height="330" viewBox="0 0 340 400">
+          <g stroke="#8d8678" stroke-width="2" fill="none">
+            <line x1="87" y1="65" x2="253" y2="150"/>
+            <line x1="87" y1="150" x2="253" y2="60"/>
+            <line x1="87" y1="150" x2="253" y2="150"/>
+            <line x1="87" y1="245" x2="253" y2="65"/>
+            <line x1="87" y1="250" x2="253" y2="155"/>
+            <line x1="87" y1="335" x2="253" y2="70"/>
+            <line x1="87" y1="340" x2="253" y2="340"/>
+          </g>
+          <g stroke="#b85a26" stroke-width="4" fill="none">
+            <line x1="87" y1="60" x2="253" y2="60"/>
+            <line x1="87" y1="150" x2="253" y2="150"/>
+            <line x1="87" y1="330" x2="253" y2="245"/>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="70" cy="60" r="16"/><circle cx="70" cy="150" r="16"/>
+            <circle cx="70" cy="240" r="16"/><circle cx="70" cy="330" r="16"/>
+            <circle cx="270" cy="60" r="16"/><circle cx="270" cy="150" r="16"/>
+            <circle cx="270" cy="240" r="16"/><circle cx="270" cy="330" r="16"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="30" y="66">L1</text><text x="30" y="156">L2</text>
+            <text x="30" y="246">L3</text><text x="30" y="336">L4</text>
+            <text x="312" y="66">R1</text><text x="312" y="156">R2</text>
+            <text x="312" y="246">R3</text><text x="312" y="336">R4</text>
+          </g>
+        </svg>
+        <figcaption>The size of a maximum matching in this graph is $3$.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Matching as a Flow Problem</h2>
+      <div class="cols">
+        <div class="smaller">
+          <p>Build a flow network:</p>
+          <ul style="font-size:0.95em;">
+            <li class="fragment">direct all edges from $L$ to $R$, capacity $1$;</li>
+            <li class="fragment">add source $s$ with edges $s \to \ell$ of capacity $1$
+                for every $\ell \in L$;</li>
+            <li class="fragment">add sink $t$ with edges $r \to t$ of capacity $1$
+                for every $r \in R$.</li>
+          </ul>
+        </div>
+        <figure>
+        <svg width="420" height="330" viewBox="0 0 640 400">
+          <defs>
+            <marker id="mJ" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2" fill="none" marker-end="url(#mJ)">
+            <line x1="74" y1="188" x2="188" y2="72"/>
+            <line x1="78" y1="194" x2="185" y2="157"/>
+            <line x1="78" y1="206" x2="185" y2="243"/>
+            <line x1="74" y1="212" x2="188" y2="328"/>
+            <line x1="217" y1="65" x2="413" y2="150"/>
+            <line x1="217" y1="150" x2="413" y2="60"/>
+            <line x1="217" y1="155" x2="413" y2="155"/>
+            <line x1="217" y1="245" x2="413" y2="65"/>
+            <line x1="217" y1="250" x2="413" y2="155"/>
+            <line x1="217" y1="335" x2="413" y2="70"/>
+            <line x1="217" y1="330" x2="413" y2="245"/>
+            <line x1="217" y1="340" x2="413" y2="340"/>
+            <line x1="452" y1="72" x2="566" y2="188"/>
+            <line x1="455" y1="157" x2="562" y2="194"/>
+            <line x1="455" y1="243" x2="562" y2="206"/>
+            <line x1="452" y1="328" x2="566" y2="212"/>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="60" cy="200" r="16"/>
+            <circle cx="200" cy="60" r="16"/><circle cx="200" cy="150" r="16"/>
+            <circle cx="200" cy="240" r="16"/><circle cx="200" cy="330" r="16"/>
+            <circle cx="430" cy="60" r="16"/><circle cx="430" cy="150" r="16"/>
+            <circle cx="430" cy="240" r="16"/><circle cx="430" cy="330" r="16"/>
+            <circle cx="580" cy="200" r="16"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="60" y="206">s</text><text x="580" y="206">t</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="600" fill="#7a2419">
+            <text x="106" y="117">1</text><text x="117" y="167">1</text>
+            <text x="117" y="248">1</text><text x="106" y="298">1</text>
+            <text x="300" y="46">1</text><text x="300" y="378">1</text>
+            <text x="516" y="117">1</text><text x="502" y="167">1</text>
+            <text x="502" y="248">1</text><text x="516" y="298">1</text>
+          </g>
+        </svg>
+        <figcaption>All capacities are $1$.</figcaption>
+        </figure>
+      </div>
+      <div class="box fragment" style="font-size:0.9em;"><span class="tag">Claim</span>
+        max flow value $=$ maximum matching size.
+      </div>
+    </section>
+
+    <section>
+      <h2>Proof: Flow &ge; Matching</h2>
+      <p>Take any matching $M$.</p>
+      <ul>
+        <li class="fragment">Each matching edge $(\ell, r)$ gives a path
+            $s \to \ell \to r \to t$.</li>
+        <li class="fragment">Because $M$ is a matching, these paths are <strong>edge-disjoint</strong>
+            (each $\ell$ and each $r$ is used once).</li>
+        <li class="fragment">Sending one unit along each path is a valid flow of value $|M|$.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Half Done</span>
+        max flow $\ge$ max matching.
+      </div>
+    </section>
+
+    <section>
+      <h2>Proof: Flow &le; Matching — via Integrality</h2>
+      <p>All capacities are $1$, so by the integrality theorem
+      there is a <strong>maximum flow with values in $\{0, 1\}$</strong>.</p>
+      <div class="box fragment"><span class="tag">Claim</span>
+        The $L\!\to\!R$ edges carrying flow $1$ form a matching of size $|f|$.
+      </div>
+    </section>
+
+    <section>
+      <h2>Proof: Flow &le; Matching — via Integrality</h2>
+      <div class="box"><span class="tag">Claim</span>
+        The $L\!\to\!R$ edges carrying flow $1$ form a matching of size $|f|$.
+      </div>
+      <ul>
+        <li class="fragment">$\ell \in L$ receives at most $1$ unit (from $s$), so by conservation at
+            most one flow-$1$ edge <em>leaves</em> $\ell$.</li>
+        <li class="fragment">$r \in R$ can send at most $1$ unit (to $t$), so at most one flow-$1$
+            edge <em>enters</em> $r$.</li>
+      </ul>
+      <p class="fragment">So every vertex touches at most one selected edge: the selected
+      $L\!\to\!R$ edges <strong>form a matching</strong>.</p>
+    </section>
+
+    <section>
+      <h2>Proof: Flow &le; Matching — via Integrality</h2>
+      <ul>
+        <li>The number of selected edges is the flow crossing the cut
+            $(\{s\} \cup L,\; R \cup \{t\})$, which is $|f|$. $\blacksquare$</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Runtime</span>
+        $F \le |V|$, so plain Ford-Fulkerson already solves bipartite matching in
+        $O(|V| \cdot |E|)$ time. Integrality did the heavy lifting.
+      </div>
+    </section>
+
+    <section>
+      <h2>Kőnig's Theorem</h2>
+      <div class="box"><span class="tag">Theorem (Kőnig, 1931)</span>
+        If $G$ is bipartite, then $\nu(G) = \tau(G)$: the maximum matching size equals the
+        minimum vertex cover size.
+      </div>
+      <p class="fragment">Weak duality (Week 3): $\nu(G) \le \tau(G)$ in <em>every</em> graph, since a
+      cover needs a distinct vertex for each edge of a matching.</p>
+      <p class="fragment">Week 3 proved the bipartite case with alternating paths. Today we
+      <span class="hl">read a cover off a minimum cut</span> of the matching network.</p>
+    </section>
+
+    <section>
+      <h2>Kőnig via Min Cut</h2>
+      <p>Plan: turn a minimum cut of the matching network into a vertex cover of the same size,
+      by associating each cut edge with a vertex:</p>
+      <ul>
+        <li class="fragment">cutting $s \to \ell$ costs $1$ &nbsp;$\leftrightarrow$&nbsp; put $\ell$ in the cover;</li>
+        <li class="fragment">cutting $r \to t$ costs $1$ &nbsp;$\leftrightarrow$&nbsp; put $r$ in the cover;</li>
+        <li class="fragment">cutting a middle edge $\ell \to r$: two candidates, $\ell$ or $r$, and nothing
+            in the cut says which. Either works, but the association is no longer forced.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Kőnig via Min Cut</h2>
+      <p>We would like the association to be forced, and exact.</p>
+      <div class="box fragment"><span class="tag">The role of $\infty$</span>
+        Give the middle edges capacity $\infty$. A cut using one costs $\infty$ while $\{s\}$
+        costs $|L|$, so <span class="hl">a minimum cut uses only $s$- and $t$-edges</span>. Each of
+        these is associated with one vertex, so the cut maps to a set of vertices of size exactly
+        its capacity.
+      </div>
+      <p class="fragment">The max flow is unchanged: each $\ell$ still receives at most $1$ unit.</p>
+    </section>
+
+    <section>
+      <h2>Kőnig via Min Cut</h2>
+      <p class="smaller">Take a minimum cut $X \ni s$ of the network with $\infty$ middle edges; let
+      $X_L = X \cap L$ and $X_R = X \cap R$. For $S \subseteq L$, write $N(S)$ for its set of
+      neighbours in $R$.</p>
+      <figure>
+        <svg width="500" height="258" viewBox="0 0 640 330">
+          <defs>
+            <marker id="mR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mR)">
+            <line x1="66" y1="155" x2="160" y2="100"/>        <!-- s -> X_L -->
+            <line x1="66" y1="175" x2="160" y2="235"/>        <!-- s -> L\X_L  (crosses) -->
+            <line x1="273" y1="85" x2="367" y2="85"/>         <!-- X_L -> X_R -->
+            <line x1="273" y1="250" x2="367" y2="250"/>       <!-- L\X_L -> R\X_R -->
+            <line x1="483" y1="100" x2="574" y2="155"/>       <!-- X_R -> t  (crosses) -->
+            <line x1="483" y1="235" x2="574" y2="175"/>       <!-- R\X_R -> t -->
+            <line x1="268" y1="110" x2="372" y2="225" stroke-dasharray="6 6"/> <!-- X_L -> R\X_R: would cross with capacity oo -->
+          </g>
+          <path d="M 15,225 C 110,222 200,165 320,165 C 410,165 470,165 505,120 C 530,90 545,50 550,10"
+                fill="none" stroke="#b03a2e" stroke-width="3" stroke-dasharray="9 7"/>
+          <ellipse cx="215" cy="85" rx="58" ry="40" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/><ellipse cx="215" cy="250" rx="58" ry="40" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <ellipse cx="425" cy="85" rx="58" ry="40" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/><ellipse cx="425" cy="250" rx="58" ry="40" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="165" r="17" fill="#cad9ee" stroke="#2e588f"/><circle cx="590" cy="165" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="171">s</text><text x="590" y="171">t</text>
+            <text x="215" y="91" font-style="italic">X<tspan dy="5" font-size="12" font-style="normal">L</tspan></text>
+            <text x="425" y="91" font-style="italic">X<tspan dy="5" font-size="12" font-style="normal">R</tspan></text>
+            <text x="215" y="256" font-style="italic">L \ X<tspan dy="5" font-size="12" font-style="normal">L</tspan></text>
+            <text x="425" y="256" font-style="italic">R \ X<tspan dy="5" font-size="12" font-style="normal">R</tspan></text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#7a2419">
+            <text x="70" y="112">1 each</text><text x="62" y="252">1 each</text>
+            <text x="536" y="108">1 each</text><text x="536" y="236">1 each</text>
+            <text x="308" y="76" font-size="28">&#8734;</text><text x="308" y="284" font-size="28">&#8734;</text>
+            <text x="288" y="128" fill="#b03a2e"><tspan font-size="24">&#8734;</tspan><tspan dy="-5">: none</tspan></text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="700" font-style="italic">
+            <text x="22" y="70" fill="#2e588f">X</text><text x="606" y="300" fill="#2a2a2a">Y</text>
+          </g>
+        </svg>
+        <figcaption class="fragment">The cut $\{s\}$ has capacity $|L|$, so a minimum cut is finite:
+        no $\infty$ edge leaves $X$, i.e. $N(X_L) \subseteq X_R$.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Kőnig via Min Cut</h2>
+      <p class="smaller">Let $C = (L \setminus X_L) \cup X_R$: the vertices associated with the crossing edges.</p>
+      <figure>
+        <svg width="500" height="258" viewBox="0 0 640 330">
+          <defs>
+            <marker id="mRc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#mRc)">
+            <line x1="66" y1="155" x2="160" y2="100"/>        <!-- s -> X_L -->
+            <line x1="66" y1="175" x2="160" y2="235"/>        <!-- s -> L\X_L  (crosses) -->
+            <line x1="273" y1="85" x2="367" y2="85"/>         <!-- X_L -> X_R -->
+            <line x1="273" y1="250" x2="367" y2="250"/>       <!-- L\X_L -> R\X_R -->
+            <line x1="483" y1="100" x2="574" y2="155"/>       <!-- X_R -> t  (crosses) -->
+            <line x1="483" y1="235" x2="574" y2="175"/>       <!-- R\X_R -> t -->
+            <line x1="268" y1="110" x2="372" y2="225" stroke-dasharray="6 6"/> <!-- X_L -> R\X_R: none -->
+          </g>
+          <path d="M 15,225 C 110,222 200,165 320,165 C 410,165 470,165 505,120 C 530,90 545,50 550,10"
+                fill="none" stroke="#b03a2e" stroke-width="3" stroke-dasharray="9 7"/>
+          <ellipse cx="215" cy="85" rx="58" ry="40" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><ellipse cx="215" cy="250" rx="58" ry="40" fill="#f7dfc9" stroke="#b85a26" stroke-width="2"/>
+          <ellipse cx="425" cy="85" rx="58" ry="40" fill="#f7dfc9" stroke="#b85a26" stroke-width="2"/><ellipse cx="425" cy="250" rx="58" ry="40" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="50" cy="165" r="17"/><circle cx="590" cy="165" r="17"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="50" y="171">s</text><text x="590" y="171">t</text>
+            <text x="215" y="91" font-style="italic">X<tspan dy="5" font-size="12" font-style="normal">L</tspan></text>
+            <text x="425" y="91" font-style="italic">X<tspan dy="5" font-size="12" font-style="normal">R</tspan></text>
+            <text x="215" y="256" font-style="italic">L \ X<tspan dy="5" font-size="12" font-style="normal">L</tspan></text>
+            <text x="425" y="256" font-style="italic">R \ X<tspan dy="5" font-size="12" font-style="normal">R</tspan></text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#7a2419">
+            <text x="70" y="112">1 each</text><text x="62" y="252">1 each</text>
+            <text x="536" y="108">1 each</text><text x="536" y="236">1 each</text>
+            <text x="308" y="76" font-size="28">&#8734;</text><text x="308" y="284" font-size="28">&#8734;</text>
+            <text x="288" y="128" fill="#b03a2e"><tspan font-size="24">&#8734;</tspan><tspan dy="-5">: none</tspan></text>
+          </g>
+        </svg>
+        <figcaption>The orange sets form $C$, one vertex per crossing edge, so $|C|$ equals the cut
+        capacity, $|L \setminus X_L| + |X_R|$.</figcaption>
+      </figure>
+      <p class="fragment"><strong>$C$ is a vertex cover:</strong> an edge missing $C$ would run from $X_L$
+      to $R \setminus X_R$ — and there are none.</p>
+    </section>
+
+    <section>
+      <h2>Kőnig via Min Cut</h2>
+      <p>A minimum cut $X$ gave a vertex cover $C$ with $|C| = $ capacity of $X$.</p>
+      <div class="box fragment"><span class="tag">Conclusion</span>
+        <div style="font-size:0.85em;">
+        $$\underbrace{\tau}_{\text{min vertex cover}} \le |C| = \text{min cut} = \text{max flow}
+        = \underbrace{\nu}_{\text{max matching}}$$
+        </div>
+        With weak duality $\nu \le \tau$, thus $\nu = \tau$. $\blacksquare$
+      </div>
+    </section>
+
+    <section>
+      <h2>Perfect Matchings and an Obstacle</h2>
+      <p class="smaller">When does a bipartite graph with $|L| = |R| = n$ have a
+      <em>perfect</em> matching? Our example has none:</p>
+      <figure>
+        <svg width="250" height="233" viewBox="0 0 340 400">
+          <ellipse cx="70" cy="150" rx="42" ry="130" fill="#f4c5c2" opacity="0.65"/>
+          <g stroke="#8d8678" stroke-width="2" fill="none">
+            <line x1="87" y1="60" x2="253" y2="60"/>
+            <line x1="87" y1="65" x2="253" y2="150"/>
+            <line x1="87" y1="150" x2="253" y2="60"/>
+            <line x1="87" y1="155" x2="253" y2="155"/>
+            <line x1="87" y1="245" x2="253" y2="65"/>
+            <line x1="87" y1="250" x2="253" y2="155"/>
+            <line x1="87" y1="335" x2="253" y2="70"/>
+            <line x1="87" y1="330" x2="253" y2="245"/>
+            <line x1="87" y1="340" x2="253" y2="340"/>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="70" cy="60" r="16" fill="#f4c5c2" stroke="#b03a2e"/>
+            <circle cx="70" cy="150" r="16" fill="#f4c5c2" stroke="#b03a2e"/>
+            <circle cx="70" cy="240" r="16" fill="#f4c5c2" stroke="#b03a2e"/>
+            <circle cx="70" cy="330" r="16"/>
+            <circle cx="270" cy="60" r="16"/><circle cx="270" cy="150" r="16"/>
+            <circle cx="270" cy="240" r="16"/><circle cx="270" cy="330" r="16"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="30" y="66">L1</text><text x="30" y="156">L2</text>
+            <text x="30" y="246">L3</text><text x="30" y="336">L4</text>
+            <text x="312" y="66">R1</text><text x="312" y="156">R2</text>
+            <text x="312" y="246">R3</text><text x="312" y="336">R4</text>
+          </g>
+        </svg>
+        <figcaption>$\{L1, L2, L3\}$ has only two neighbours, $\{R1, R2\}$: three vertices cannot all
+        be matched into two.</figcaption>
+      </figure>
+      <p class="fragment smaller">In general: a perfect matching forces $|N(S)| \ge |S|$ for
+      <em>every</em> $S \subseteq L$, since $S$ must be matched into $N(S)$.</p>
+    </section>
+
+    <section>
+      <h2>Hall's Theorem</h2>
+      <div class="box"><span class="tag">Theorem (Hall)</span>
+        A bipartite graph with $|L| = |R| = n$ has a perfect matching
+        <strong>if and only if</strong> $|N(S)| \ge |S|$ for every $S \subseteq L$.
+      </div>
+      <p class="fragment">A set with $|N(S)| < |S|$ is the <em>only</em> obstacle to a perfect
+      matching.</p>
+      <p class="fragment">We just saw necessity. Sufficiency is a <span class="hl">corollary of
+      Kőnig</span>: we show every vertex cover has at least $n$ vertices.</p>
+    </section>
+
+    <section>
+      <h2>Hall's Theorem: a Corollary</h2>
+      <p class="smaller">Assume $|N(S)| \ge |S|$ for all $S \subseteq L$. Let $C$ be a minimum vertex
+      cover (orange) and $S = L \setminus C$, the uncovered part of $L$.</p>
+      <figure>
+        <svg width="500" height="258" viewBox="0 0 640 330">
+          <g stroke="#8d8678" stroke-width="2.5" fill="none">
+            <line x1="262" y1="85" x2="378" y2="85"/>          <!-- L∩C — R∩C -->
+            <line x1="250" y1="115" x2="390" y2="220"/>        <!-- L∩C — R\C -->
+            <line x1="250" y1="220" x2="390" y2="115"/>        <!-- S — R∩C -->
+            <line x1="262" y1="250" x2="378" y2="250" stroke="#b03a2e" stroke-dasharray="6 6"/> <!-- S — R\C: none -->
+          </g>
+          <ellipse cx="190" cy="85" rx="72" ry="42" fill="#f7dfc9" stroke="#b85a26" stroke-width="2"/><ellipse cx="190" cy="250" rx="72" ry="42" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <ellipse cx="450" cy="85" rx="72" ry="42" fill="#f7dfc9" stroke="#b85a26" stroke-width="2"/><ellipse cx="450" cy="250" rx="72" ry="42" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="190" y="91" font-style="italic">L &#8745; C</text>
+            <text x="450" y="91" font-style="italic">R &#8745; C</text>
+            <text x="190" y="256" font-style="italic">S = L \ C</text>
+            <text x="450" y="256" font-style="italic">R \ C</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="700" font-style="italic" fill="#2a2a2a" text-anchor="middle">
+            <text x="190" y="28">L</text><text x="450" y="28">R</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="middle">
+            <text x="320" y="318" fill="#b03a2e">none: would be uncovered</text>
+            <text x="450" y="148" fill="#7a2419" font-style="italic">&#8839; N(S)</text>
+          </g>
+        </svg>
+        <figcaption class="fragment">An edge from $S$ to $R \setminus C$ would have no endpoint in $C$.
+        So every neighbour of $S$ is covered: $N(S) \subseteq R \cap C$.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Hall's Theorem: a Corollary</h2>
+      <p>Now count $C$, column by column:</p>
+      <ul>
+        <li class="fragment">$|L \cap C| = n - |S|$, since $S$ is the rest of $L$;</li>
+        <li class="fragment">$|R \cap C| \ge |N(S)| \ge |S|$, by the picture and by Hall's condition.</li>
+      </ul>
+      <p class="fragment">So $|C| \ge (n - |S|) + |S| = n$: <strong>every vertex cover has at least $n$
+      vertices</strong>. And $L$ itself is a cover of size $n$, so $\tau = n$.</p>
+      <div class="box fragment"><span class="tag">Conclusion</span>
+        By Kőnig, $\nu = \tau = n$, thus there is a perfect matching. $\blacksquare$
+      </div>
+    </section>
+
+    <section>
+      <h2>Application 2: Matrix Rounding</h2>
+      <div class="cols">
+        <div>
+          <p>Back to the puzzle: round each entry to an integer, preserving all row and column
+          sums.</p>
+          <p class="fragment">Model it as a flow network:</p>
+          <ul class="smaller">
+            <li class="fragment">$s \to R_i$ with capacity $=$ row sum $i$;</li>
+            <li class="fragment">$R_i \to C_j$ with capacity $\lceil a_{ij} \rceil = 1$
+                for every entry;</li>
+            <li class="fragment">$C_j \to t$ with capacity $=$ column sum $j$.</li>
+          </ul>
+        </div>
+        <div>
+          <table class="results" style="font-size:0.85em;">
+            <tbody>
+              <tr><td>0.7</td><td>0.8</td><td>0.5</td><td style="color:#b03a2e;">2</td></tr>
+              <tr><td>0.3</td><td>0.1</td><td>0.6</td><td style="color:#b03a2e;">1</td></tr>
+              <tr><td>1</td><td>0.1</td><td>0.9</td><td style="color:#b03a2e;">2</td></tr>
+              <tr><td style="color:#b03a2e;">2</td><td style="color:#b03a2e;">1</td><td style="color:#b03a2e;">2</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Application 2: Matrix Rounding</h2>
+      <figure>
+        <svg width="520" height="240" viewBox="0 0 640 300">
+          <defs>
+            <marker id="mK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <g stroke="#8d8678" stroke-width="2" fill="none" marker-end="url(#mK)">
+            <line x1="73" y1="140" x2="199" y2="70"/>
+            <line x1="77" y1="150" x2="196" y2="150"/>
+            <line x1="73" y1="160" x2="199" y2="230"/>
+            <line x1="234" y1="60" x2="399" y2="60"/>
+            <line x1="233" y1="66" x2="400" y2="144"/>
+            <line x1="233" y1="71" x2="401" y2="229"/>
+            <line x1="233" y1="144" x2="400" y2="66"/>
+            <line x1="234" y1="150" x2="399" y2="150"/>
+            <line x1="233" y1="156" x2="400" y2="234"/>
+            <line x1="233" y1="229" x2="401" y2="71"/>
+            <line x1="233" y1="234" x2="400" y2="156"/>
+            <line x1="234" y1="240" x2="399" y2="240"/>
+            <line x1="434" y1="70" x2="560" y2="140"/>
+            <line x1="437" y1="150" x2="556" y2="150"/>
+            <line x1="434" y1="230" x2="560" y2="160"/>
+          </g>
+          <g stroke="#2a2a2a" stroke-width="2" fill="#fbf7ed">
+            <circle cx="60" cy="150" r="16"/>
+            <circle cx="217" cy="60" r="16"/><circle cx="217" cy="150" r="16"/>
+            <circle cx="217" cy="240" r="16"/>
+            <circle cx="417" cy="60" r="16"/><circle cx="417" cy="150" r="16"/>
+            <circle cx="417" cy="240" r="16"/>
+            <circle cx="577" cy="150" r="16"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="60" y="156">s</text><text x="577" y="156">t</text>
+            <text x="217" y="65">R1</text><text x="217" y="155">R2</text>
+            <text x="217" y="245">R3</text><text x="417" y="65">C1</text>
+            <text x="417" y="155">C2</text><text x="417" y="245">C3</text>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#7a2419">
+            <text x="125" y="95">2</text><text x="130" y="140">1</text>
+            <text x="125" y="215">2</text>
+            <text x="310" y="48">1</text><text x="310" y="260">1</text>
+            <text x="495" y="95">2</text><text x="490" y="140">1</text>
+            <text x="495" y="215">2</text>
+          </g>
+        </svg>
+        <figcaption>All nine middle edges have capacity $1$ (labels shown on two).</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Matrix Rounding via Integrality</h2>
+      <ul>
+        <li class="fragment">The fractional entries themselves are a flow: put $a_{ij}$ on edge
+            $R_i \to C_j$. Conservation at $R_i$ / $C_j$ is exactly the row / column sum.
+            Value $= 0.7 + 0.8 + \dots = 5$, the total sum.</li>
+        <li class="fragment">The cut $X = \{s\}$ has capacity $2+1+2 = 5$, so this flow is
+            <strong>maximum</strong>.</li>
+        <li class="fragment">All capacities are integers $\Rightarrow$ there is an
+            <strong>integral</strong> max flow of value $5$: each middle edge carries $0$ or $1$.</li>
+        <li class="fragment">Those $0/1$ values are the rounded matrix — row and column sums are
+            forced by saturation of the $s$- and $t$-edges. <span class="hl">The rounding always
+            exists.</span></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Matrix Rounding via Integrality</h2>
+      <div class="cols">
+        <div class="box" style="font-size:0.85em;"><span class="tag">One Answer</span>
+          Ford-Fulkerson on this network outputs, e.g., the rounding shown right — check the sums!
+        </div>
+        <table class="results" style="font-size:0.85em;">
+          <tbody>
+            <tr><td>1</td><td>1</td><td>0</td><td style="color:#b03a2e;">2</td></tr>
+            <tr><td>0</td><td>0</td><td>1</td><td style="color:#b03a2e;">1</td></tr>
+            <tr><td>1</td><td>0</td><td>1</td><td style="color:#b03a2e;">2</td></tr>
+            <tr><td style="color:#b03a2e;">2</td><td style="color:#b03a2e;">1</td><td style="color:#b03a2e;">2</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Summary</h2>
+      <ul>
+        <li class="fragment"><strong>Max flow:</strong> route as much as possible from $s$ to $t$
+            under capacities; greedy path-packing fails.</li>
+        <li class="fragment"><strong>Residual networks</strong> let augmenting paths undo earlier
+            decisions; Ford-Fulkerson repeats until no augmenting path remains.</li>
+        <li class="fragment"><strong>Max-flow $=$ min-cut:</strong> no augmenting path $\Rightarrow$
+            the reachable set of $G_f$ is a cut of capacity $|f|$. Cuts certify optimality.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Summary</h2>
+      <ul>
+        <li class="fragment"><strong>Edmonds-Karp:</strong> BFS-shortest augmenting paths give
+            $O(|V| \cdot |E|^2)$, independent of capacities.</li>
+        <li class="fragment"><strong>Integrality</strong> turns flows into combinatorics:
+            bipartite matching, Kőnig's and Hall's theorems, matrix rounding.</li>
+        <li class="fragment">Week 10: the same min-cut theorem falls out of
+            <strong>LP duality</strong>.</li>
+      </ul>
+    </section>
+
+
+    <!-- ============================== RESOURCES =========================== -->
+
+  </div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [ RevealMath.MathJax3 ],
+
+    mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        macros: {
+          tO:   ['{\\widetilde{O}}'],
+          R:    ['{\\mathbb{R}}'],
+          E:    ['{\\mathbb{E}}']
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+</script>
+</body>
+</html>
