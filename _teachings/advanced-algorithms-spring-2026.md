@@ -108,6 +108,11 @@ schedule:
     description: >-
       Ford–Fulkerson · Edmonds–Karp · max-flow = min-cut via the residual
       graph · applications: bipartite matching, matrix rounding
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week08.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week08.pdf
   - week: 9
     topic: Linear Programming I — Modelling and Geometry
     description: >-
