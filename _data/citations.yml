@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-08-28'
+  last_updated: '2026-09-07'
 papers:
   iSjOah4AAAAJ:-95Q15plzcUC:
     citations: 0
@@ -110,7 +110,7 @@ papers:
     title: On the query complexity of connectivity with global queries
     year: '2021'
   iSjOah4AAAAJ:6G1OFF11MdUC:
-    citations: 329
+    citations: 332
     title: Quantum attacks on Bitcoin, and how to protect against them
     year: '2017'
   iSjOah4AAAAJ:7cqQt8SKcR0C:
@@ -202,7 +202,7 @@ papers:
     title: "\uC804\uC2E0 \uC9C8\uD658 \uBC0F \uACBD\uAD6C \uCCA0\uBD84 \uC81C\uC7AC\uC640 \uC5F0\uAD00\uB41C \uC2ED\uC774\uC9C0\uC7A5 \uAC00\uC131\uD751\uC0C9\uC99D 2 \uC608"
     year: '2009'
   iSjOah4AAAAJ:FSl0EHHYj-kC:
-    citations: 15
+    citations: 16
     title: Quantum complexity of minimum cut
     year: '2020'
   iSjOah4AAAAJ:FXgMSCUEOHUC:
@@ -238,7 +238,7 @@ papers:
     title: Synthesis of aligned self-joint carbon nanotubes
     year: '2004'
   iSjOah4AAAAJ:HbR8gkJAVGIC:
-    citations: 120
+    citations: 121
     title: Separations in query complexity based on pointer functions
     year: '2017'
   iSjOah4AAAAJ:HhcuHIWmDEUC:
@@ -298,7 +298,7 @@ papers:
     title: Studies on a melanocyte-stimulating hormone-sensitive adenyl cyclase of mouse melanoma. Abstr.
     year: '1974'
   iSjOah4AAAAJ:LkGwnXOMwfcC:
-    citations: 15
+    citations: 16
     title: Kolmogorov complexity and formula size lower bounds
     year: '2005'
   iSjOah4AAAAJ:LvS0yHEg1QsC:
@@ -782,7 +782,7 @@ papers:
     title: Effects of flaking processing of grains on growth performance and nutrient digestibilities for growing Korean native cattle
     year: '1994'
   iSjOah4AAAAJ:mVmsd5A6BfQC:
-    citations: 210
+    citations: 211
     title: Quantum query complexity of state conversion
     year: '2011'
   iSjOah4AAAAJ:mWEH9CqjF64C:
@@ -870,7 +870,7 @@ papers:
     title: Quantum algorithms for graph problems with cut queries
     year: '2021'
   iSjOah4AAAAJ:roLk4NBRz8UC:
-    citations: 28
+    citations: 29
     title: Resource bounded symmetry of information revisited
     year: '2005'
   iSjOah4AAAAJ:sAujV351FBYC:
@@ -926,7 +926,7 @@ papers:
     title: The quantum adversary method and classical formula size lower bounds
     year: '2006'
   iSjOah4AAAAJ:u5HHmVD_uO8C:
-    citations: 253
+    citations: 255
     title: Negative weights make adversaries stronger
     year: '2007'
   iSjOah4AAAAJ:uLbwQdceFCQC:
@@ -934,7 +934,7 @@ papers:
     title: Long-term outcome of renal transplant recipients in children (< 20yrs) with focal segmental glomerulosclerosis.
     year: '2005'
   iSjOah4AAAAJ:uWFADo6cQ7YC:
-    citations: 37
+    citations: 38
     title: Cut query algorithms with star contraction
     year: '2022'
   iSjOah4AAAAJ:uXirmJe02n4C:
@@ -942,7 +942,7 @@ papers:
     title: Tumor Angiogenesis in Uterine Cervical Neoplasia and Relation of Angiogenesis to Neoadjuvant Chemotherapy
     year: '2001'
   iSjOah4AAAAJ:uYElc5AnwZoC:
-    citations: 5
+    citations: 6
     title: The quantum query complexity of composition with a relation
     year: '2020'
   iSjOah4AAAAJ:vDZJ-YLwNdEC:
@@ -990,6 +990,6 @@ papers:
     title: E-070 Endovascular treatment of the vertebral artery origin stenosis by using the closed-cell, self-expandable carotid wallstent
     year: '2020'
   iSjOah4AAAAJ:zYLM7Y9cAGgC:
-    citations: 30
+    citations: 31
     title: Language compression and pseudorandom generators
     year: '2005'
