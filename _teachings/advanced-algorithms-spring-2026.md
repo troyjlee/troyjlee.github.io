@@ -103,6 +103,8 @@ schedule:
         url: /assets/courses/advanced-algorithms-2026/lectures/week07.html
       - name: Lecture slides (PDF)
         url: /assets/courses/advanced-algorithms-2026/lectures/week07.pdf
+      - name: "Animation: Karger's Min Cut"
+        url: /assets/courses/advanced-algorithms-2026/animations/karger.html
   - week: 8
     topic: Maximum Flow
     description: >-
