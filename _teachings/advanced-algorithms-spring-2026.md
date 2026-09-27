@@ -119,7 +119,13 @@ schedule:
     topic: Linear Programming I — Modelling and Geometry
     description: >-
       LPs in standard form · the feasible region as a polytope · LP
-      relaxations and integrality gaps · Kruskal and the matroid polytope
+      relaxations and integrality gaps · total unimodularity · Kruskal and
+      the forest polytope
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week09.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week09.pdf
   - week: 10
     topic: Linear Programming II — Duality
     description: >-
