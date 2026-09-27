@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 9: Linear Programming I — Modelling and Geometry — Advanced Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <style>
+    :root { --accent: #1f6feb; --muted: #6a737d; }
+
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--accent); letter-spacing: -0.01em; }
+    .reveal h1 { font-size: 2.0em; }
+    /* Theme styling (uppercase headings, small-caps tags) garbles MathJax output. */
+    .reveal mjx-container { text-transform: none; font-variant: normal; letter-spacing: normal; }
+    /* Keep a lowercase plural in uppercased headings: LP<span class="lc">s</span>. */
+    .reveal .lc { text-transform: none; }
+    .reveal h2 { text-align: center; }
+    .reveal section { font-size: 0.92em; }
+    .reveal a { color: var(--accent); }
+
+    /* Left-align most slides; titles stay centered via their own class. */
+    .reveal .slides section { text-align: left; }
+    .reveal .slides section.center { text-align: center; }
+
+    /* Boxes for theorems / definitions / takeaways. */
+    .box {
+      border-left: 5px solid var(--accent);
+      background: #f4f8ff;
+      padding: 0.5em 0.8em; margin: 0.4em 0; border-radius: 4px;
+    }
+    .box .tag { font-variant: small-caps; font-weight: 700; color: var(--accent);
+                letter-spacing: 0.04em; margin-right: 0.4em; }
+    .box.warn { border-left-color: #d29922; background: #fff8ec; }
+    .box.warn .tag { color: #b07400; }
+
+    /* Result highlight pill. */
+    .hl { background: #fff3b0; padding: 0.05em 0.25em; border-radius: 3px; }
+
+    /* Results table. */
+    .reveal table.results { margin: 0.7em auto; border-collapse: collapse; }
+    .reveal table.results th, .reveal table.results td {
+      padding: 0.4em 1.1em; border: none; text-align: left; }
+    .reveal table.results thead th { color: var(--accent);
+      border-bottom: 2px solid var(--accent); font-variant: small-caps; letter-spacing: 0.03em; }
+    .reveal table.results tbody tr { border-bottom: 1px solid #e7ebf0; }
+    .reveal table.results td.q { font-weight: 700; }
+    .reveal table.results tr.hlrow { background: #fff8d6; }
+    /* Compact variant: single-line cells, tighter gutters. */
+    .reveal table.results.compact th, .reveal table.results.compact td {
+      padding: 0.4em 0.7em; white-space: nowrap; }
+
+    /* Two-column layout helper:  <div class="cols"> <div>..</div> <div>..</div> </div> */
+    .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+    .cols > * { flex: 1; min-width: 0; }
+
+    /* Pseudocode / algorithm blocks. */
+    .reveal pre.algo {
+      font-size: 0.5em; line-height: 1.35; box-shadow: none;
+      border: 1px solid #d0d7de; border-radius: 6px; background: #fbfcfd;
+      width: 100%;
+    }
+    .reveal pre.algo code { padding: 0.8em 1em; }
+    .algo .kw { color: var(--accent); font-weight: 700; }
+    .algo .cm { color: var(--muted); font-style: italic; }
+
+    .reveal .credit { color: var(--muted); font-size: 0.8em; }
+    .reveal .smaller { font-size: 0.82em; }
+    .reveal figure { margin: 0; text-align: center; }
+    .reveal figcaption { font-size: 0.7em; color: var(--muted); margin-top: 0.3em; }
+    .reveal .footnote { position: absolute; bottom: 0.2em; left: 0.6em;
+                        font-size: 0.55em; color: var(--muted); }
+
+    /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
+    .reveal figure svg { max-width: 100%; height: auto; }
+
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
+    /* Fragments print fully revealed, so show fade-out fragments in their final (gone) state. */
+    html.reveal-print .reveal .fragment.fade-out { visibility: hidden !important; opacity: 0 !important; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== TITLE ============================== -->
+    <section class="center">
+      <h1>Week 9: Linear Programming I — Modelling and Geometry</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Advanced Algorithms</p>
+    </section>
+
+    <!-- ============================== ROADMAP ============================ -->
+    <section>
+      <h2>Roadmap</h2>
+      <ol>
+        <li><strong>What is a linear program?</strong></li>
+        <li><strong>Three old friends as LPs</strong> — max flow, matching, vertex cover</li>
+        <li><strong>Geometry</strong> — the feasible region as a polytope</li>
+        <li><strong>Relaxations and the integrality gap</strong></li>
+        <li><strong>Integral polytopes</strong> — total unimodularity and bipartite graphs</li>
+        <li><strong>Kruskal and the forest polytope</strong></li>
+      </ol>
+      <p class="fragment">One idea for the whole session: many problems we
+      already solved fit in one framework.</p>
+    </section>
+
+    <!-- ====================================================================
+         PART 1: WHAT IS A LINEAR PROGRAM
+         ==================================================================== -->
+    <section class="center">
+      <h1>Part 1: What is a linear program?</h1>
+    </section>
+
+    <section>
+      <h2>Where We've Been</h2>
+      <ul>
+        <li>Weeks 1–3: <strong>dynamic programming</strong> — solve by decomposing into subproblems</li>
+        <li>Weeks 4–6: <strong>greedy &amp; matroids, MST</strong> — solve by local choices with exchange arguments</li>
+        <li>Weeks 7–8: <strong>min cut &amp; max flow</strong> — solve by augmentation, certify by cuts</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Where This Goes</h2>
+      <p class="fragment">Each family came with its own tricks. <strong>Linear programming</strong> is a single framework that can express flow, matching and cover problems — <em>exactly</em> for some, as a <em>relaxation</em> (a bound) for others — and a single solver handles every LP.</p>
+      <div class="box fragment"><span class="tag">This week</span> Learn to <em>write</em> problems as LPs and to <em>see</em> what an LP looks like geometrically. Next time: duality, the theory that explains our Week 8 certificates.</div>
+    </section>
+
+    <section>
+      <h2>The three ingredients</h2>
+      <p>A <strong>linear program (LP)</strong> is built from:</p>
+      <ul>
+        <li class="fragment"><strong>Decision variables</strong> $x_1, \dots, x_n \in \R$ — the numbers we get to choose</li>
+        <li class="fragment">A <strong>linear objective</strong> to maximise or minimise: $c_1 x_1 + \cdots + c_n x_n$</li>
+        <li class="fragment"><strong>Linear constraints</strong>: each is $a_1 x_1 + \cdots + a_n x_n \;\{\le, =, \ge\}\; b$</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The three ingredients</h2>
+      <div>
+      <p>Example with concrete numbers (we will reuse it all session):</p>
+      $$\begin{aligned}
+        \max\quad & 3x + 2y \\
+        \text{s.t.}\quad & x \le 6, \qquad x + y \le 8, \qquad x + 3y \le 18 \\
+        & x \ge 0, \quad y \ge 0
+      \end{aligned}$$
+      </div>
+      <p class="fragment smaller">Story: a workshop makes $x$ chairs (profit 3) and $y$ tables (profit 2). Only chairs need the machine, and it can finish at most 6 of them; each piece uses one unit of wood (8 available); a table takes three times as much varnish as a chair (18 available).</p>
+    </section>
+
+    <section>
+      <h2>What "linear" allows — and forbids</h2>
+      <div class="cols">
+        <div>
+          <p><strong>Allowed</strong></p>
+          <ul class="smaller">
+            <li>$2x_1 - 5x_2 + x_3 \le 7$</li>
+            <li>$\sum_{e : v \in e} x_e \le 1$</li>
+            <li>fractional values: $x = \tfrac{1}{2}$ is fine</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Not allowed</strong></p>
+          <ul class="smaller">
+            <li>$x_1 x_2 \le 3$ (products of variables)</li>
+            <li>$x^2$, $|x|$, $\max(x,y)$ in constraints</li>
+            <li>$x \in \{0,1\}$ (integrality!)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>What "linear" allows — and forbids</h2>
+      <div class="box warn"><span class="tag">Careful</span> Requiring $x \in \{0,1\}$ or $x \in \mathbb{Z}$ makes it an <em>integer</em> linear program (ILP) — a different beast. ILP is NP-hard (Week 11 will make that precise); LP is solvable in polynomial time. The gap between them is the story of Parts 4 and 5.</div>
+    </section>
+
+    <section>
+      <h2>Standard form</h2>
+      <p>Collect the coefficients into a matrix and vectors: $A \in \R^{m \times n}$, $b \in \R^m$, $c \in \R^n$.</p>
+      <div class="box"><span class="tag">Definition</span> An LP in <strong>standard form</strong> is
+        $$\max\ \{\, c^\top x \;:\; Ax \le b,\ x \ge 0 \,\}$$
+        $n$ variables, $m$ inequality constraints, all variables nonnegative.
+      </div>
+    </section>
+
+    <section>
+      <h2>Standard form</h2>
+      <p>Our example, in matrix clothing:</p>
+      <div>
+      $$c = \begin{pmatrix}3\\2\end{pmatrix}, \qquad
+        A = \begin{pmatrix}1 & 0\\ 1 & 1\\ 1 & 3\end{pmatrix}, \qquad
+        b = \begin{pmatrix}6\\8\\18\end{pmatrix}$$
+      </div>
+      <p class="fragment smaller">Row $i$ of $A$ paired with $b_i$ is one constraint: row 2 says $1\cdot x + 1 \cdot y \le 8$.</p>
+    </section>
+
+    <section>
+      <h2>Every LP can be put in standard form</h2>
+      <p>Standard form looks restrictive. It isn't — four mechanical rewrites:</p>
+      <table class="results compact">
+        <thead><tr><th>You have</th><th>Rewrite as</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td class="q">$\min\ c^\top x$</td><td>$\max\ (-c)^\top x$ &nbsp; (negate the answer back)</td></tr>
+          <tr class="fragment"><td class="q">$a^\top x \ge \beta$</td><td>$(-a)^\top x \le -\beta$</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Every LP can be put in standard form</h2>
+      <table class="results compact">
+        <thead><tr><th>You have</th><th>Rewrite as</th></tr></thead>
+        <tbody>
+          <tr><td class="q">$a^\top x = \beta$</td><td>$a^\top x \le \beta$ <em>and</em> $(-a)^\top x \le -\beta$</td></tr>
+          <tr class="fragment"><td class="q">$x_j$ unrestricted</td><td>$x_j = x_j^+ - x_j^-$ with $x_j^+, x_j^- \ge 0$</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment">So standard form loses nothing: theorems proved and solvers written for this one shape apply to every LP.</p>
+    </section>
+
+    <section>
+      <h2>Conversion: a worked example</h2>
+      <div class="cols" style="font-size:0.8em;">
+        <div>
+          <p class="smaller"><strong>Given</strong> ($x_2$ unrestricted):</p>
+          $$\begin{aligned}
+            \min\quad & 2x_1 - x_2\\
+            \text{s.t.}\quad & x_1 + x_2 = 4\\
+            & x_1 - 3x_2 \ge -6\\
+            & x_1 \ge 0
+          \end{aligned}$$
+        </div>
+        <div class="fragment">
+          <p class="smaller"><strong>Standard form</strong> (sub $x_2 = u - v$):</p>
+          $$\begin{aligned}
+            \max\quad & -2x_1 + u - v\\
+            \text{s.t.}\quad & x_1 + u - v \le 4\\
+            & -x_1 - u + v \le -4\\
+            & -x_1 + 3u - 3v \le 6\\
+            & x_1, u, v \ge 0
+          \end{aligned}$$
+        </div>
+      </div>
+      <p class="fragment smaller">Sanity check: $(x_1, x_2) = (3, 1)$, i.e. $(x_1, u, v) = (3, 1, 0)$, is feasible in both, objective $5$ on the left $=$ $-5$ on the right (sign flipped by the $\min \to \max$ swap). ✓</p>
+    </section>
+
+    <!-- ====================================================================
+         PART 2: MODELLING — THREE OLD FRIENDS AS LPs
+         ==================================================================== -->
+    <section class="center">
+      <h1>Part 2: Three old friends as LP<span class="lc">s</span></h1>
+      <p class="credit">max flow · bipartite matching · vertex cover</p>
+    </section>
+
+    <section>
+      <h2>Maximum flow</h2>
+      <div class="cols">
+        <div>
+          <figure>
+            <svg width="400" height="240" viewBox="0 0 400 240">
+              <defs>
+                <marker id="arrF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#8d8678"/>
+                </marker>
+              </defs>
+              <g stroke="#8d8678" stroke-width="2.5" fill="none" marker-end="url(#arrF)">
+                <line x1="68" y1="112" x2="170" y2="64"/>
+                <line x1="68" y1="128" x2="170" y2="176"/>
+                <line x1="190" y1="77" x2="190" y2="163"/>
+                <line x1="208" y1="63" x2="310" y2="111"/>
+                <line x1="208" y1="177" x2="310" y2="129"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#6e3416">
+                <text x="110" y="76">4</text>
+                <text x="110" y="170">3</text>
+                <text x="199" y="125">2</text>
+                <text x="266" y="76">2</text>
+                <text x="266" y="172">4</text>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+                <circle cx="50" cy="120" r="20" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/>
+                <text x="50" y="126" fill="#1d3c66">s</text>
+                <circle cx="190" cy="55" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="190" y="61" fill="#2a2a2a">a</text>
+                <circle cx="190" cy="185" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="190" y="191" fill="#2a2a2a">b</text>
+                <circle cx="330" cy="120" r="20" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+                <text x="330" y="126" fill="#2c4329">t</text>
+              </g>
+            </svg>
+            <figcaption>Edge labels are capacities $c_e$.</figcaption>
+          </figure>
+        </div>
+        <div>
+          <p><strong>One variable per edge</strong>: $f_e$ = flow on $e$.</p>
+          <p class="fragment">Five edges, so five numbers to choose: $f_{sa}, f_{sb}, f_{ab}, f_{at}, f_{bt}$.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Maximum flow</h2>
+      <p>A flow must obey two kinds of rules — and both are <em>linear</em>:</p>
+      <ul>
+        <li class="fragment"><strong>Capacity</strong>: $0 \le f_e \le c_e$</li>
+        <li class="fragment"><strong>Conservation</strong>: flow in $=$ flow out at every $v \ne s, t$</li>
+      </ul>
+      <p class="fragment">Objective: push as much out of $s$ as possible.</p>
+    </section>
+
+    <section>
+      <h2>Max flow: the LP</h2>
+      <p ><strong>In general</strong> ($\delta^+(v)$ = edges out of $v$, $\delta^-(v)$ = edges into $v$):</p>
+      $$\begin{aligned}
+            \max\quad & \textstyle\sum_{e \in \delta^+(s)} f_e\\
+            \text{s.t.}\quad & \textstyle\sum_{e \in \delta^-(v)} f_e = \sum_{e \in \delta^+(v)} f_e \quad \forall v \ne s,t\\
+            & 0 \le f_e \le c_e \quad \forall e \in E
+          \end{aligned}$$
+    </section>
+
+    <section>
+      <h2>Max flow: the LP</h2>
+      <p ><strong>For our graph</strong> (5 variables):</p>
+      <div class="cols">
+        <div style="flex:1.3;">
+          $$\begin{aligned}
+            \max\quad & f_{sa} + f_{sb}\\
+            \text{s.t.}\quad & f_{sa} = f_{ab} + f_{at}\\
+            & f_{sb} + f_{ab} = f_{bt}\\
+            & 0 \le f_{sa} \le 4,\ 0 \le f_{sb} \le 3\\
+            & 0 \le f_{ab} \le 2,\ 0 \le f_{at} \le 2,\ 0 \le f_{bt} \le 4
+          \end{aligned}$$
+        </div>
+        <div>
+          <figure>
+            <svg width="380" height="215" viewBox="0 0 300 170">
+              <defs>
+                <marker id="arrFmini" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#8d8678"/>
+                </marker>
+              </defs>
+              <g stroke="#8d8678" stroke-width="2" fill="none" marker-end="url(#arrFmini)">
+                <line x1="45.7" y1="78.5" x2="132.4" y2="42.3"/>
+                <line x1="45.7" y1="91.5" x2="132.4" y2="127.7"/>
+                <line x1="150" y1="52" x2="150" y2="116"/>
+                <line x1="165.7" y1="41.5" x2="252.4" y2="77.7"/>
+                <line x1="165.7" y1="128.5" x2="252.4" y2="92.3"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#6e3416">
+                <text x="88" y="52">4</text>
+                <text x="88" y="128">3</text>
+                <text x="158" y="89">2</text>
+                <text x="208" y="52">2</text>
+                <text x="208" y="128">4</text>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="middle">
+                <circle cx="30" cy="85" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/>
+                <text x="30" y="91" fill="#1d3c66">s</text>
+                <circle cx="150" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="150" y="41" fill="#2a2a2a">a</text>
+                <circle cx="150" cy="135" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="150" y="141" fill="#2a2a2a">b</text>
+                <circle cx="270" cy="85" r="16" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+                <text x="270" y="91" fill="#2c4329">t</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Max flow: the LP</h2>
+      <p>Optimal value $6$: e.g. $f_{sa}=4$, $f_{at}=2$, $f_{ab}=2$, $f_{sb}=2$, $f_{bt}=4$.</p>
+      <p class="fragment">Matches the min cut $\{s,a,b\}$ vs $\{t\}$ of capacity $2+4=6$ — Week 8's certificate, now a statement about two LPs (wait for Week 10!).</p>
+    </section>
+
+    <section>
+      <h2>Bipartite matching</h2>
+      <div class="cols">
+        <div style="flex:0.7;">
+          <figure>
+            <svg width="340" height="240" viewBox="0 0 340 240">
+              <g stroke="#8d8678" stroke-width="2.5" fill="none">
+                <line x1="88" y1="50" x2="252" y2="50"/>
+                <line x1="87" y1="56" x2="253" y2="114" stroke="#b85a26"/>
+                <line x1="88" y1="120" x2="252" y2="120" stroke="#b85a26"/>
+                <line x1="87" y1="184" x2="253" y2="126" stroke="#b85a26"/>
+                <line x1="88" y1="190" x2="252" y2="190"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+                <circle cx="70" cy="50" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="70" y="56" fill="#2a2a2a">u₁</text>
+                <circle cx="70" cy="120" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="70" y="126" fill="#2a2a2a">u₂</text>
+                <circle cx="70" cy="190" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="70" y="196" fill="#2a2a2a">u₃</text>
+                <circle cx="270" cy="50" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="270" y="56" fill="#2a2a2a">v₁</text>
+                <circle cx="270" cy="120" r="18" fill="#f1c79f" stroke="#b85a26" stroke-width="2"/>
+                <text x="270" y="126" fill="#6e3416">v₂</text>
+                <circle cx="270" cy="190" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="270" y="196" fill="#2a2a2a">v₃</text>
+              </g>
+            </svg>
+            <figcaption>Vertex $v_2$ and its three incident edges: one degree constraint.</figcaption>
+          </figure>
+        </div>
+        <div style="font-size:0.9em;">
+          <p><strong>One variable per edge</strong>: $x_e \in [0,1]$, "how much" $e$ is in the matching.</p>
+          $$\begin{aligned}
+            \max\quad & \textstyle\sum_{e \in E} x_e\\
+            \text{s.t.}\quad & \textstyle\sum_{e : v \in e} x_e \le 1 \quad \forall v \in V\\
+            & 0 \le x_e \le 1 \quad \forall e \in E
+          \end{aligned}$$
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Bipartite matching</h2>
+      <p>At $v_2$: $x_{u_1 v_2} + x_{u_2 v_2} + x_{u_3 v_2} \le 1$.</p>
+      <p class="fragment">A <em>matching</em> is exactly a feasible $x$ with $x_e \in \{0,1\}$ — the LP is the <strong>relaxation</strong> that lets edges be picked fractionally.</p>
+    </section>
+
+    <section>
+      <h2>LP vs. maximum matching</h2>
+      <p>Every matching is a feasible LP solution: set $x_e = 1$ on its edges and $0$ elsewhere. So</p>
+      $$\text{LP value} \;\ge\; \text{maximum matching size}.$$
+      <p class="fragment">Can the LP be strictly larger — can fractions beat every genuine matching?</p>
+    </section>
+
+    <section>
+      <h2>Matching on the triangle</h2>
+      <figure>
+        <svg width="560" height="250" viewBox="0 0 560 250">
+            <line x1="131" y1="61" x2="69" y2="174" stroke="#9a7a26" stroke-width="4"/>
+            <line x1="149" y1="61" x2="211" y2="174" stroke="#9a7a26" stroke-width="4"/>
+            <line x1="78" y1="190" x2="202" y2="190" stroke="#9a7a26" stroke-width="4"/>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+            <circle cx="140" cy="45" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+            <circle cx="60" cy="190" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+            <circle cx="220" cy="190" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+            </g>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#5f4910" text-anchor="middle"><text x="84" y="112">½</text><text x="196" y="112">½</text><text x="140" y="214">½</text></g>
+            <text x="140" y="240" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#5f4910">LP: every xₑ = ½, value 3/2</text>
+            <line x1="411" y1="61" x2="349" y2="174" stroke="#4d7349" stroke-width="6"/>
+            <line x1="429" y1="61" x2="491" y2="174" stroke="#8d8678" stroke-width="2.5" stroke-dasharray="5 4"/>
+            <line x1="358" y1="190" x2="482" y2="190" stroke="#8d8678" stroke-width="2.5" stroke-dasharray="5 4"/>
+            <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+            <circle cx="420" cy="45" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+            <circle cx="340" cy="190" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+            <circle cx="500" cy="190" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+            </g>
+            <text x="420" y="240" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#2c4329">best matching: 1 edge</text>
+        </svg>
+      </figure>
+      <ul class="smaller">
+        <li class="fragment">All-halves is feasible: each vertex touches two edges, load $\tfrac12 + \tfrac12 = 1 \le 1$. ✓ Value $\tfrac32$.</li>
+        <li class="fragment">But any two edges of a triangle share a vertex, so every matching has $1$ edge. The fractions win: $\tfrac32 &gt; 1$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Bipartite graphs</h2>
+      <div class="box"><span class="tag">Fact</span> For <em>bipartite</em> graphs, nothing is lost: the matching LP always has an integral optimal solution — its optimum equals the maximum matching size. We will see why later today.</div>
+    </section>
+
+    <section>
+      <h2>Vertex cover</h2>
+      <div class="cols">
+        <div style="flex:0.8;">
+          <figure>
+            <svg width="320" height="235" viewBox="0 0 320 235">
+              <g stroke="#8d8678" stroke-width="2.5" fill="none">
+                <line x1="98" y1="60" x2="222" y2="60"/>
+                <line x1="80" y1="78" x2="80" y2="167"/>
+                <line x1="240" y1="78" x2="240" y2="167"/>
+                <line x1="98" y1="185" x2="222" y2="185"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+                <circle cx="80" cy="60" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="80" y="66" fill="#2a2a2a">a</text>
+                <circle cx="240" cy="60" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="240" y="66" fill="#2a2a2a">b</text>
+                <circle cx="80" cy="185" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="80" y="191" fill="#2a2a2a">c</text>
+                <circle cx="240" cy="185" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="240" y="191" fill="#2a2a2a">d</text>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#5f4910">
+                <text x="80" y="28" text-anchor="middle">w = 3</text>
+                <text x="240" y="28" text-anchor="middle">w = 2</text>
+                <text x="80" y="222" text-anchor="middle">w = 2</text>
+                <text x="240" y="222" text-anchor="middle">w = 1</text>
+              </g>
+            </svg>
+            <figcaption>Pick vertices to touch every edge, minimising total weight.</figcaption>
+          </figure>
+        </div>
+        <div style="font-size:0.8em;">
+          <p><strong>One variable per vertex</strong>: $x_v \in [0,1]$, "how much" $v$ is in the cover.</p>
+          $$\begin{aligned}
+            \min\quad & \textstyle\sum_{v} w_v x_v\\
+            \text{s.t.}\quad & x_u + x_v \ge 1 \quad \forall \{u,v\} \in E\\
+            & 0 \le x_v \le 1 \quad \forall v \in V
+          \end{aligned}$$
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Vertex cover</h2>
+      <div class="cols">
+        <div style="flex:0.8;">
+          <figure>
+            <svg width="320" height="235" viewBox="0 0 320 235">
+              <g stroke="#8d8678" stroke-width="2.5" fill="none">
+                <line x1="98" y1="60" x2="222" y2="60"/>
+                <line x1="80" y1="78" x2="80" y2="167"/>
+                <line x1="240" y1="78" x2="240" y2="167"/>
+                <line x1="98" y1="185" x2="222" y2="185"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+                <circle cx="80" cy="60" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="80" y="66" fill="#2a2a2a">a</text>
+                <circle cx="240" cy="60" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="240" y="66" fill="#2a2a2a">b</text>
+                <circle cx="80" cy="185" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="80" y="191" fill="#2a2a2a">c</text>
+                <circle cx="240" cy="185" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="240" y="191" fill="#2a2a2a">d</text>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#5f4910">
+                <text x="80" y="28" text-anchor="middle">w = 3</text>
+                <text x="240" y="28" text-anchor="middle">w = 2</text>
+                <text x="80" y="222" text-anchor="middle">w = 2</text>
+                <text x="240" y="222" text-anchor="middle">w = 1</text>
+              </g>
+            </svg>
+            <figcaption>Pick vertices to touch every edge, minimising total weight.</figcaption>
+          </figure>
+        </div>
+        <div>
+          <p class="fragment">Here: $\min 3x_a + 2x_b + 2x_c + x_d$ with $x_a + x_b \ge 1$, $x_a + x_c \ge 1$, $x_b + x_d \ge 1$, $x_c + x_d \ge 1$.</p>
+          <p class="fragment">Both $\{a,d\}$ and $\{b,c\}$ cost $4$ — and the LP optimum is also $4$ here.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>LP vs. minimum vertex cover</h2>
+      <p>Every vertex cover is a feasible LP solution: set $x_v = 1$ on its vertices and $0$ elsewhere. So</p>
+      $$\text{LP value} \;\le\; \text{minimum cover weight}.$$
+      <p class="fragment">Can the LP be strictly smaller — can fractions undercut every genuine cover?</p>
+    </section>
+
+    <section>
+      <h2>Vertex cover on the triangle</h2>
+      <figure>
+        <svg width="560" height="250" viewBox="0 0 560 250">
+          <!-- left: LP solution -->
+          <g stroke="#8d8678" stroke-width="2.5" fill="none">
+            <line x1="131" y1="61" x2="69" y2="174"/>
+            <line x1="149" y1="61" x2="211" y2="174"/>
+            <line x1="78" y1="190" x2="202" y2="190"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+            <circle cx="140" cy="45" r="18" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/>
+            <text x="140" y="51" fill="#5f4910">½</text>
+            <circle cx="60" cy="190" r="18" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/>
+            <text x="60" y="196" fill="#5f4910">½</text>
+            <circle cx="220" cy="190" r="18" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/>
+            <text x="220" y="196" fill="#5f4910">½</text>
+          </g>
+          <text x="140" y="238" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#5f4910">LP: every xᵥ = ½, cost 3/2</text>
+          <!-- right: integer solution -->
+          <g stroke="#8d8678" stroke-width="2.5" fill="none">
+            <line x1="411" y1="61" x2="349" y2="174"/>
+            <line x1="429" y1="61" x2="491" y2="174"/>
+            <line x1="358" y1="190" x2="482" y2="190"/>
+          </g>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+            <circle cx="420" cy="45" r="18" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <text x="420" y="51" fill="#2c4329">1</text>
+            <circle cx="340" cy="190" r="18" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+            <text x="340" y="196" fill="#2c4329">1</text>
+            <circle cx="500" cy="190" r="18" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+            <text x="500" y="196" fill="#2a2a2a">0</text>
+          </g>
+          <text x="420" y="238" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#2c4329">best integer cover: 2 vertices, cost 2</text>
+        </svg>
+      </figure>
+      <ul class="smaller">
+        <li class="fragment">All weights $1$. All-halves is feasible: every edge gets $\tfrac12 + \tfrac12 = 1$. So $\mathrm{OPT}_{\mathrm{LP}} \le \tfrac32$ — in fact $= \tfrac32$: summing the three edge constraints gives $2(x_A + x_B + x_C) \ge 3$.</li>
+        <li class="fragment">Any integral cover needs $2$ of the $3$ vertices (one vertex misses the opposite edge). So $\mathrm{OPT}_{\mathrm{LP}} = \tfrac32 < 2 = \mathrm{OPT}_{\mathrm{ILP}}$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The modelling pattern</h2>
+      <table class="results compact" style="font-size:0.9em;">
+        <thead><tr><th>Problem</th><th>Variables</th><th>Constraints say</th></tr></thead>
+        <tbody>
+          <tr><td class="q">max flow</td><td>$f_e$ per edge</td><td>capacities, conservation</td></tr>
+          <tr><td class="q">matching</td><td>$x_e$ per edge</td><td>each vertex used $\le 1$ time</td></tr>
+          <tr><td class="q">vertex cover</td><td>$x_v$ per vertex</td><td>each edge covered $\ge 1$ time</td></tr>
+        </tbody>
+      </table>
+      <ul>
+        <li class="fragment">Choose variables = "the decisions", one number each.</li>
+        <li class="fragment">Every combinatorial rule became a <em>linear</em> inequality or equation.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The modelling pattern</h2>
+      <ul>
+        <li class="fragment">Matching and vertex cover needed a <strong>relaxation</strong>: $\{0,1\} \rightsquigarrow [0,1]$. Max flow didn't — flows were already fractional-friendly.</li>
+      </ul>
+      <p class="fragment">Now: what does the set of feasible solutions <em>look like</em>?</p>
+    </section>
+
+    <!-- ====================================================================
+         PART 3: GEOMETRY
+         ==================================================================== -->
+    <section class="center">
+      <h1>Part 3: The geometry of an LP</h1>
+      <p class="credit">two variables, so we can draw everything</p>
+    </section>
+
+    <section>
+      <h2>Our running example</h2>
+      $$\begin{aligned}
+        \max\quad & 3x + 2y\\
+        \text{s.t.}\quad & x \le 6 && \text{(machine)}\\
+        & x + y \le 8 && \text{(wood)}\\
+        & x + 3y \le 18 && \text{(varnish)}\\
+        & x, y \ge 0
+      \end{aligned}$$
+      <p class="fragment">Two variables $\Rightarrow$ every solution is a point $(x, y)$ in the plane.</p>
+    </section>
+
+    <section>
+      <h2>Our running example</h2>
+      <ul>
+        <li class="fragment">Each constraint $a_1 x + a_2 y \le \beta$ keeps a <strong>half-plane</strong>: the line $a_1 x + a_2 y = \beta$ plus everything on one side of it.</li>
+        <li class="fragment">Feasible set $=$ intersection of all five half-planes.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Building the feasible region</h2>
+      <div class="cols">
+        <div style="flex: 1.6;">
+          <figure>
+            <svg width="480" height="365" viewBox="0 0 480 365">
+              <defs>
+                <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#2e588f"/>
+                </marker>
+                <marker id="arrGn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#4d7349"/>
+                </marker>
+                <marker id="arrY" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#9a7a26"/>
+                </marker>
+              </defs>
+              <!-- shaded region (last fragment) -->
+              <polygon class="fragment" data-fragment-index="4" points="50,330 290,330 290,250 170,130 50,90" fill="#cad9ee" fill-opacity="0.55" stroke="none"/>
+              <!-- axes -->
+              <g stroke="#2a2a2a" stroke-width="2">
+                <line x1="50" y1="330" x2="458" y2="330"/>
+                <line x1="50" y1="330" x2="50" y2="8"/>
+              </g>
+              <g stroke="#2a2a2a" stroke-width="1.5">
+                <line x1="130" y1="330" x2="130" y2="336"/><line x1="210" y1="330" x2="210" y2="336"/>
+                <line x1="290" y1="330" x2="290" y2="336"/><line x1="370" y1="330" x2="370" y2="336"/>
+                <line x1="44" y1="250" x2="50" y2="250"/><line x1="44" y1="170" x2="50" y2="170"/>
+                <line x1="44" y1="90" x2="50" y2="90"/><line x1="44" y1="10" x2="50" y2="10"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d">
+                <text x="130" y="352" text-anchor="middle">2</text><text x="210" y="352" text-anchor="middle">4</text>
+                <text x="290" y="352" text-anchor="middle">6</text><text x="370" y="352" text-anchor="middle">8</text>
+                <text x="36" y="255" text-anchor="end">2</text><text x="36" y="175" text-anchor="end">4</text>
+                <text x="36" y="95" text-anchor="end">6</text><text x="36" y="15" text-anchor="end">8</text>
+                <text x="468" y="334">x</text><text x="55" y="12">y</text>
+              </g>
+              <!-- constraint 1: x + 3y = 18 -->
+              <g class="fragment" data-fragment-index="1">
+                <line x1="50" y1="90" x2="450" y2="223" stroke="#2e588f" stroke-width="2.5"/>
+                <line x1="110" y1="110" x2="102" y2="132" stroke="#2e588f" stroke-width="2" marker-end="url(#arrB)"/>
+                <text x="345" y="165" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#1d3c66">x + 3y = 18</text>
+              </g>
+              <!-- constraint 2: x + y = 8 -->
+              <g class="fragment" data-fragment-index="2">
+                <line x1="50" y1="10" x2="370" y2="330" stroke="#4d7349" stroke-width="2.5"/>
+                <line x1="210" y1="170" x2="196" y2="184" stroke="#4d7349" stroke-width="2" marker-end="url(#arrGn)"/>
+                <text x="270" y="88" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#2c4329">x + y = 8</text>
+              </g>
+              <!-- constraint 3: x = 6 -->
+              <g class="fragment" data-fragment-index="3">
+                <line x1="290" y1="330" x2="290" y2="10" stroke="#9a7a26" stroke-width="2.5"/>
+                <line x1="290" y1="60" x2="268" y2="60" stroke="#9a7a26" stroke-width="2" marker-end="url(#arrY)"/>
+                <text x="300" y="36" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#5f4910">x = 6</text>
+              </g>
+              <g class="fragment" data-fragment-index="4">
+                <text x="150" y="255" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1d3c66">feasible</text>
+                <text x="150" y="273" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1d3c66">region</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+        <div>
+          <p class="smaller">$x \ge 0$, $y \ge 0$: stay in the first quadrant.</p>
+          <p class="smaller fragment" data-fragment-index="1"><span style="color:#2e588f;">■</span> varnish: below $x+3y=18$</p>
+          <p class="smaller fragment" data-fragment-index="2"><span style="color:#4d7349;">■</span> wood: below $x+y=8$</p>
+          <p class="smaller fragment" data-fragment-index="3"><span style="color:#9a7a26;">■</span> machine: left of $x=6$</p>
+          <p class="smaller fragment" data-fragment-index="4">The intersection is a convex polygon — every feasible production plan lives inside it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Polytopes and vertices</h2>
+      <div class="box"><span class="tag">Definition</span> A <strong>polyhedron</strong> is an intersection of finitely many half-spaces, $\{x \in \R^n : Ax \le b\}$. A bounded polyhedron is a <strong>polytope</strong>.</div>
+      <div class="box fragment"><span class="tag">Definition</span> A point $z$ of a polyhedron $P$ is a <strong>vertex</strong> (extreme point) if it is not the midpoint of any segment inside $P$: there is no $d \ne 0$ with both $z + d \in P$ and $z - d \in P$.</div>
+    </section>
+
+    <section>
+      <h2>No two-way wiggle room</h2>
+      <div class="cols">
+        <div style="flex: 1.5;">
+          <figure>
+            <svg width="480" height="330" viewBox="15 62 450 300">
+              <defs>
+                <marker id="arrWg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#4d7349"/>
+                </marker>
+                <marker id="arrWr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#b03a2e"/>
+                </marker>
+              </defs>
+              <polygon points="50,330 290,330 290,250 170,130 50,90" fill="#cad9ee" fill-opacity="0.55" stroke="#2e588f" stroke-width="2"/>
+              <g stroke="#2a2a2a" stroke-width="2">
+                <line x1="50" y1="330" x2="450" y2="330"/>
+                <line x1="50" y1="330" x2="50" y2="70"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d">
+                <text x="130" y="352" text-anchor="middle">2</text><text x="210" y="352" text-anchor="middle">4</text>
+                <text x="290" y="352" text-anchor="middle">6</text><text x="370" y="352" text-anchor="middle">8</text>
+                <text x="36" y="255" text-anchor="end">2</text><text x="36" y="95" text-anchor="end">6</text>
+                <text x="440" y="324">x</text><text x="57" y="78">y</text>
+              </g>
+              <g class="fragment" data-fragment-index="1">
+                <line x1="139.0" y1="250.0" x2="168.0" y2="250.0" stroke="#4d7349" stroke-width="3" marker-end="url(#arrWg)"/><line x1="121.0" y1="250.0" x2="92.0" y2="250.0" stroke="#4d7349" stroke-width="3" marker-end="url(#arrWg)"/><line x1="130.0" y1="241.0" x2="130.0" y2="212.0" stroke="#4d7349" stroke-width="3" marker-end="url(#arrWg)"/><line x1="130.0" y1="259.0" x2="130.0" y2="288.0" stroke="#4d7349" stroke-width="3" marker-end="url(#arrWg)"/><circle cx="130" cy="250" r="5.5" fill="#2a2a2a" stroke="#fff" stroke-width="1.5"/>
+                <text x="120" y="280" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#2a2a2a">(2, 2)</text>
+              </g>
+              <g class="fragment" data-fragment-index="2">
+                <line x1="203.6" y1="163.6" x2="183.1" y2="143.1" stroke="#4d7349" stroke-width="3" marker-end="url(#arrWg)"/><line x1="216.4" y1="176.4" x2="236.9" y2="196.9" stroke="#4d7349" stroke-width="3" marker-end="url(#arrWg)"/><circle cx="210.0" cy="170.0" r="5.5" fill="#2a2a2a" stroke="#fff" stroke-width="1.5"/>
+                <text x="222" y="163" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#2a2a2a">(4, 4)</text>
+              </g>
+              <g class="fragment" data-fragment-index="3">
+                <line x1="290.0" y1="241.0" x2="290.0" y2="212.0" stroke="#b03a2e" stroke-width="3" stroke-dasharray="4 3" marker-end="url(#arrWr)"/><line x1="290.0" y1="259.0" x2="290.0" y2="288.0" stroke="#4d7349" stroke-width="3" marker-end="url(#arrWg)"/><line x1="283.6" y1="243.6" x2="263.1" y2="223.1" stroke="#4d7349" stroke-width="3" marker-end="url(#arrWg)"/><line x1="296.4" y1="256.4" x2="316.9" y2="276.9" stroke="#b03a2e" stroke-width="3" stroke-dasharray="4 3" marker-end="url(#arrWr)"/><circle cx="290" cy="250" r="5.5" fill="#2a2a2a" stroke="#fff" stroke-width="1.5"/>
+                <text x="280" y="296" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#2a2a2a">(6, 2)</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+        <div>
+          <p class="smaller">Can $z$ step to <em>both</em> $z + d$ and $z - d$?</p>
+          <p class="smaller fragment" data-fragment-index="1"><strong>Inside:</strong> every direction works both ways. Not a vertex.</p>
+          <p class="smaller fragment" data-fragment-index="2"><strong>On an edge:</strong> slide along it both ways. One such $d$ is enough — not a vertex.</p>
+          <p class="smaller fragment" data-fragment-index="3"><strong>Corner:</strong> every $d$ has one side (red) leaving the region. A vertex.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Polytopes and vertices</h2>
+      <ul>
+        <li class="fragment">Equivalent, more computational view in $\R^2$: a vertex is where $2$ constraint lines meet (in $\R^n$: $n$ constraints hold with equality, with linearly independent rows) — and the point is feasible.</li>
+        <li class="fragment">Our region is a polytope with $5$ vertices. Let's find them all.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The five vertices</h2>
+      <div class="cols">
+        <div style="flex: 1.6;">
+          <figure>
+            <svg width="480" height="365" viewBox="0 0 480 365">
+              <polygon points="50,330 290,330 290,250 170,130 50,90" fill="#cad9ee" fill-opacity="0.55" stroke="#2e588f" stroke-width="2"/>
+              <g stroke="#2a2a2a" stroke-width="2">
+                <line x1="50" y1="330" x2="458" y2="330"/>
+                <line x1="50" y1="330" x2="50" y2="8"/>
+              </g>
+              <g stroke="#8d8678" stroke-width="1.5" stroke-dasharray="3 4">
+                <line x1="50" y1="90" x2="450" y2="223"/>
+                <line x1="50" y1="10" x2="370" y2="330"/>
+                <line x1="290" y1="330" x2="290" y2="10"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d">
+                <text x="130" y="352" text-anchor="middle">2</text><text x="210" y="352" text-anchor="middle">4</text>
+                <text x="290" y="352" text-anchor="middle">6</text><text x="370" y="352" text-anchor="middle">8</text>
+                <text x="36" y="255" text-anchor="end">2</text><text x="36" y="95" text-anchor="end">6</text>
+                <text x="468" y="334">x</text><text x="55" y="12">y</text>
+              </g>
+              <g fill="#b85a26" stroke="#6e3416" stroke-width="1.5">
+                <circle cx="50" cy="330" r="6"/><circle cx="290" cy="330" r="6"/>
+                <circle cx="290" cy="250" r="6"/><circle cx="170" cy="130" r="6"/>
+                <circle cx="50" cy="90" r="6"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#6e3416">
+                <text x="62" y="318">(0, 0)</text>
+                <text x="262" y="312">(6, 0)</text>
+                <text x="300" y="248">(6, 2)</text>
+                <text x="180" y="124">(3, 5)</text>
+                <text x="62" y="80">(0, 6)</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+        <div>
+          <p class="smaller">Each vertex $=$ two tight constraints:</p>
+          <ul class="smaller">
+            <li class="fragment">$(0,0)$: $x = 0$, $y = 0$</li>
+            <li class="fragment">$(6,0)$: $x = 6$, $y = 0$</li>
+            <li class="fragment">$(6,2)$: $x = 6$, $x + y = 8$</li>
+            <li class="fragment">$(3,5)$: $x + y = 8$, $x + 3y = 18$</li>
+            <li class="fragment">$(0,6)$: $x = 0$, $x + 3y = 18$</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>The five vertices</h2>
+      <p>How do we compute a vertex? Solve the $2 \times 2$ linear system of its two tight constraints.</p>
+      <p class="fragment">e.g. solving $x + y = 8$ and $x + 3y = 18$: subtract to get $2y = 10$, so $y = 5$ — the vertex $(3,5)$.</p>
+    </section>
+
+    <section>
+      <h2>Sweeping the objective</h2>
+      <p class="smaller">Every level set $3x + 2y = k$ is a line perpendicular to $c = (3,2)$. Increasing $k$ slides the line in direction $c$.</p>
+      <div class="cols">
+        <div style="flex: 1.6;">
+          <figure>
+            <svg width="480" height="365" viewBox="0 0 480 365">
+              <defs>
+                <marker id="arrO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#b85a26"/>
+                </marker>
+              </defs>
+              <polygon points="50,330 290,330 290,250 170,130 50,90" fill="#cad9ee" fill-opacity="0.55" stroke="#2e588f" stroke-width="2"/>
+              <g stroke="#2a2a2a" stroke-width="2">
+                <line x1="50" y1="330" x2="458" y2="330"/>
+                <line x1="50" y1="330" x2="50" y2="8"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d">
+                <text x="130" y="352" text-anchor="middle">2</text><text x="210" y="352" text-anchor="middle">4</text>
+                <text x="290" y="352" text-anchor="middle">6</text><text x="370" y="352" text-anchor="middle">8</text>
+                <text x="468" y="334">x</text><text x="55" y="12">y</text>
+              </g>
+              <!-- objective direction arrow -->
+              <g>
+                <line x1="150" y1="290" x2="187" y2="265" stroke="#b85a26" stroke-width="2.5" marker-end="url(#arrO)"/>
+                <text x="128" y="312" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#6e3416">c = (3, 2)</text>
+              </g>
+              <g class="fragment" data-fragment-index="1">
+                <line x1="130" y1="330" x2="50" y2="210" stroke="#8d8678" stroke-width="2" stroke-dasharray="7 5"/>
+                <text x="58" y="200" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d">= 6</text>
+              </g>
+              <g class="fragment" data-fragment-index="2">
+                <line x1="210" y1="330" x2="50" y2="90" stroke="#8d8678" stroke-width="2" stroke-dasharray="7 5"/>
+                <text x="58" y="80" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d">= 12</text>
+              </g>
+              <g class="fragment" data-fragment-index="3">
+                <line x1="290" y1="330" x2="77" y2="10" stroke="#8d8678" stroke-width="2" stroke-dasharray="7 5"/>
+                <text x="86" y="22" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d">= 18</text>
+              </g>
+              <g class="fragment" data-fragment-index="4">
+                <line x1="343" y1="330" x2="130" y2="10" stroke="#b85a26" stroke-width="3" stroke-dasharray="8 5"/>
+                <text x="140" y="22" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#6e3416">3x + 2y = 22</text>
+                <circle cx="290" cy="250" r="8" fill="#b5cdb0" stroke="#2c4329" stroke-width="2.5"/>
+                <text x="302" y="246" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1f3520">(6, 2)</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+        <div>
+          <p class="smaller fragment" data-fragment-index="1">$k = 6$: cuts through the region</p>
+          <p class="smaller fragment" data-fragment-index="2">$k = 12$: still inside…</p>
+          <p class="smaller fragment" data-fragment-index="3">$k = 18$: getting tight…</p>
+          <p class="smaller fragment" data-fragment-index="4"><span class="hl">$k = 22$: touches the region at exactly one point — the vertex $(6,2)$.</span> Push further and we leave the region entirely.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Reading off the answer</h2>
+      <p>Cross-check by evaluating $3x + 2y$ at all five vertices:</p>
+      <div class="smaller">
+      <table class="results">
+        <thead><tr><th>vertex</th><th>tight constraints</th><th>$3x + 2y$</th></tr></thead>
+        <tbody>
+          <tr><td class="q">$(0,0)$</td><td>$x=0,\ y=0$</td><td>$0$</td></tr>
+          <tr><td class="q">$(6,0)$</td><td>$x=6,\ y=0$</td><td>$18$</td></tr>
+          <tr class="hlrow"><td class="q">$(6,2)$</td><td>$x=6,\ x+y=8$</td><td>$\mathbf{22}$</td></tr>
+          <tr><td class="q">$(3,5)$</td><td>$x+y=8,\ x+3y=18$</td><td>$19$</td></tr>
+          <tr><td class="q">$(0,6)$</td><td>$x=0,\ x+3y=18$</td><td>$12$</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Reading off the answer</h2>
+      <p>The last level line touching the region pins down the optimum — and the vertex table agrees.</p>
+      <p class="fragment">Optimum $22$ at $(6,2)$: make $6$ chairs, $2$ tables; the machine is at capacity and the wood is used up, and $6 + 3\cdot 2 = 12 < 18$ varnish left slack.</p>
+    </section>
+
+    <section>
+      <h2>Why is the optimum at a vertex?</h2>
+      <p>Keep walking until you can't. Start at any feasible $z$.</p>
+      <ul>
+        <li class="fragment">If $z$ is not a vertex, some $d \ne 0$ has $z \pm d$ feasible. Pick the sign with $c^\top d \ge 0$ and walk until a new constraint becomes tight. The objective never drops.</li>
+        <li class="fragment">Repeat. In 2D: slide across the region to an edge, then along the edge to a corner.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Why is the optimum at a vertex?</h2>
+      <p>Why the walk ends at a vertex within $n$ steps:</p>
+      <ul>
+        <li class="fragment">Constraints tight at $z$ stay tight: each has $a^\top d = 0$, or $z + d$ or $z - d$ would break it.</li>
+        <li class="fragment">The new tight constraint has $a^\top d \ne 0$, so it is independent of the old ones.</li>
+        <li class="fragment">Each step adds an independent tight constraint — after at most $n$ steps, we are at a vertex.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Can the walk get stuck?</h2>
+      <p>But does the walk always reach a new constraint? Two cases.</p>
+      <div class="box fragment"><span class="tag">Case 1: $c^\top d \ne 0$</span> Pick the sign with $c^\top d &gt; 0$ and walk. Either a constraint stops us — progress — or we walk forever with $c^\top x \to \infty$: the LP is <strong>unbounded</strong>.</div>
+    </section>
+
+    <section>
+      <h2>Can the walk get stuck?</h2>
+      <div class="box"><span class="tag">Case 2: $c^\top d = 0$</span> The objective is flat, so either sign will do. But what if <em>neither</em> direction ever hits a constraint?</div>
+      <ul>
+        <li class="fragment">Then the whole line $\{\, z + t\,d : t \in \R \,\}$ lies inside the region.</li>
+        <li class="fragment">But some $d_j \ne 0$, so $z_j + t\,d_j &lt; 0$ once $t$ goes far enough one way — breaking $x_j \ge 0$.</li>
+        <li class="fragment">So one of $\pm d$ does hit a constraint.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Can the walk get stuck?</h2>
+      <p>So the walk only fails if the region is empty (nowhere to start) or the LP is unbounded (Case 1 runs forever). That's the fine print in the theorem.</p>
+      <div class="box warn fragment"><span class="tag">Careful</span> Case 2 needed $x \ge 0$. Without it, the strip $\{(x,y) : 0 \le y \le 1\}$ with $\max y$ has optimum $1$ — but no vertices at all.</div>
+    </section>
+
+    <section>
+      <h2>The fundamental theorem</h2>
+      <div class="box"><span class="tag">Fundamental theorem of LP</span> For an LP $\max\{c^\top x : Ax \le b,\ x \ge 0\}$, exactly one of the following holds:
+        <ol style="margin: 0.3em 0 0 0;">
+          <li>the LP is <strong>infeasible</strong> (the region is empty), or</li>
+          <li>the LP is <strong>unbounded</strong> (feasible points of arbitrarily large value exist), or</li>
+          <li>the LP has a finite optimum, and some vertex of the feasible region is optimal.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>The fundamental theorem</h2>
+      <p class="fragment">Consequence: an LP — a continuous problem over infinitely many points — is secretly a <em>finite</em> problem: only the vertices matter.</p>
+      <p class="fragment smaller">(Ties are allowed: if $c$ is perpendicular to an edge, the whole edge is optimal — e.g. objective $x + y$ in our example is $8$ along the entire segment from $(6,2)$ to $(3,5)$. A vertex is still among the optima.)</p>
+    </section>
+
+    <section>
+      <h2>The other two outcomes, drawn</h2>
+      <div class="cols">
+        <div>
+          <figure>
+            <svg width="230" height="170" viewBox="0 0 230 170">
+              <defs>
+                <marker id="arrR1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#b03a2e"/>
+                </marker>
+              </defs>
+              <line x1="30" y1="60" x2="200" y2="60" stroke="#b03a2e" stroke-width="2.5"/>
+              <line x1="30" y1="110" x2="200" y2="110" stroke="#b03a2e" stroke-width="2.5"/>
+              <line x1="115" y1="60" x2="115" y2="35" stroke="#b03a2e" stroke-width="2" marker-end="url(#arrR1)"/>
+              <line x1="115" y1="110" x2="115" y2="135" stroke="#b03a2e" stroke-width="2" marker-end="url(#arrR1)"/>
+              <text x="115" y="26" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#7a2419">x + y ≥ 6</text>
+              <text x="115" y="155" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#7a2419">x + y ≤ 4</text>
+            </svg>
+            <figcaption><strong>Infeasible</strong>: half-planes with empty intersection. No solutions at all.</figcaption>
+          </figure>
+        </div>
+        <div>
+          <figure>
+            <svg width="230" height="170" viewBox="0 0 230 170">
+              <defs>
+                <marker id="arrU1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#b85a26"/>
+                </marker>
+              </defs>
+              <polygon points="40,140 200,140 200,20 120,20" fill="#cad9ee" fill-opacity="0.55"/>
+              <line x1="40" y1="140" x2="120" y2="20" stroke="#2e588f" stroke-width="2.5"/>
+              <line x1="40" y1="140" x2="205" y2="140" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="90" y1="105" x2="160" y2="70" stroke="#b85a26" stroke-width="2.5" marker-end="url(#arrU1)"/>
+              <text x="150" y="120" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6e3416">c</text>
+            </svg>
+            <figcaption><strong>Unbounded</strong>: the region is open in direction $c$ — walk forever, value $\to \infty$.</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="box warn fragment"><span class="tag">Careful</span> "Unbounded <em>region</em>" $\ne$ "unbounded <em>LP</em>": if $c$ points away from the open end, the optimum is still finite and still at a vertex. It's the objective that has to escape.</div>
+    </section>
+
+    <section>
+      <h2>An algorithm for tiny LP<span class="lc">s</span>: vertex enumeration</h2>
+      <p>The fundamental theorem <em>is</em> an algorithm — check every vertex. With $n = 2$ variables and $m$ constraints (counting $x \ge 0$, $y \ge 0$):</p>
+      <pre class="algo"><code><span class="kw">best</span> ← −∞,  argbest ← none
+<span class="kw">for each</span> pair {i, j} of constraints:            <span class="cm">// O(m²) candidate corners</span>
+    solve   aᵢ·(x,y) = bᵢ  and  aⱼ·(x,y) = bⱼ     <span class="cm">// a 2×2 linear system</span>
+    <span class="kw">if</span> the lines are parallel: <span class="kw">continue</span>
+    <span class="kw">if</span> (x,y) satisfies ALL m constraints:          <span class="cm">// feasibility check, O(m)</span>
+        <span class="kw">if</span> c·(x,y) > best:  best ← c·(x,y),  argbest ← (x,y)
+<span class="kw">return</span> argbest, best                             <span class="cm">// none found ⇔ infeasible</span></code></pre>
+    </section>
+
+    <section>
+      <h2>An algorithm for tiny LP<span class="lc">s</span>: vertex enumeration</h2>
+      <ul>
+        <li class="fragment"><strong>Caveat:</strong> on an <em>unbounded</em> LP this still returns the best vertex that exists — a confidently finite, wrong answer. Enumeration assumes a bounded optimum.</li>
+        <li class="fragment">Running time $O(m^3)$ — fine for $m \le 100$, hopeless in general: in $\R^n$ there can be $\binom{m}{n}$ candidates, exponentially many.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>What's used in practice</h2>
+      <div class="smaller">
+      <table class="results">
+        <thead><tr><th>Algorithm</th><th>Idea</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td class="q">Simplex (Dantzig, 1947)</td><td>walk vertex → better neighbouring vertex until stuck</td><td>exponential in the worst case, excellent in practice</td></tr>
+          <tr class="fragment"><td class="q">Ellipsoid (Khachiyan, 1979)</td><td>shrink an ellipsoid around the feasible region</td><td>first polynomial-time algorithm; mostly theoretical</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>What's used in practice</h2>
+      <div class="smaller">
+      <table class="results">
+        <thead><tr><th>Algorithm</th><th>Idea</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="q">Interior point (Karmarkar, 1984)</td><td>move through the interior of the polytope, not along its edges</td><td>polynomial <em>and</em> practical</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>What's used in practice</h2>
+      <div class="box"><span class="tag">Fact</span> Linear programming is solvable in <strong>polynomial time</strong> (in the bit-size of the input). So from now on: if a problem can be written <em>exactly</em> as an LP of <em>polynomial size</em> — polynomially many variables and constraints — then we can solve it efficiently.</div>
+    </section>
+
+    <!-- ====================================================================
+         PART 4: RELAXATIONS AND THE INTEGRALITY GAP
+         ==================================================================== -->
+    <section class="center">
+      <h1>Part 4: Relaxations and the integrality gap</h1>
+    </section>
+
+    <section>
+      <h2>The LP as a bound</h2>
+      <p>Part 2 showed both directions:</p>
+      <ul>
+        <li class="fragment">Minimisation (vertex cover): $\mathrm{OPT}_{\mathrm{LP}} \le \mathrm{OPT}_{\mathrm{ILP}}$ — the LP is an efficiently computable <strong>lower bound</strong>.</li>
+        <li class="fragment">Maximisation (matching): $\mathrm{OPT}_{\mathrm{LP}} \ge \mathrm{OPT}_{\mathrm{ILP}}$ — an <strong>upper bound</strong>.</li>
+      </ul>
+      <p class="fragment">Question: how far apart can they be? If never far, the LP is a great proxy — the engine behind Week 12's approximation algorithms.</p>
+    </section>
+
+    <section>
+      <h2>Integrality gap</h2>
+      <div class="box"><span class="tag">Definition</span> The <strong>integrality gap</strong> of an LP relaxation (of a minimisation problem) is the smallest $\alpha$ such that
+        $$\mathrm{OPT}_{\mathrm{ILP}} \;\le\; \alpha \cdot \mathrm{OPT}_{\mathrm{LP}} \qquad \text{on every instance}$$
+        — the worst-case factor by which the true optimum exceeds the LP bound.
+      </div>
+      <p class="fragment">Gap $= 1$ means the relaxation is <strong>exact</strong>: the LP always has an integral optimum.</p>
+    </section>
+
+    <section>
+      <h2>Vertex cover gap</h2>
+      <ul>
+        <li class="fragment">The triangle shows the gap is $\ge \tfrac{2}{3/2} = \tfrac43.$</li>
+        <li class="fragment">The complete graph $K_n$ pushes it to $\tfrac{n-1}{n/2} \to 2.$</li>
+      </ul>
+      <p class="fragment">Can it be worse than $2$? No — and the proof is short.</p>
+    </section>
+
+    <section>
+      <h2>Vertex cover gap ≤ 2</h2>
+      <p>Take an optimal LP solution $x^*$ and round: $\;C = \{\, v : x^*_v \ge \tfrac12 \,\}$.</p>
+      <ul>
+        <li class="fragment"><strong>$C$ is a cover.</strong> Every edge has $x^*_u + x^*_v \ge 1$, so one endpoint has $x^* \ge \tfrac12$ and lands in $C$.</li>
+        <li class="fragment"><strong>$C$ costs at most twice the LP.</strong>
+          $$\begin{aligned} w(C) = \textstyle\sum_{v \in C} w_v &\le \textstyle\sum_{v \in C} w_v \cdot 2x^*_v\\
+          &\le 2\textstyle\sum_{v} w_v x^*_v = 2\,\mathrm{OPT}_{\mathrm{LP}} \end{aligned}$$
+          <span class="smaller">(each $v \in C$ has $2x^*_v \ge 1$; then add the $v \notin C$ terms, all $\ge 0$)</span></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Vertex cover gap ≤ 2</h2>
+      <p>$C$ is an integral cover, so on every instance
+        $$\mathrm{OPT}_{\mathrm{ILP}} \;\le\; w(C) \;\le\; 2\,\mathrm{OPT}_{\mathrm{LP}}.$$
+        The gap is at most $2$ — and $K_n$ shows it's exactly $2$.</p>
+      <p class="fragment smaller">Bonus: solve the LP, round — a polynomial-time cover within $2\times$ optimal. Week 12 returns to this as an <em>approximation algorithm</em>.</p>
+    </section>
+
+    <!-- ====================================================================
+         PART 5: INTEGRAL POLYTOPES AND TOTAL UNIMODULARITY
+         ==================================================================== -->
+    <section class="center">
+      <h1>Part 5: Integral polytopes and total unimodularity</h1>
+    </section>
+
+    <section>
+      <h2>Geometry of the gap</h2>
+      <p>The dictionary between Parts 3 and 4:</p>
+      <ul>
+        <li class="fragment">The LP optimum lives at a <strong>vertex of the relaxation's polytope</strong>.</li>
+        <li class="fragment">If every vertex is a $0/1$ point (an <em>integral polytope</em>), solving the LP <em>is</em> solving the combinatorial problem.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Geometry of the gap</h2>
+      <ul>
+        <li>The triangle's cover polytope has the genuinely fractional vertex $(\tfrac12, \tfrac12, \tfrac12)$ — a corner that no integer point can imitate. Gaps are <em>geometric defects</em>: fractional corners.</li>
+      </ul>
+      <p class="fragment">So a natural question: which polytopes from combinatorics have <em>all</em> corners integral? Two answers today: one from linear algebra (next), and one from Week 5 (Part 6).</p>
+    </section>
+
+    <section>
+      <h2>Bipartite graphs: gap 1</h2>
+      <div class="box"><span class="tag">Fact</span> On <em>bipartite</em> graphs, both the matching LP and the vertex cover LP have integrality gap $1$: every vertex of their polytopes is integral. Both triangle examples hinge on an odd cycle — bipartite graphs have none. Next time, combined with duality, this gives König's theorem.</div>
+    </section>
+
+    <section>
+      <h2>Totally unimodular</h2>
+      <div class="box"><span class="tag">Definition</span> A matrix $A$ is <strong>totally unimodular (TU)</strong> if every square submatrix has determinant $0$, $+1$ or $-1$.</div>
+      <div class="box fragment"><span class="tag">Theorem</span> If $A$ is TU and $b$ is integral, every vertex of $\{\, x : Ax \le b,\ x \ge 0 \,\}$ is integral.</div>
+    </section>
+
+    <section>
+      <h2>Cramer's rule</h2>
+      <p>For a square system $Bx = {\color{#b85a26} b'}$ with $\det B \ne 0$:</p>
+      $$x_j = \frac{\det B_j}{\det B}$$
+      <p>where $B_j$ is $B$ with <strong>column $j$ replaced by ${\color{#b85a26} b'}$</strong>.</p>
+      <p class="fragment">Example: the vertex $(3,5)$ of our pentagon, where $x + y = 8$ and $x + 3y = 18$ are tight:</p>
+      <div class="fragment">
+      $$B = \begin{pmatrix} 1 & 1\\ 1 & 3 \end{pmatrix}, \quad {\color{#b85a26} b'} = \begin{pmatrix} {\color{#b85a26} 8} \\ {\color{#b85a26} 18} \end{pmatrix}, \quad \det B = 2.$$
+      </div>
+    </section>
+
+    <section>
+      <h2>Cramer's rule</h2>
+      <p>Replace one column of $B$ by ${\color{#b85a26} b'}$ at a time:</p>
+      $$x = \frac{\det \begin{pmatrix} {\color{#b85a26} 8} & 1\\ {\color{#b85a26} 18} & 3 \end{pmatrix}}{2} = \frac{24 - 18}{2} = 3$$
+      <div class="fragment">
+      $$y = \frac{\det \begin{pmatrix} 1 & {\color{#b85a26} 8}\\ 1 & {\color{#b85a26} 18} \end{pmatrix}}{2} = \frac{18 - 8}{2} = 5$$
+      </div>
+      <p class="fragment smaller">The only division is by $\det B$. (Here $\det B = 2$, and the numerators happened to be even.)</p>
+    </section>
+
+    <section>
+      <h2>Why TU gives integers</h2>
+      <ul>
+        <li>Part 3: a vertex is where $n$ linearly independent constraints are tight. So it solves $Bx = b'$ for a nonsingular square $B$ built from rows of the constraints, with $b'$ integral.</li>
+        <li class="fragment">Cramer's rule: $\;x_j = \dfrac{\det B_j}{\det B}$. The numerator is an integer.</li>
+        <li class="fragment">The denominator is $\pm 1$: rows from $x \ge 0$ are unit vectors, and expanding along them leaves a square submatrix of $A$.</li>
+      </ul>
+      <p class="fragment">So every coordinate of every vertex is an integer.</p>
+    </section>
+
+    <section>
+      <h2>The incidence matrix</h2>
+      <p>The <strong>vertex–edge incidence matrix</strong> $A$ of a graph has one row per vertex and one column per edge:
+        $A_{v,e} = 1$ if $v$ is an endpoint of $e$, else $0$.</p>
+      <div class="cols">
+        <div style="flex: 0.8;">
+          <figure>
+            <svg width="220" height="190" viewBox="0 0 190 165">
+              <g stroke="#8d8678" stroke-width="2.5">
+                <line x1="95" y1="25" x2="25" y2="135"/><line x1="25" y1="135" x2="165" y2="135"/><line x1="165" y1="135" x2="95" y2="25"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#6e3416" text-anchor="middle">
+                <text x="44" y="74">ab</text><text x="95" y="157">bc</text><text x="147" y="74">ca</text>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="600" text-anchor="middle">
+                <circle cx="95" cy="25" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><text x="95" y="31" fill="#2a2a2a">a</text>
+                <circle cx="25" cy="135" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><text x="25" y="141" fill="#2a2a2a">b</text>
+                <circle cx="165" cy="135" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><text x="165" y="141" fill="#2a2a2a">c</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+        <div>
+          $$\begin{array}{r|ccc} & ab & bc & ca\\ \hline a & 1 & 0 & 1\\ b & 1 & 1 & 0\\ c & 0 & 1 & 1 \end{array}$$
+        </div>
+      </div>
+      <p class="fragment">Every column has exactly two $1$s: the edge's two endpoints.</p>
+    </section>
+
+    <section>
+      <h2>The incidence matrix</h2>
+      <p>Both of our LPs are built from it:</p>
+      <ul>
+        <li class="fragment"><strong>Matching:</strong> row $v$ says $\sum_{e : v \in e} x_e \le 1$. All together: $Ax \le \mathbf{1}$.</li>
+        <li class="fragment"><strong>Vertex cover:</strong> column $e = uv$ says $x_u + x_v \ge 1$. All together: $A^\top x \ge \mathbf{1}$.</li>
+      </ul>
+      <p class="fragment">So whether their polytopes have integral corners depends on the determinants of $A$'s square submatrices.</p>
+    </section>
+
+    <section>
+      <h2>The triangle is not TU</h2>
+      <p>The triangle's incidence matrix has determinant $2$:</p>
+      $$\det \begin{pmatrix} 1 & 0 & 1\\ 1 & 1 & 0\\ 0 & 1 & 1 \end{pmatrix} = 1 \cdot (1 - 0) - 0 + 1 \cdot (1 - 0) = 2.$$
+      <p class="fragment">The vertex cover LP's corner has all three edge constraints tight: $x_a + x_b = x_b + x_c = x_a + x_c = 1$. Cramer divides by $2$ — that's where the $\tfrac12$'s come from.</p>
+    </section>
+
+    <section>
+      <h2>Bipartite graphs are TU</h2>
+      <p>Claim: the incidence matrix of a bipartite graph (sides $L$, $R$) is TU. Induct on the size of a square submatrix $B$. Each column has at most two $1$s — one in an $L$ row, one in an $R$ row.</p>
+      <ul class="smaller">
+        <li class="fragment">A column of zeros: $\det B = 0$.</li>
+        <li class="fragment">A column with one $1$: expand along it; $\det B = \pm$ a smaller determinant, which is $0$ or $\pm1$ by induction.</li>
+        <li class="fragment">Every column has two $1$s: the $L$ rows and the $R$ rows each sum to all-ones, so ($L$ rows) $-$ ($R$ rows) $= 0$. The rows are dependent: $\det B = 0$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Bipartite graphs are TU</h2>
+      <p>The last case on the 4-cycle: $L = \{{\color{#2e588f} a_1, a_2}\}$, $R = \{{\color{#4d7349} b_1, b_2}\}$.</p>
+      <div class="cols">
+        <div style="flex: 0.6;">
+          <figure>
+            <svg width="240" height="240" viewBox="20 20 180 180">
+              <g stroke="#8d8678" stroke-width="2.5">
+                <line x1="45" y1="45" x2="175" y2="45"/><line x1="175" y1="45" x2="175" y2="175"/>
+                <line x1="175" y1="175" x2="45" y2="175"/><line x1="45" y1="175" x2="45" y2="45"/>
+              </g>
+              <circle cx="45" cy="45" r="17" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/><text x="42" y="51" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#1d3c66">a<tspan font-size="11" dy="4">1</tspan></text>
+              <circle cx="175" cy="45" r="17" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/><text x="172" y="51" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2c4329">b<tspan font-size="11" dy="4">1</tspan></text>
+              <circle cx="175" cy="175" r="17" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/><text x="172" y="181" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#1d3c66">a<tspan font-size="11" dy="4">2</tspan></text>
+              <circle cx="45" cy="175" r="17" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/><text x="42" y="181" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#2c4329">b<tspan font-size="11" dy="4">2</tspan></text>
+            </svg>
+          </figure>
+        </div>
+        <div>
+          $$\begin{array}{r|cccc} & a_1b_1 & b_1a_2 & a_2b_2 & b_2a_1\\ \hline
+        {\color{#2e588f} a_1} & {\color{#2e588f} 1} & {\color{#2e588f} 0} & {\color{#2e588f} 0} & {\color{#2e588f} 1}\\
+        {\color{#2e588f} a_2} & {\color{#2e588f} 0} & {\color{#2e588f} 1} & {\color{#2e588f} 1} & {\color{#2e588f} 0}\\
+        {\color{#4d7349} b_1} & {\color{#4d7349} 1} & {\color{#4d7349} 1} & {\color{#4d7349} 0} & {\color{#4d7349} 0}\\
+        {\color{#4d7349} b_2} & {\color{#4d7349} 0} & {\color{#4d7349} 0} & {\color{#4d7349} 1} & {\color{#4d7349} 1}
+      \end{array}$$
+        </div>
+      </div>
+      <p class="fragment">${\color{#2e588f} a_1 + a_2} = (1,1,1,1) = {\color{#4d7349} b_1 + b_2}$, so the rows are dependent: $\det = 0$.</p>
+    </section>
+
+    <section>
+      <h2>Bipartite graphs are TU</h2>
+      <ul>
+        <li>The matching LP uses $A$; the vertex cover LP uses $A^\top$ with $\ge$ rows. Transposing and negating keep TU.</li>
+        <li class="fragment">So on bipartite graphs both polytopes have integral corners: gap $1$, as the Fact promised.</li>
+        <li class="fragment">The odd cycle breaks exactly the last case: the triangle's rows can't be split into $L$ and $R$.</li>
+      </ul>
+    </section>
+
+    <!-- ====================================================================
+         PART 6: KRUSKAL AND THE FOREST POLYTOPE
+         ==================================================================== -->
+    <section class="center">
+      <h1>Part 6: Kruskal and the forest polytope</h1>
+    </section>
+
+    <section>
+      <h2>Forests as vectors</h2>
+      <ul>
+        <li>Week 5: Kruskal adds edges smallest weight first, skipping any edge that closes a cycle, and returns an MST. Correct because forests form a <strong>matroid</strong>.</li>
+        <li class="fragment">Encode an edge set $F \subseteq E$ as its indicator vector $\mathbb{1}_F \in \{0,1\}^E$ — one coordinate per edge, like our matching LPs.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The goal</h2>
+      <p>We want linear constraints such that</p>
+      <ol>
+        <li class="fragment"><strong>Valid:</strong> every forest satisfies them, and</li>
+        <li class="fragment"><strong>No extra corners:</strong> every vertex of the polytope is a forest.</li>
+      </ol>
+      <p class="fragment">Together: the polytope is exactly the convex hull of the forests. Then MST is an LP — and we can watch what Kruskal does to it.</p>
+    </section>
+
+    <section>
+      <h2>The goal</h2>
+      <ul>
+        <li>Checking (1) is easy: count edges.</li>
+        <li class="fragment">To see (2) <em>fail</em>: find an objective where some feasible point beats every forest. The LP optimum sits at a vertex — and that vertex can't be a forest.</li>
+      </ul>
+      <p class="fragment">Build it on the smallest graph with a cycle: the triangle. Three edges, so $x \in \R^3$ — we can draw it.</p>
+    </section>
+
+    <section>
+      <h2>Edge sets of a triangle</h2>
+      <div class="cols">
+        <div style="flex: 1.5;">
+          <figure>
+              <svg width="480" height="330" viewBox="0 0 470 325">
+              <line x1="90" y1="272" x2="162" y2="232" stroke="#8d8678" stroke-width="1.8" stroke-dasharray="5 4"/>
+              <line x1="90" y1="272" x2="90" y2="87" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="90" y1="272" x2="280" y2="272" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="162" y1="232" x2="162" y2="47" stroke="#8d8678" stroke-width="1.8" stroke-dasharray="5 4"/>
+              <line x1="162" y1="232" x2="352" y2="232" stroke="#8d8678" stroke-width="1.8" stroke-dasharray="5 4"/>
+              <line x1="90" y1="87" x2="162" y2="47" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="90" y1="87" x2="280" y2="87" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="162" y1="47" x2="352" y2="47" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="280" y1="272" x2="352" y2="232" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="280" y1="272" x2="280" y2="87" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="352" y1="232" x2="352" y2="47" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="280" y1="87" x2="352" y2="47" stroke="#2a2a2a" stroke-width="2"/>
+              <circle cx="90" cy="272" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="162" cy="232" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="90" cy="87" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="162" cy="47" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="280" cy="272" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="352" cy="232" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="280" cy="87" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="352" cy="47" r="7" fill="#f3c9c3" stroke="#b03a2e" stroke-width="2"/>
+              <text x="80" y="294" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">∅</text>
+              <text x="172" y="222" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ca}</text>
+              <text x="78" y="93" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{bc}</text>
+              <text x="150" y="39" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{bc, ca}</text>
+              <text x="280" y="300" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ab}</text>
+              <text x="364" y="238" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ab, ca}</text>
+              <text x="268" y="111" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ab, bc}</text>
+              <text x="364" y="39" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">{ab, bc, ca}</text>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#6a737d"><text x="185" y="320" text-anchor="middle">x_ab →</text><text x="45" y="212" text-anchor="middle">↑ x_bc</text></g>
+              </svg>
+          </figure>
+        </div>
+        <div>
+          <figure>
+              <svg width="170" height="143" viewBox="0 0 190 160">
+              <g stroke="#8d8678" stroke-width="2.5"><line x1="95" y1="25" x2="25" y2="135"/><line x1="25" y1="135" x2="165" y2="135"/><line x1="165" y1="135" x2="95" y2="25"/></g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="600" text-anchor="middle">
+              <circle cx="95" cy="25" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><text x="95" y="32" fill="#2a2a2a">a</text>
+              <circle cx="25" cy="135" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><text x="25" y="142" fill="#2a2a2a">b</text>
+              <circle cx="165" cy="135" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><text x="165" y="142" fill="#2a2a2a">c</text>
+              </g></svg>
+          </figure>
+          <ul class="smaller">
+            <li class="fragment">$2^3 = 8$ edge sets $=$ the $8$ corners of the cube.</li>
+            <li class="fragment">$7$ are forests. Only $\{ab, bc, ca\}$ — the whole triangle — is a cycle.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>First try: the cube</h2>
+      <ul>
+        <li>Every forest satisfies $0 \le x_e \le 1$, so (1) ✓. Try the cube.</li>
+        <li class="fragment">(2) ✗: maximise $x_{ab} + x_{bc} + x_{ca}$. Every forest scores at most $2$, but the LP answers $(1,1,1)$ — the cycle, scoring $3$.</li>
+      </ul>
+      <p class="fragment">We need a constraint that keeps (1) and cuts off the cycle.</p>
+    </section>
+
+    <section>
+      <h2>Cut off the cycle</h2>
+      <div class="cols">
+        <div style="flex: 1.5;">
+          <figure>
+              <svg width="480" height="330" viewBox="0 0 470 325">
+              <polygon class="fragment" data-fragment-index="1" points="280,87 352,232 162,47" fill="#f1c79f" fill-opacity="0.55" stroke="#b85a26" stroke-width="2"/>
+              <line x1="90" y1="272" x2="162" y2="232" stroke="#8d8678" stroke-width="1.8" stroke-dasharray="5 4"/>
+              <line x1="90" y1="272" x2="90" y2="87" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="90" y1="272" x2="280" y2="272" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="162" y1="232" x2="162" y2="47" stroke="#8d8678" stroke-width="1.8" stroke-dasharray="5 4"/>
+              <line x1="162" y1="232" x2="352" y2="232" stroke="#8d8678" stroke-width="1.8" stroke-dasharray="5 4"/>
+              <line x1="90" y1="87" x2="162" y2="47" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="90" y1="87" x2="280" y2="87" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="280" y1="272" x2="352" y2="232" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="280" y1="272" x2="280" y2="87" stroke="#2a2a2a" stroke-width="2"/>
+              <g class="fragment fade-out" data-fragment-index="1"><line x1="280" y1="87" x2="352" y2="47" stroke="#2a2a2a" stroke-width="2"/></g>
+              <g class="fragment fade-out" data-fragment-index="1"><line x1="352" y1="232" x2="352" y2="47" stroke="#2a2a2a" stroke-width="2"/></g>
+              <g class="fragment fade-out" data-fragment-index="1"><line x1="162" y1="47" x2="352" y2="47" stroke="#2a2a2a" stroke-width="2"/></g>
+              <circle cx="90" cy="272" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="162" cy="232" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="90" cy="87" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="162" cy="47" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="280" cy="272" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="352" cy="232" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="280" cy="87" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <text x="80" y="294" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">∅</text>
+              <text x="172" y="222" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ca}</text>
+              <text x="78" y="93" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{bc}</text>
+              <text x="150" y="39" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{bc, ca}</text>
+              <text x="280" y="300" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ab}</text>
+              <text x="364" y="238" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ab, ca}</text>
+              <text x="268" y="111" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ab, bc}</text>
+              <text class="fragment fade-out" data-fragment-index="1" x="364" y="39" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#7a2419">{ab, bc, ca}</text>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#6a737d"><text x="185" y="320" text-anchor="middle">x_ab →</text><text x="45" y="212" text-anchor="middle">↑ x_bc</text></g>
+              </svg>
+          </figure>
+        </div>
+        <div>
+          <p class="smaller">A forest uses at most $2$ of the triangle's $3$ edges, so this is valid — (1) ✓:</p>
+          <p class="smaller fragment" data-fragment-index="1">$$x_{ab} + x_{bc} + x_{ca} \le 2$$ The plane slices off the red corner.</p>
+          <p class="smaller fragment" data-fragment-index="2">It creates no new corners: it meets the cube only at $3$ existing ones.</p>
+          <p class="smaller fragment" data-fragment-index="3">Corners left: <strong>exactly the $7$ forests</strong> — (2) ✓.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>One cut per cycle?</h2>
+      <div class="cols">
+        <div style="flex: 0.8;">
+          <figure>
+              <svg width="280" height="250" viewBox="0 0 280 250">
+              <g stroke="#8d8678" stroke-width="2.5">
+              <line x1="50" y1="40" x2="230" y2="40"/>
+              <line x1="50" y1="40" x2="50" y2="210"/>
+              <line x1="230" y1="40" x2="230" y2="210"/>
+              <line x1="50" y1="210" x2="230" y2="210"/>
+              <line x1="50" y1="40" x2="230" y2="210"/>
+              <line x1="230" y1="40" x2="50" y2="210"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="#5f4910" text-anchor="middle"><text x="140" y="30">2/3</text><text x="140" y="238">2/3</text><text x="22" y="131">2/3</text><text x="258" y="131">2/3</text><text x="140" y="98">2/3</text><text x="140" y="166">2/3</text></g>
+              <circle cx="50" cy="40" r="14" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/>
+              <circle cx="230" cy="40" r="14" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/>
+              <circle cx="50" cy="210" r="14" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/>
+              <circle cx="230" cy="210" r="14" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/>
+              </svg>
+            <figcaption>$K_4$, every $x_e = \tfrac23$.</figcaption>
+          </figure>
+        </div>
+        <div>
+          <p class="smaller">Natural guess: for every cycle $C$, $\ \sum_{e \in C} x_e \le |C| - 1$. Valid — (1) ✓.</p>
+          <ul class="smaller">
+            <li class="fragment">Each triangle: $3 \cdot \tfrac23 = 2 \le 2$. ✓</li>
+            <li class="fragment">Each $4$-cycle: $4 \cdot \tfrac23 = \tfrac83 \le 3$. ✓</li>
+            <li class="fragment">Maximise $\sum_e x_e$: this point scores $6 \cdot \tfrac23 = 4$, but a forest on $4$ vertices has at most $3$ edges. (2) ✗</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>What the cycles miss</h2>
+      <div class="cols">
+        <div style="flex: 0.8;">
+          <figure>
+            <svg width="280" height="250" viewBox="0 0 280 250">
+              <line x1="50" y1="40" x2="230" y2="40" stroke="#2e588f" stroke-width="4"/><line x1="230" y1="40" x2="230" y2="210" stroke="#2e588f" stroke-width="4"/><line x1="230" y1="210" x2="50" y2="210" stroke="#2e588f" stroke-width="4"/><line x1="50" y1="210" x2="50" y2="40" stroke="#2e588f" stroke-width="4"/>
+              <g class="fragment" data-fragment-index="1"><line x1="50" y1="40" x2="230" y2="210" stroke="#b85a26" stroke-width="3" stroke-dasharray="7 5"/><line x1="230" y1="40" x2="50" y2="210" stroke="#b85a26" stroke-width="3" stroke-dasharray="7 5"/><text x="140" y="160" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#6e3416" stroke="#fff" stroke-width="5" paint-order="stroke">chords</text></g>
+              <circle cx="50" cy="40" r="14" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/><circle cx="230" cy="40" r="14" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/><circle cx="50" cy="210" r="14" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/><circle cx="230" cy="210" r="14" fill="#e8d6a8" stroke="#9a7a26" stroke-width="2"/>
+            </svg>
+            <figcaption>A $4$-cycle of $K_4$ (blue) and its chords.</figcaption>
+          </figure>
+        </div>
+        <div>
+          <p class="smaller">The $4$-cycle constraint counts only the cycle's own edges: $4 \cdot \tfrac23 = \tfrac83 \le 3$.</p>
+          <p class="smaller fragment" data-fragment-index="1">It ignores the <strong>chords</strong>. But a forest can't use more than $3$ edges of <em>any</em> kind among these $4$ vertices — and all $6$ edges give $4 &gt; 3$.</p>
+          <p class="smaller fragment" data-fragment-index="2">Repair: count <strong>every</strong> edge inside the cycle's vertex set. (The triangle has no chords — which is why it couldn't tell the difference.)</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Count by vertices</h2>
+      <ul>
+        <li>Week 5: a forest with $k$ edges on $s$ vertices has $s - k$ components.</li>
+        <li class="fragment">At least one component, so $k \le s - 1$.</li>
+        <li class="fragment">The edges of a forest that lie inside a vertex set $S$ form a forest on $S$ — so these are valid, (1) ✓:
+          $$\textstyle\sum_{e \subseteq S} x_e \;\le\; |S| - 1 \qquad \forall S \subseteq V,\ |S| \ge 2$$</li>
+      </ul>
+      <p class="fragment smaller">($e \subseteq S$: both endpoints of $e$ lie in $S$.)</p>
+    </section>
+
+    <section>
+      <h2>Count by vertices</h2>
+      <p>Sanity check — it includes every earlier fix:</p>
+      <ul>
+        <li class="fragment">$S = \{a, b, c\}$ in the triangle: $x_{ab} + x_{bc} + x_{ca} \le 2$.</li>
+        <li class="fragment">$S = $ all of $K_4$: $\sum_e x_e \le 3$ — kills the $\tfrac23$ point, whose total is $4$.</li>
+        <li class="fragment">$S = \{u, v\}$: the only edge inside is $uv$, so $x_{uv} \le 1$ — the cube's upper bounds are special cases.</li>
+      </ul>
+      <p class="fragment">Does it get (2) in general? That's the theorem.</p>
+    </section>
+
+    <section>
+      <h2>The forest polytope</h2>
+      <div class="box"><span class="tag">Theorem (Edmonds)</span> These constraints — the <strong>subtour elimination constraints</strong> — are enough:
+        <div style="font-size:0.78em;">
+        $$\begin{aligned}P_{\text{forest}} = \Big\{ x \in \R^E \;:\;\; & x \ge 0,\\[-0.1em]
+        & \textstyle\sum_{e \subseteq S} x_e \le |S| - 1 \ \ \forall S \subseteq V,\ |S| \ge 2 \Big\}\end{aligned}$$
+        </div>
+        is exactly the convex hull of the forests of $G$. Every vertex is a forest — the polytope is <strong>integral</strong>. (We won't prove this here.)
+      </div>
+    </section>
+
+    <section>
+      <h2>The forest polytope</h2>
+      <ul class="smaller">
+        <li class="fragment">Integral, but <em>not</em> by TU: rows $\{1,2,3\}, \{1,2,4\}, \{1,3,4\}$ of $K_4$ on columns $12, 13, 14$ give determinant $-2$. Here integrality comes from the matroid structure.</li>
+        <li class="fragment">Exponentially many constraints — and that's allowed! A polytope doesn't care how many inequalities describe it. (Solving such LPs efficiently needs the ellipsoid method + a "separation oracle" — a story for another course.)</li>
+        <li class="fragment">For <em>spanning trees</em> of a connected $G$: add $\sum_{e \in E} x_e = |V| - 1$; the vertices become exactly the spanning trees.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>MST as an LP</h2>
+      <p>Pick $C$ bigger than every weight and set $w'_e = C - w_e &gt; 0$.</p>
+      <ul>
+        <li class="fragment">Every spanning tree has $|V| - 1$ edges, so $w'(T) = (|V|-1)\,C - w(T)$: maximising $w'$ is minimising $w$.</li>
+        <li class="fragment">All $w'_e &gt; 0$, so a best forest never stops short of spanning.</li>
+      </ul>
+      <p class="fragment">So the MST is the optimal vertex of $\max\, \{ w'^\top x : x \in P_{\text{forest}} \}$. Largest $w'$ first is smallest $w$ first: Kruskal's order.</p>
+    </section>
+
+    <section>
+      <h2>Kruskal walks the polytope</h2>
+      <div class="cols">
+        <div style="flex: 1.25;">
+          <figure>
+              <svg width="480" height="330" viewBox="0 0 470 325">
+              <defs><marker id="arrKw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b85a26"/></marker><marker id="arrKx" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b03a2e"/></marker></defs>
+              <polygon points="280,87 352,232 162,47" fill="#f1c79f" fill-opacity="0.55" stroke="#b85a26" stroke-width="2"/>
+              <line x1="90" y1="272" x2="162" y2="232" stroke="#8d8678" stroke-width="1.8" stroke-dasharray="5 4"/>
+              <line x1="90" y1="272" x2="90" y2="87" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="90" y1="272" x2="280" y2="272" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="162" y1="232" x2="162" y2="47" stroke="#8d8678" stroke-width="1.8" stroke-dasharray="5 4"/>
+              <line x1="162" y1="232" x2="352" y2="232" stroke="#8d8678" stroke-width="1.8" stroke-dasharray="5 4"/>
+              <line x1="90" y1="87" x2="162" y2="47" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="90" y1="87" x2="280" y2="87" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="280" y1="272" x2="352" y2="232" stroke="#2a2a2a" stroke-width="2"/>
+              <line x1="280" y1="272" x2="280" y2="87" stroke="#2a2a2a" stroke-width="2"/>
+              <circle cx="352" cy="47" r="9" fill="none" stroke="#8d8678" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <line class="fragment" data-fragment-index="1" x1="101.0" y1="272.0" x2="267.0" y2="272.0" stroke="#b85a26" stroke-width="5" marker-end="url(#arrKw)"/>
+              <line class="fragment" data-fragment-index="2" x1="280.0" y1="261.0" x2="280.0" y2="100.0" stroke="#b85a26" stroke-width="5" marker-end="url(#arrKw)"/>
+              <g class="fragment" data-fragment-index="3"><line x1="289.6" y1="81.7" x2="339.8" y2="53.8" stroke="#b03a2e" stroke-width="3" stroke-dasharray="6 4" marker-end="url(#arrKx)"/><text x="298.70000000000005" y="63.75" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#b03a2e">✗</text></g>
+              <circle cx="90" cy="272" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="162" cy="232" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="90" cy="87" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="162" cy="47" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="280" cy="272" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="352" cy="232" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle cx="280" cy="87" r="7" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+              <circle class="fragment" data-fragment-index="3" cx="280" cy="87" r="11" fill="#b5cdb0" stroke="#2c4329" stroke-width="3"/>
+              <text x="80" y="294" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">∅</text>
+              <text x="172" y="222" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ca}</text>
+              <text x="78" y="93" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{bc}</text>
+              <text x="150" y="39" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{bc, ca}</text>
+              <text x="280" y="300" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ab}</text>
+              <text x="364" y="238" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ab, ca}</text>
+              <text x="268" y="111" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2c4329">{ab, bc}</text>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#6a737d"><text x="185" y="320" text-anchor="middle">x_ab →</text><text x="45" y="212" text-anchor="middle">↑ x_bc</text></g>
+              </svg>
+          </figure>
+        </div>
+        <div>
+          <figure>
+              <svg width="170" height="143" viewBox="0 0 190 160">
+              <g stroke="#8d8678" stroke-width="2.5"><line x1="95" y1="25" x2="25" y2="135"/><line x1="25" y1="135" x2="165" y2="135"/><line x1="165" y1="135" x2="95" y2="25"/></g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="#6e3416"><text x="46" y="74" text-anchor="end">3</text><text x="95" y="158" text-anchor="middle">2</text><text x="146" y="74">1</text></g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="600" text-anchor="middle">
+              <circle cx="95" cy="25" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><text x="95" y="32" fill="#2a2a2a">a</text>
+              <circle cx="25" cy="135" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><text x="25" y="142" fill="#2a2a2a">b</text>
+              <circle cx="165" cy="135" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/><text x="165" y="142" fill="#2a2a2a">c</text>
+              </g></svg>
+            <figcaption>labels $w' = 4 - w$; value $= w'^\top x$</figcaption>
+          </figure>
+          <ul class="smaller">
+            <li>Start at $\varnothing$: <span style="white-space:nowrap">value $0.$</span></li>
+            <li class="fragment" data-fragment-index="1">Take $ab$: to $\{ab\}$, <span style="white-space:nowrap">value $3.$</span></li>
+            <li class="fragment" data-fragment-index="2">Take $bc$: to $\{ab, bc\}$, <span style="white-space:nowrap">value $5.$</span></li>
+            <li class="fragment" data-fragment-index="3">$ca$ closes a cycle — that corner is cut off. Stop.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Why it stops at the optimum</h2>
+      <p>Neighbours of $\{ab, bc\}$ on the polytope:</p>
+      <ul>
+        <li class="fragment">Drop an edge: $\{ab\}$ (value $3$), $\{bc\}$ (value $2$).</li>
+        <li class="fragment">Swap one edge for another along the cut face: $\{ab, ca\}$ (value $4$), $\{bc, ca\}$ (value $3$).</li>
+      </ul>
+      <p class="fragment">None beats $5$. On any LP, a vertex with no better neighbouring vertex is optimal — convexity leaves no local traps (we won't prove this here).</p>
+    </section>
+
+    <section>
+      <h2>Why it stops at the optimum</h2>
+      <div class="box"><span class="tag">Takeaway</span> Kruskal is a simplex-style walk on $P_{\text{forest}}$: each accepted edge is a step to an adjacent, better vertex.</div>
+      <ul>
+        <li class="fragment">Edmonds' theorem makes the polytope integral, so its optimal vertex is a real spanning tree.</li>
+        <li class="fragment">The exchange property is why greedy gets there by only <em>adding</em> edges — it never has to back up.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The big picture</h2>
+      <table class="results" style="font-size:0.8em;">
+        <thead><tr><th>Week</th><th>Then</th><th>Now, in LP language</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td class="q">4–5</td><td>greedy + exchange</td><td>walking the skeleton of an integral polytope</td></tr>
+          <tr class="fragment"><td class="q">8</td><td>max flow, min cut certificate</td><td>an LP that a cut certifies (W10: duality)</td></tr>
+          <tr class="fragment"><td class="q">8</td><td>bipartite matching via flow</td><td>an LP with integrality gap $1$</td></tr>
+          <tr class="fragment"><td class="q">3, 11, 12</td><td>vertex cover arc</td><td>an LP with gap $\to 2$; a $2$-approximation in W12</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller">One solver, one geometry — and the special structure of each problem shows up as the <em>shape of its polytope</em>.</p>
+    </section>
+
+    <!-- ============================== CLOSING ============================= -->
+    <section>
+      <h2>Next time: duality</h2>
+      <ul>
+        <li class="fragment">In Week 4, exchange arguments <em>certified</em> that greedy's answer couldn't be beaten. In Week 8, a saturated cut certified a max flow. Both times: a short proof of optimality you can check without rerunning the algorithm.</li>
+        <li class="fragment">Next time we'll see this is no accident: <span class="hl">every LP has a shadow LP — its <strong>dual</strong> — whose feasible solutions are certificates bounding the original.</span></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Next time: duality</h2>
+      <ul>
+        <li class="fragment">Max-flow/min-cut becomes a two-line consequence of duality (same theorem as Week 8, second proof, wider reach), and König's theorem lands the matching-vs-vertex-cover capstone.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Takeaway</span> This week: write it as an LP, then look at the polytope — the optimum sits at a corner. Next time: how to <em>prove</em> a corner is the best one.</div>
+    </section>
+
+  </div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [ RevealMath.MathJax3 ],
+
+    mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        macros: {
+          tO:   ['{\\widetilde{O}}'],
+          R:    ['{\\mathbb{R}}'],
+          E:    ['{\\mathbb{E}}']
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+</script>
+</body>
+</html>
