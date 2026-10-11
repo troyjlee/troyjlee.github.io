@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 10: Linear Programming II — Duality — Advanced Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <style>
+    :root { --accent: #1f6feb; --muted: #6a737d; }
+
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--accent); letter-spacing: -0.01em; }
+    .reveal h1 { font-size: 2.0em; }
+    /* Theme styling (uppercase headings, small-caps tags) garbles MathJax output. */
+    .reveal mjx-container { text-transform: none; font-variant: normal; letter-spacing: normal; }
+    .reveal h2 { text-align: center; }
+    .reveal section { font-size: 0.92em; }
+    .reveal a { color: var(--accent); }
+
+    /* Left-align most slides; titles stay centered via their own class. */
+    .reveal .slides section { text-align: left; }
+    .reveal .slides section.center { text-align: center; }
+
+    /* Boxes for theorems / definitions / takeaways. */
+    .box {
+      border-left: 5px solid var(--accent);
+      background: #f4f8ff;
+      padding: 0.5em 0.8em; margin: 0.4em 0; border-radius: 4px;
+    }
+    .box .tag { font-variant: small-caps; font-weight: 700; color: var(--accent);
+                letter-spacing: 0.04em; margin-right: 0.4em; }
+    .box.warn { border-left-color: #d29922; background: #fff8ec; }
+    .box.warn .tag { color: #b07400; }
+    .box.minimax-box { padding-top: 0.25em; padding-bottom: 0.25em; }
+    .reveal .minimax-box mjx-container[display="true"] { margin: 0.3em 0; }
+
+    /* Result highlight pill. */
+    .hl { background: #fff3b0; padding: 0.05em 0.25em; border-radius: 3px; }
+
+    /* Results table. */
+    .reveal table.results { margin: 0.7em auto; border-collapse: collapse; }
+    .reveal table.results th, .reveal table.results td {
+      padding: 0.4em 1.1em; border: none; text-align: left; }
+    .reveal table.results thead th { color: var(--accent);
+      border-bottom: 2px solid var(--accent); font-variant: small-caps; letter-spacing: 0.03em; }
+    .reveal table.results tbody tr { border-bottom: 1px solid #e7ebf0; }
+    .reveal table.results td.q { font-weight: 700; }
+    .reveal table.results tr.hlrow { background: #fff8d6; }
+    .reveal table.feas td { text-align: center; }
+    .reveal table.feas .why { font-size: 0.8em; color: #555; }
+
+    /* Two-column layout helper:  <div class="cols"> <div>..</div> <div>..</div> </div> */
+    .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+    .cols > * { flex: 1; min-width: 0; }
+
+    /* Pseudocode / algorithm blocks. */
+    .reveal pre.algo {
+      font-size: 0.5em; line-height: 1.35; box-shadow: none;
+      border: 1px solid #d0d7de; border-radius: 6px; background: #fbfcfd;
+      width: 100%;
+    }
+    .reveal pre.algo code { padding: 0.8em 1em; }
+    .algo .kw { color: var(--accent); font-weight: 700; }
+    .algo .cm { color: var(--muted); font-style: italic; }
+
+    .reveal .credit { color: var(--muted); font-size: 0.8em; }
+    .reveal .smaller { font-size: 0.82em; }
+    .reveal figure { margin: 0; text-align: center; }
+    .reveal figcaption { font-size: 0.7em; color: var(--muted); margin-top: 0.3em; }
+    .reveal .footnote { position: absolute; bottom: 0.2em; left: 0.6em;
+                        font-size: 0.55em; color: var(--muted); }
+
+    /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
+    .reveal figure svg { max-width: 100%; height: auto; }
+
+    /* Threshold demonstration: keep the graph and the moving cutoff together. */
+    .reveal .threshold-demo p { margin: 0.35em 0; }
+    .threshold-demo figure svg { display: block; margin: 0 auto; }
+    .threshold-controls { display: flex; align-items: center; gap: 0.6em;
+                          margin: 0.4em 0; font-size: 0.8em; }
+    .threshold-controls input { flex: 1; min-width: 0; accent-color: var(--accent); }
+    .threshold-controls output { min-width: 2.6em; font-variant-numeric: tabular-nums; }
+    .threshold-demo .cut-status { display: block; text-align: center; font-size: 0.82em; }
+    .threshold-edge { stroke: #8d8678; stroke-width: 2.5; marker-end: url(#threshold-arrow); }
+    .threshold-edge.crossing { stroke: #b03a2e; stroke-width: 4; marker-end: url(#threshold-cut-arrow); }
+    .threshold-node { fill: #fbf7ed; stroke: #2a2a2a; stroke-width: 2; }
+    .threshold-node.inside { fill: #f1c79f; stroke: #b85a26; stroke-width: 2.5; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== TITLE ============================== -->
+    <section class="center">
+      <h1>Week 10: Linear Programming II — Duality</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Advanced Algorithms</p>
+    </section>
+
+    <!-- ============================== ROADMAP ============================ -->
+    <section>
+      <h2>Roadmap</h2>
+      <ol>
+        <li>Certifying an optimum: bounding an LP by combining its constraints</li>
+        <li>The dual LP, and a recipe for writing it</li>
+        <li>Weak duality (proved) and strong duality (stated)</li>
+        <li>Max-flow = min-cut, round two: as LP duality</li>
+        <li>The matching capstone: K&#337;nig's theorem</li>
+        <li>Complementary slackness — and what a negative price tells you</li>
+      </ol>
+    </section>
+
+    <!-- =============== PART I: CERTIFICATES AND BOUNDS ==================== -->
+    <section class="center">
+      <h1>Part I — Certificates and Bounds</h1>
+    </section>
+
+    <section>
+      <h2>How do we <em>certify</em> an LP optimum?</h2>
+      <p>Last week we saw an optimum of a (feasible, bounded) LP occurs at a vertex. A skeptic asks: <em>how do I know no feasible point does better?</em></p>
+      <p class="fragment">We have played this game before:</p>
+      <ul>
+        <li class="fragment"><strong>Week 8:</strong> to certify a flow is maximum, exhibit a <em>cut</em> of the same value — no need to re-run Ford–Fulkerson.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>How do we <em>certify</em> an LP optimum?</h2>
+      <p>Last week we saw an optimum of a (feasible, bounded) LP occurs at a vertex. A skeptic asks: <em>how do I know no feasible point does better?</em></p>
+      <p>We have played this game before:</p>
+      <ul>
+        <li><strong>Week 4:</strong> greedy picks $k$ disjoint activities. For half-open intervals $[s,f)$, choose one point sufficiently close before each selected finish time. These $k$ points <em>hit every activity</em> — so no $k+1$ disjoint activities exist.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>How do we <em>certify</em> an LP optimum?</h2>
+      <div class="box"><span class="tag">Goal</span> A short, checkable <em>certificate of optimality</em> for any LP. Today's answer: a solution to a second LP — the <strong>dual</strong>.</div>
+    </section>
+
+    <section>
+      <h2>Last week's LP</h2>
+      <div class="cols">
+        <div style="font-size:0.8em;">
+          $$\begin{aligned}
+            \max\ \ & 3x_1 + 2x_2 \\
+            \text{s.t.}\ \ & x_1 \le 6 \quad \text{(machine)}\\
+            & x_1 + x_2 \le 8 \quad \text{(wood)}\\
+            & x_1 + 3x_2 \le 18 \quad \text{(varnish)}\\
+            & x_1, x_2 \ge 0
+          \end{aligned}$$
+          <p>Chairs $x_1$, tables $x_2$.</p>
+        </div>
+        <div>
+          <figure>
+            <svg width="420" height="320" viewBox="0 0 480 365" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="objarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#b85a26"/>
+                </marker>
+              </defs>
+              <!-- feasible region -->
+              <polygon points="50,330 290,330 290,250 170,130 50,90" fill="#cad9ee" fill-opacity="0.55" stroke="#2e588f" stroke-width="2"/>
+              <!-- constraint lines -->
+              <line x1="50" y1="90" x2="450" y2="223" stroke="#2e588f" stroke-width="1.5"/>
+              <text x="345" y="178" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1d3c66">varnish</text>
+              <line x1="50" y1="10" x2="370" y2="330" stroke="#4d7349" stroke-width="1.5"/>
+              <text x="138" y="84" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#2c4329">wood</text>
+              <line x1="290" y1="330" x2="290" y2="10" stroke="#9a7a26" stroke-width="1.5"/>
+              <text x="300" y="36" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#5f4910">machine</text>
+              <!-- axes -->
+              <g stroke="#2a2a2a" stroke-width="2">
+                <line x1="50" y1="330" x2="458" y2="330"/>
+                <line x1="50" y1="330" x2="50" y2="8"/>
+              </g>
+              <g stroke="#2a2a2a" stroke-width="1.5">
+                <line x1="130" y1="330" x2="130" y2="336"/><line x1="210" y1="330" x2="210" y2="336"/>
+                <line x1="290" y1="330" x2="290" y2="336"/><line x1="370" y1="330" x2="370" y2="336"/>
+                <line x1="44" y1="250" x2="50" y2="250"/><line x1="44" y1="170" x2="50" y2="170"/>
+                <line x1="44" y1="90" x2="50" y2="90"/><line x1="44" y1="10" x2="50" y2="10"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d">
+                <text x="130" y="352" text-anchor="middle">2</text><text x="210" y="352" text-anchor="middle">4</text>
+                <text x="290" y="352" text-anchor="middle">6</text><text x="370" y="352" text-anchor="middle">8</text>
+                <text x="36" y="255" text-anchor="end">2</text><text x="36" y="175" text-anchor="end">4</text>
+                <text x="36" y="95" text-anchor="end">6</text><text x="36" y="15" text-anchor="end">8</text>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#2a2a2a">
+                <text x="462" y="334">x&#8321;</text><text x="56" y="14">x&#8322;</text>
+              </g>
+              <!-- objective direction -->
+              <line x1="150" y1="290" x2="187" y2="265" stroke="#b85a26" stroke-width="2.5" marker-end="url(#objarrow)"/>
+              <text x="128" y="312" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#6e3416">c = (3, 2)</text>
+              <!-- vertices -->
+              <circle cx="50" cy="330" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="290" cy="330" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="170" cy="130" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="50" cy="90" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="290" cy="250" r="8" fill="#f1c79f" stroke="#b85a26" stroke-width="2.5"/>
+              <text x="302" y="262" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#6e3416">(6,2)</text>
+            </svg>
+            <figcaption>The feasible region and the claimed optimum $(6,2)$.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Last week's LP</h2>
+      <p>Same LP as Week 9, with $(x, y)$ renamed $(x_1, x_2)$ — the letter $y$ is about to get a new job.</p>
+      <p class="fragment">The sweep found $(6,2)$, value $3\cdot 6 + 2\cdot 2 = 22$.</p>
+      <p class="fragment">But <em>checking all vertices</em> is not a certificate that scales. We want an upper bound proof.</p>
+    </section>
+
+    <section>
+      <h2>Bounding from Above</h2>
+      <div style="font-size:0.75em;">
+      $$\begin{gathered}\max\ 3x_1 + 2x_2 \quad\text{s.t.}\\ \underbrace{x_1 \le 6}_{\text{machine}},\ \ \underbrace{x_1 + x_2 \le 8}_{\text{wood}},\ \ \underbrace{x_1 + 3x_2 \le 18}_{\text{varnish}},\ \ x_1, x_2 \ge 0\end{gathered}$$
+      </div>
+      <p class="smaller">Idea: <strong>combine the constraints</strong>. Multiply each by a number $y_i \ge 0$ and add. If the result dominates the objective coefficient-wise, its right-hand side is an upper bound.</p>
+      <p class="fragment"><strong>Attempt 1</strong> — take $2\times$ (machine) $+\ 1\times$ (varnish):
+      $$2x_1 + (x_1 + 3x_2) \;=\; 3x_1 + 3x_2 \;\le\; 12 + 18 \;=\; 30.$$</p>
+      <p class="fragment smaller">Since $x_2 \ge 0$:&ensp; $3x_1 + 2x_2 \le 3x_1 + 3x_2 \le 30$. &ensp;<span class="hl">Bound: $30$.</span></p>
+    </section>
+
+    <section>
+      <h2>Bounding from Above</h2>
+      <div style="font-size:0.75em;">
+      $$\begin{gathered}\max\ 3x_1 + 2x_2 \quad\text{s.t.}\\ \underbrace{x_1 \le 6}_{\text{machine}},\ \ \underbrace{x_1 + x_2 \le 8}_{\text{wood}},\ \ \underbrace{x_1 + 3x_2 \le 18}_{\text{varnish}},\ \ x_1, x_2 \ge 0\end{gathered}$$
+      </div>
+      <p class="fragment"><strong>Attempt 2</strong> — take $3\times$ (wood):
+      $$3x_1 + 3x_2 \le 24.$$</p>
+      <p class="fragment smaller">Same left side as Attempt 1, cheaper right side. &ensp;<span class="hl">Bound: $24$.</span></p>
+      <p class="fragment">Getting closer to $22$. Both attempts overshoot the $x_2$ coefficient ($3 &gt; 2$). Can a mix avoid that waste?</p>
+    </section>
+
+    <section id="certificate-exercise">
+      <h2>Your turn: a bound of $22$</h2>
+      <div style="font-size:0.8em;">
+      $$\begin{aligned}
+        x_1 &\le 6 && \text{(machine)}\\
+        x_1 + x_2 &\le 8 && \text{(wood)}\\
+        x_1 + 3x_2 &\le 18 && \text{(varnish)}
+      \end{aligned}$$
+      </div>
+      <div class="box"><span class="tag">Challenge</span> Combine these constraints with nonnegative weights to prove $3x_1+2x_2 \le 22$ for every feasible point.</div>
+      <p class="fragment smaller">Hint: try using just machine and wood. What weights give exactly $3x_1+2x_2$?</p>
+    </section>
+
+    <section>
+      <h2>The perfect combination</h2>
+      <p><strong>Attempt 3</strong> — take $1\times$ (machine) $+\ 2\times$ (wood):</p>
+      <p class="fragment" style="font-size:0.85em;">$$x_1 + 2(x_1 + x_2) \;=\; 3x_1 + 2x_2 \;\le\; 6 + 16 \;=\; 22.$$</p>
+      <p class="fragment smaller">This time the combination is <em>exactly</em> the objective — no slack wasted. <span class="hl">Bound: $22$.</span></p>
+      <p class="fragment">And the feasible point $(6,2)$ <em>achieves</em> $22$.</p>
+      <div class="box fragment"><span class="tag">Certified</span>
+        Every feasible point has value $\le 22$, and $(6,2)$ has value $22$.
+        The pair — point $(6,2)$, multipliers $(y_1,y_2,y_3)=(1,2,0)$ — is a two-line proof of optimality anyone can check.</div>
+    </section>
+
+    <section>
+      <h2>The best bound is an LP</h2>
+      <div style="font-size:0.8em;">
+      $$\begin{aligned}
+        y_1 \times\quad & x_1 \le 6 && \text{(machine)}\\
+        y_2 \times\quad & x_1 + x_2 \le 8 && \text{(wood)}\\
+        y_3 \times\quad & x_1 + 3x_2 \le 18 && \text{(varnish)}\\[2pt]
+        \text{objective:}\quad & 3x_1 + 2x_2
+      \end{aligned}$$
+      </div>
+      <ul class="smaller">
+        <li class="fragment"><strong>Legal:</strong> $y_1, y_2, y_3 \ge 0$ (adding $\le$-inequalities only works with nonnegative weights).</li>
+        <li class="fragment"><strong>Dominates the objective:</strong> coefficient of $x_1$: $y_1 + y_2 + y_3 \ge 3$; &ensp; coefficient of $x_2$: $y_2 + 3y_3 \ge 2$.<br>
+            (Domination suffices because $x_1, x_2 \ge 0$.)</li>
+        <li class="fragment"><strong>Bound obtained:</strong> $6y_1 + 8y_2 + 18y_3$ — make it as small as possible.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The best bound is an LP</h2>
+      <div class="cols">
+        <div>
+          <p class="smaller" style="text-align:center;"><strong>Primal</strong></p>
+          $$\begin{aligned}
+            \max\ \ & 3x_1 + 2x_2\\
+            & x_1 \le 6\\
+            & x_1 + x_2 \le 8\\
+            & x_1 + 3x_2 \le 18\\
+            & x_1, x_2 \ge 0
+          \end{aligned}$$
+        </div>
+        <div>
+          <p class="smaller" style="text-align:center;"><strong>Dual</strong></p>
+          $$\begin{aligned}
+            \min\ \ & 6y_1 + 8y_2 + 18y_3\\
+            & y_1 + y_2 + y_3 \ge 3\\
+            & y_2 + 3y_3 \ge 2\\
+            & y_1, y_2, y_3 \ge 0
+          \end{aligned}$$
+        </div>
+      </div>
+      <p class="fragment smaller">Three constraints $\to$ three dual variables; two primal variables $\to$ two dual constraints.</p>
+    </section>
+
+    <section>
+      <h2>The best bound is an LP</h2>
+      <div class="box"><span class="tag">Definition</span> The search for the best upper bound is itself a linear program: the <strong>dual</strong> of the original (<strong>primal</strong>) LP.</div>
+    </section>
+
+    <!-- ==================== PART II: THE DUAL RECIPE ====================== -->
+    <section class="center">
+      <h1>Part II — The Dual Recipe</h1>
+    </section>
+
+    <section>
+      <h2>Running example, in matrices</h2>
+      <div style="font-size:0.75em;">
+      $$\begin{gathered}\max\ 3x_1 + 2x_2 \quad\text{s.t.}\\ \underbrace{x_1 \le 6}_{\text{machine}},\ \ \underbrace{x_1 + x_2 \le 8}_{\text{wood}},\ \ \underbrace{x_1 + 3x_2 \le 18}_{\text{varnish}},\ \ x_1, x_2 \ge 0\end{gathered}$$
+      </div>
+      <p class="fragment" data-fragment-index="1">The same LP in matrix form:</p>
+      <div class="fragment" data-fragment-index="1" style="font-size:0.8em;">
+      $$\begin{gathered}
+        \max\ \underbrace{\begin{pmatrix} 3 & 2 \end{pmatrix}}_{c^{\mathsf T}} \underbrace{\begin{pmatrix} x_1 \\ x_2 \end{pmatrix}}_{x} \quad\text{s.t.}\quad
+        \underbrace{\begin{pmatrix} 1 & 0 \\ 1 & 1 \\ 1 & 3 \end{pmatrix}}_{A} \begin{pmatrix} x_1 \\ x_2 \end{pmatrix}
+        \le \underbrace{\begin{pmatrix} 6 \\ 8 \\ 18 \end{pmatrix}}_{b},\ \ x \ge 0
+      \end{gathered}$$
+      </div>
+    </section>
+
+    <section>
+      <h2>Combining constraints</h2>
+      <p>Multiply the constraints by $y_1, y_2, y_3 \ge 0$ and add. The left side is</p>
+      <div style="font-size:0.75em;">
+      $$\begin{pmatrix} y_1 & y_2 & y_3 \end{pmatrix} \begin{pmatrix} 1 & 0 \\ 1 & 1 \\ 1 & 3 \end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \end{pmatrix}
+        = (y_1 + y_2 + y_3)\, x_1 + (y_2 + 3y_3)\, x_2.$$
+      </div>
+    </section>
+
+    <section>
+      <h2>Combining constraints</h2>
+      <p>We want the combination to dominate $3x_1 + 2x_2$, coefficient by coefficient:</p>
+      <div style="font-size:0.8em;">
+      $$\begin{pmatrix} y_1 & y_2 & y_3 \end{pmatrix} \begin{pmatrix} 1 & 0 \\ 1 & 1 \\ 1 & 3 \end{pmatrix} \ge \begin{pmatrix} 3 & 2 \end{pmatrix},
+        \quad\text{i.e.}\quad y^{\mathsf T} A \ge c^{\mathsf T}.$$
+      </div>
+      <p class="fragment smaller">Multiplied out: $y_1 + y_2 + y_3 \ge 3$ and $y_2 + 3y_3 \ge 2$ — the dual constraints from Part I.</p>
+    </section>
+
+    <section>
+      <h2>The bound, in one line</h2>
+      <div class="box"><span class="tag">Claim</span> If $y \ge 0$ and $y^{\mathsf T} A \ge c^{\mathsf T}$, then every feasible $x$ satisfies
+        $$c^{\mathsf T} x \;\le\; y^{\mathsf T} A x \;\le\; y^{\mathsf T} b.$$</div>
+      <ul class="smaller">
+        <li class="fragment">First $\le$: $y^{\mathsf T} A$ dominates $c^{\mathsf T}$ entrywise, and $x \ge 0$.</li>
+        <li class="fragment">Second $\le$: $Ax \le b$, weighted by $y \ge 0$.</li>
+        <li class="fragment">Attempt 3 was $y = (1, 2, 0)$: &ensp; $y^{\mathsf T} A = (3, 2) = c^{\mathsf T}$, &ensp; $y^{\mathsf T} b = 6 + 16 = 22$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Dual of the standard form</h2>
+      <p>Nothing used the specific numbers. Any LP in Week 9's standard form ($A \in \R^{m\times n}$)
+      $$\max\ c^{\mathsf T} x \quad \text{s.t.}\quad Ax \le b,\ \ x \ge 0$$
+      has the same bound: $c^{\mathsf T} x \le y^{\mathsf T} b$ for every $y \in \R^m$ with $y \ge 0$ and $y^{\mathsf T} A \ge c^{\mathsf T}$.</p>
+      <p class="fragment">Transposing, $y^{\mathsf T} A \ge c^{\mathsf T}$ is the same as $A^{\mathsf T} y \ge c$: one constraint per column of $A$.</p>
+    </section>
+
+    <section>
+      <h2>Dual of the standard form</h2>
+      <p>Best bound = smallest right-hand side:</p>
+      <div class="box fragment"><span class="tag">Dual LP</span>
+        $$\min\ b^{\mathsf T} y \quad \text{s.t.}\quad A^{\mathsf T} y \ge c,\ \ y \ge 0.$$
+        Constraints of the primal $\leftrightarrow$ variables of the dual, and vice versa; $A$ becomes $A^{\mathsf T}$; $b$ and $c$ trade places.</div>
+    </section>
+
+    <section>
+      <h2>Mixed constraints</h2>
+      <p>Real LPs mix $\le$ rows and $=$ rows:</p>
+      $$\begin{aligned}
+        \max\ \ & 3x_1 + x_2\\
+        \text{s.t.}\ \ & x_1 + x_2 = 4\\
+        & x_1 - x_2 \le 2\\
+        & x_1, x_2 \ge 0
+      \end{aligned}$$
+      <p class="fragment smaller">Combining constraints still works, but the signs need care: may the equality get a <em>negative</em> multiplier?</p>
+      <p class="fragment">One idea answers this: <strong>penalise, don't enforce</strong>.</p>
+    </section>
+
+    <section>
+      <h2>Penalise, don't enforce</h2>
+      <p class="smaller">Keep the sign constraints $x_1, x_2 \ge 0$. Drop the other constraints and add a term per row to the objective, with a price $y_i$:</p>
+      <div style="font-size:0.85em;">
+      $$L(x,y) = 3x_1 + x_2 + y_1\,(4 - x_1 - x_2) + y_2\,(2 - x_1 + x_2).$$
+      </div>
+      <div class="box fragment"><span class="tag">Goal</span> $L$ never undercuts the objective on feasible points:
+        $$3x_1 + x_2 \;\le\; L(x,y) \quad\text{for every feasible } x.$$
+        Then $\max_x L(x,y)$ bounds OPT from above. Choose the signs of $y$ to make this hold.</div>
+    </section>
+
+    <section>
+      <h2>Penalise, don't enforce</h2>
+      <div style="font-size:0.85em;">
+      $$L(x,y) = 3x_1 + x_2 + y_1\,(4 - x_1 - x_2) + y_2\,(2 - x_1 + x_2)$$
+      </div>
+      <p class="smaller">Goal: every added term is $\ge 0$ on feasible points.</p>
+      <ul class="smaller">
+        <li class="fragment">Feasible $x$ has $4 - x_1 - x_2 = 0$: &ensp; the term vanishes, so $y_1$ may have <em>any sign</em>.</li>
+        <li class="fragment">Feasible $x$ has $2 - x_1 + x_2 \ge 0$: &ensp; we need $y_2 \ge 0$.</li>
+        <li class="fragment">Now a violated $\le$ row ($x_1 - x_2 &gt; 2$) makes its term negative. We are maximising, so that is a <strong>penalty</strong>: $y_2$ per unit of violation.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Every $y$ gives a bound</h2>
+      <p>For $y_1$ free and $y_2 \ge 0$:
+      $$\text{OPT} \;\le\; \max_{x_1, x_2 \ge 0} L(x,y).$$</p>
+      <p class="smaller">The max on the right is over <em>all</em> such $x$, feasible or not — that only makes it larger.</p>
+      <p class="fragment">Regroup $L$ by variable:</p>
+      <div class="fragment" style="font-size:0.85em;">
+      $$\begin{aligned}
+        L(x,y) &= 3x_1 + x_2 + y_1\,(4 - x_1 - x_2) + y_2\,(2 - x_1 + x_2)\\
+               &= 4y_1 + 2y_2 + (3 - y_1 - y_2)\,x_1 + (1 - y_1 + y_2)\,x_2.
+      \end{aligned}$$
+      </div>
+    </section>
+
+    <section>
+      <h2>When is the bound finite?</h2>
+      <div style="font-size:0.85em;">
+      $$L(x,y) = 4y_1 + 2y_2 + (3 - y_1 - y_2)\,x_1 + (1 - y_1 + y_2)\,x_2$$
+      </div>
+      <p class="smaller">A bound of $+\infty$ is useless. Which $y$ keep $\max_x L(x,y)$ finite?</p>
+      <ul class="smaller">
+        <li class="fragment">A positive coefficient on $x_1$ lets $x_1 \to \infty$. &ensp; Need $y_1 + y_2 \ge 3$.</li>
+        <li class="fragment">Likewise for $x_2$. &ensp; Need $y_1 - y_2 \ge 1$.</li>
+        <li class="fragment">With both, each $x_j$ term is $\le 0$ for every $x_j \ge 0$ — largest at $x = 0$. So
+          $$\max_{x_1, x_2 \ge 0} L(x,y) = 4y_1 + 2y_2.$$</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The best bound</h2>
+      <p class="smaller">Fix a $y$ with $y_2 \ge 0$ that satisfies the constraints from the previous slide. Then for every feasible $x$:</p>
+      <div style="font-size:0.85em;">
+      $$3x_1 + x_2 \;\le\; L(x,y) \;\le\; \max_{x'} L(x',y) \;=\; 4y_1 + 2y_2.$$
+      </div>
+      <p class="fragment">Every such $y$ bounds OPT. The best bound is the <em>smallest</em>:</p>
+      <div class="box fragment"><span class="tag">Dual &mdash; derived, not looked up</span>
+        <div style="font-size:0.85em;">$$\begin{gathered}\min\ 4y_1 + 2y_2 \quad\text{s.t.}\\ y_1 + y_2 \ge 3,\ \ y_1 - y_2 \ge 1,\ \ y_1 \text{ free},\ y_2 \ge 0\end{gathered}$$</div></div>
+    </section>
+
+    <section>
+      <h2>The Lagrangian</h2>
+      <p class="smaller">General primal: $\max\ c^{\mathsf T}x$ subject to rows $a_i^{\mathsf T}x \le b_i$ or $a_i^{\mathsf T}x = b_i$, and $x \ge 0$. The <strong>Lagrangian</strong> adds price $y_i$ times the slack of row $i$:</p>
+      <div style="font-size:0.85em;">
+      $$L(x,y) = c^{\mathsf T}x + \textstyle\sum_i y_i\,(b_i - a_i^{\mathsf T}x) = c^{\mathsf T}x + y^{\mathsf T}(b - Ax).$$
+      </div>
+      <p class="fragment smaller"><strong>Goal:</strong> $c^{\mathsf T}x \le L(x,y)$ for every feasible $x$, i.e. every term $y_i\,(b_i - a_i^{\mathsf T}x) \ge 0$:</p>
+      <ul class="smaller">
+        <li class="fragment">$a_i^{\mathsf T}x \le b_i$: &ensp; the slack is $\ge 0$, so $y_i \ge 0$.</li>
+        <li class="fragment">$a_i^{\mathsf T}x = b_i$: &ensp; the slack is $0$, so $y_i$ is unrestricted.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The Lagrangian</h2>
+      <p class="smaller">Regroup by variable:</p>
+      <div style="font-size:0.85em;">
+      $$L(x,y) = b^{\mathsf T}y + (c - A^{\mathsf T}y)^{\mathsf T}x = b^{\mathsf T}y + \textstyle\sum_j \big(c_j - (A^{\mathsf T}y)_j\big)\, x_j.$$
+      </div>
+      <p class="fragment smaller">The max over $x$ is finite exactly when no $x_j$ can push $L$ to $+\infty$:</p>
+      <ul class="smaller">
+        <li class="fragment">Since $x_j \ge 0$, its coefficient must be $\le 0$: &ensp; $(A^{\mathsf T}y)_j \ge c_j$, i.e. $A^{\mathsf T}y \ge c$.</li>
+        <li class="fragment">Then every $x_j$ term is $\le 0$, the max is at $x = 0$, and it equals $b^{\mathsf T}y$.</li>
+        <li class="fragment">Best bound: <strong>minimise $b^{\mathsf T}y$</strong> over these $y$ — the dual.</li>
+      </ul>
+      <p class="fragment smaller"><strong>Sanity check:</strong> standard form ($Ax \le b$, $x \ge 0$) gives $\min\ b^{\mathsf T}y$ s.t. $A^{\mathsf T}y \ge c$, $y \ge 0$ — the dual from before.</p>
+    </section>
+
+    <section>
+      <h2>Do the bounds meet?</h2>
+      <div class="cols">
+        <div>
+          <p class="smaller" style="text-align:center;"><strong>Primal</strong></p>
+          $$\begin{aligned}
+            \max\ \ & 3x_1 + x_2\\
+            & x_1 + x_2 = 4\\
+            & x_1 - x_2 \le 2\\
+            & x_1, x_2 \ge 0
+          \end{aligned}$$
+        </div>
+        <div>
+          <p class="smaller" style="text-align:center;"><strong>Dual</strong></p>
+          $$\begin{aligned}
+            \min\ \ & 4y_1 + 2y_2\\
+            & y_1 + y_2 \ge 3\\
+            & y_1 - y_2 \ge 1\\
+            & y_1\ \text{free},\ y_2 \ge 0
+          \end{aligned}$$
+        </div>
+      </div>
+      <p class="fragment smaller"><strong>Check with numbers.</strong> Primal: $x_2 = 4 - x_1$ and $x_1 - x_2 \le 2$ give $x_1 \le 3$; optimum $x^\star = (3,1)$, value $\mathbf{10}$.</p>
+      <p class="fragment smaller">Dual: $y^\star = (2,1)$ is feasible ($3 \ge 3$, $1 \ge 1$), value $8 + 2 = \mathbf{10}$. They meet!</p>
+    </section>
+
+    <section>
+      <h2>Dual of the dual</h2>
+      <div class="box"><span class="tag">Fact</span> For standard form, the dual of the dual is the primal: negate the dual to get a standard-form max, take its dual, negate back.</div>
+      <div class="fragment" style="font-size:0.85em;">
+      $$\begin{aligned}
+        &\min\{b^{\mathsf T}y : A^{\mathsf T}y \ge c,\ y \ge 0\}\\
+          &= -\max\{-b^{\mathsf T}y : -A^{\mathsf T}y \le -c,\ y \ge 0\}\\
+          &\xrightarrow{\text{dual}}\ -\min\{-c^{\mathsf T}x : -Ax \ge -b,\ x \ge 0\}\\
+          &= \max\{c^{\mathsf T}x : Ax \le b,\ x \ge 0\}.
+      \end{aligned}$$
+      </div>
+    </section>
+
+    <section>
+      <h2>Dual of the dual</h2>
+      <p class="fragment">Consequences:</p>
+      <ul>
+        <li class="fragment">Duality is a genuine <em>pairing</em>, not a one-way construction — each LP certifies the other.</li>
+        <li class="fragment">"Primal" and "dual" are roles, not properties: solve or analyse whichever of the pair is more convenient.</li>
+      </ul>
+    </section>
+
+    <!-- =============== PART III: WEAK AND STRONG DUALITY ================== -->
+    <section class="center">
+      <h1>Part III — Weak and Strong Duality</h1>
+    </section>
+
+    <section>
+      <h2>Weak duality</h2>
+      <div class="box"><span class="tag">Theorem (weak duality)</span>
+        If $x$ is feasible for the primal $\max\{c^{\mathsf T}x : Ax \le b,\ x\ge 0\}$ and $y$ is feasible for its dual, then
+        $\;c^{\mathsf T}x \le b^{\mathsf T}y$.</div>
+      <p class="fragment"><strong>Proof</strong> (one line):
+      $$c^{\mathsf T} x \;\le\; (A^{\mathsf T} y)^{\mathsf T} x \;=\; y^{\mathsf T}(Ax) \;\le\; y^{\mathsf T} b. \qquad \blacksquare$$</p>
+      <p class="fragment smaller">Notice: the proof is exactly the "combine the constraints" trick from Part I, written once and for all.</p>
+    </section>
+
+    <section>
+      <h2>Weak duality</h2>
+      <p class="smaller">Unpacking each step of $\;c^{\mathsf T} x \le (A^{\mathsf T} y)^{\mathsf T} x = y^{\mathsf T}(Ax) \le y^{\mathsf T} b$:</p>
+      <ul class="smaller">
+        <li class="fragment"><strong>First $\le$:</strong> $A^{\mathsf T}y \ge c$ coefficient-wise (dual feasibility), and $x \ge 0$ — multiplying a bigger coefficient by a nonnegative number can only increase the sum.</li>
+        <li class="fragment"><strong>Middle $=$:</strong> just re-bracketing, $(A^{\mathsf T}y)^{\mathsf T}x = y^{\mathsf T}Ax = y^{\mathsf T}(Ax)$.</li>
+        <li class="fragment"><strong>Second $\le$:</strong> $Ax \le b$ row-wise (primal feasibility), and $y \ge 0$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Certificates for Free</h2>
+      <div class="box"><span class="tag">Corollary</span>
+        If $x^\star$ is primal feasible, $y^\star$ is dual feasible, and $c^{\mathsf T}x^\star = b^{\mathsf T}y^\star$, then <strong>both are optimal</strong>.</div>
+      <p class="fragment smaller">Every primal value sits below every dual value — if they touch, neither side can move.</p>
+      <figure class="fragment">
+        <svg width="620" height="120" viewBox="0 0 640 120" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="60" x2="625" y2="60" stroke="#8d8678" stroke-width="2"/>
+          <!-- primal ticks (vertex values), below -->
+          <line x1="40" y1="60" x2="40" y2="78" stroke="#4d7349" stroke-width="3"/>
+          <line x1="268" y1="60" x2="268" y2="78" stroke="#4d7349" stroke-width="3"/>
+          <line x1="382" y1="60" x2="382" y2="78" stroke="#4d7349" stroke-width="3"/>
+          <line x1="401" y1="60" x2="401" y2="78" stroke="#4d7349" stroke-width="3"/>
+          <text x="40" y="96" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#2c4329">0</text>
+          <text x="268" y="96" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#2c4329">12</text>
+          <text x="382" y="96" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#2c4329">18</text>
+          <text x="401" y="96" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#2c4329">19</text>
+          <text x="60" y="112" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#2c4329">primal values c&#183;x (push up)</text>
+          <!-- dual ticks (Attempts 1-3), above -->
+          <line x1="610" y1="42" x2="610" y2="60" stroke="#b85a26" stroke-width="3"/>
+          <line x1="496" y1="42" x2="496" y2="60" stroke="#b85a26" stroke-width="3"/>
+          <line x1="458" y1="42" x2="458" y2="60" stroke="#b85a26" stroke-width="3"/>
+          <text x="610" y="34" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6e3416">30</text>
+          <text x="496" y="34" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6e3416">24</text>
+          <text x="300" y="16" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#6e3416">dual bounds b&#183;y (push down)</text>
+          <!-- meeting point -->
+          <circle cx="458" cy="60" r="7" fill="#fff3b0" stroke="#b03a2e" stroke-width="2.5"/>
+          <text x="458" y="96" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#7a2419">22</text>
+        </svg>
+        <figcaption>The running example: vertex values $0, 12, 18, 19$ from below; Attempts 1–3 give bounds $30, 24, 22$ from above; they meet at $22$.</figcaption>
+      </figure>
+      <p class="fragment smaller">This is the same logic as Week 8's worksheet: a flow of value $v$ plus a cut of capacity $v$ certify each other.</p>
+    </section>
+
+    <section>
+      <h2>Strong duality</h2>
+      <div class="box"><span class="tag">Theorem (strong duality — stated, not proved)</span>
+        If the primal has a finite optimum, so does the dual, and the two optimal values are <strong>equal</strong>:
+        $$\begin{gathered} \max\{c^{\mathsf T}x : Ax \le b,\ x \ge 0\} \\ {}=\; \min\{b^{\mathsf T}y : A^{\mathsf T}y \ge c,\ y \ge 0\}. \end{gathered}$$</div>
+      <p class="fragment">So the meeting at $22$ was no accident: <em>a perfect certificate always exists.</em> The bound-combining game can always be played to a draw.</p>
+    </section>
+
+    <section>
+      <h2>Strong duality as minimax</h2>
+      <p class="smaller">Assume the standard-form primal has a finite optimum. With $x \ge 0$ and $y \ge 0$,
+      $\;L(x,y) = c^{\mathsf T}x + y^{\mathsf T}(b - Ax).$</p>
+      <p class="smaller"><strong>Convention:</strong> write $\min = -\infty$ or $\max = +\infty$ when the expression is unbounded below or above, respectively.</p>
+      <ul class="smaller">
+        <li class="fragment"><strong>Fix $x$, let $y$ respond:</strong> a violated row lets $y_i \to \infty$, so
+          $$\min_{y \ge 0} L(x,y) = \begin{cases} c^{\mathsf T}x & \text{if } Ax \le b,\\ -\infty & \text{otherwise.}\end{cases}$$
+          Hence $\max_{x}\min_{y} L$ is the <strong>primal</strong> optimum.</li>
+        <li class="fragment"><strong>Fix $y$, let $x$ respond:</strong> $\max_{x \ge 0} L(x,y) = b^{\mathsf T}y$ if $A^{\mathsf T}y \ge c$, else $+\infty$ (Part II). Hence $\min_{y}\max_{x} L$ is the <strong>dual</strong> optimum.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Strong duality as minimax</h2>
+      <div class="box minimax-box"><span class="tag">Strong duality, restated</span>
+        If the primal has a finite optimum, then
+        $$\max_{x \ge 0}\ \min_{y \ge 0}\ L(x,y) \;=\; \min_{y \ge 0}\ \max_{x \ge 0}\ L(x,y).$$</div>
+      <ul class="smaller">
+        <li class="fragment"><strong>$\le$ is automatic</strong> — that is weak duality: &ensp; $\min_{y} L(x',y) \le L(x',y') \le \max_{x} L(x,y')$ for every $x', y'$.</li>
+        <li class="fragment"><strong>$=$ is the deep part</strong> (proof beyond this course). As a game: one player picks a production plan $x$, the other picks prices $y$. Strong duality says moving second gives no advantage.</li>
+        <li class="fragment">Von Neumann's minimax theorem for zero-sum games is a special case of LP duality.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The feasibility cases</h2>
+      <p class="smaller">Each LP has an optimum, is unbounded, or is infeasible. Of the nine pairings, only four occur:</p>
+      <table class="results feas" style="font-size:0.62em; table-layout:fixed; width:88%;">
+        <thead><tr><th>Primal \ Dual</th><th>optimum</th><th>unbounded</th><th>infeasible</th></tr></thead>
+        <tbody>
+          <tr><td class="q">optimum</td><td class="fragment" data-fragment-index="3" style="background:#e6efe3;"><strong style="color:#2c4329;">possible</strong><br><span class="why">values equal</span></td><td class="fragment" data-fragment-index="1" style="background:#f6e3df;"><strong style="color:#7a2419;">never</strong><br><span class="why">weak duality</span></td><td class="fragment" data-fragment-index="2" style="background:#f6e3df;"><strong style="color:#7a2419;">never</strong><br><span class="why">strong duality</span></td></tr>
+          <tr><td class="q">unbounded</td><td class="fragment" data-fragment-index="1" style="background:#f6e3df;"><strong style="color:#7a2419;">never</strong><br><span class="why">weak duality</span></td><td class="fragment" data-fragment-index="1" style="background:#f6e3df;"><strong style="color:#7a2419;">never</strong><br><span class="why">weak duality</span></td><td class="fragment" data-fragment-index="3" style="background:#e6efe3;"><strong style="color:#2c4329;">possible</strong><br><span class="why">forced by weak duality</span></td></tr>
+          <tr><td class="q">infeasible</td><td class="fragment" data-fragment-index="2" style="background:#f6e3df;"><strong style="color:#7a2419;">never</strong><br><span class="why">strong duality</span></td><td class="fragment" data-fragment-index="3" style="background:#e6efe3;"><strong style="color:#2c4329;">possible</strong><br><span class="why">forced by weak duality</span></td><td class="fragment" data-fragment-index="3" style="background:#e6efe3;"><strong style="color:#2c4329;">possible</strong><br><span class="why">example next</span></td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller" data-fragment-index="1">A dual-feasible $y$ caps every primal value at $b^{\mathsf T}y$ — so an unbounded side forces the other to be infeasible.</p>
+    </section>
+
+    <section>
+      <h2>The feasibility cases</h2>
+      <p class="smaller">Both infeasible at once:</p>
+      <div class="cols">
+        <div>
+          <p class="smaller" style="text-align:center;"><strong>Primal</strong></p>
+          $$\begin{aligned}
+            \max\ \ & x_1\\
+            & x_1 - x_2 \le -1\\
+            & {-x_1} + x_2 \le -1\\
+            & x_1, x_2 \ge 0
+          \end{aligned}$$
+        </div>
+        <div>
+          <p class="smaller" style="text-align:center;"><strong>Dual</strong></p>
+          $$\begin{aligned}
+            \min\ \ & {-y_1} - y_2\\
+            & y_1 - y_2 \ge 1\\
+            & {-y_1} + y_2 \ge 0\\
+            & y_1, y_2 \ge 0
+          \end{aligned}$$
+        </div>
+      </div>
+      <ul class="smaller">
+        <li class="fragment">Primal: add the two rows to get $0 \le -2$. &ensp; Infeasible.</li>
+        <li class="fragment">Dual: add the two rows to get $0 \ge 1$. &ensp; Infeasible.</li>
+      </ul>
+    </section>
+
+    <!-- ============ PART IV: MAX-FLOW / MIN-CUT AS DUALITY ================ -->
+    <section class="center">
+      <h1>Part IV — Max-Flow / Min-Cut, Round Two</h1>
+    </section>
+
+    <section>
+      <h2>Recall Week 8</h2>
+      <div class="box"><span class="tag">Theorem (max-flow = min-cut)</span>
+        In any $s$–$t$ network, the maximum flow value equals the minimum capacity of an $s$–$t$ cut.</div>
+      <p class="fragment">Week 8's proof: run Edmonds–Karp (Ford–Fulkerson with BFS) until no augmenting path exists; let $S$ = vertices reachable from $s$ in the <em>residual graph</em>; the cut $(S, V\setminus S)$ is saturated, so its capacity equals the flow value.</p>
+      <p class="fragment">Today we re-prove the same theorem <em>without ever mentioning residual graphs</em> — it will fall out of LP duality.</p>
+    </section>
+
+    <section>
+      <h2>Max Flow as an LP</h2>
+      <p class="smaller">Digraph $G=(V,E)$, capacities $c_e \ge 0$, source $s$, sink $t$ (no edges into $s$). One variable $f_e$ per edge; $\delta^+(v)$ = edges out of $v$, $\delta^-(v)$ = edges into $v$:</p>
+      <div style="font-size:0.8em;">
+      $$\begin{aligned}
+        \max\ \ & \textstyle\sum_{e \in \delta^+(s)} f_e \\
+        \text{s.t.}\ \ & f_e \le c_e \quad \forall e \in E\\
+        & \textstyle\sum_{e \in \delta^-(v)} f_e \;-\; \sum_{e \in \delta^+(v)} f_e = 0 \quad \forall v \ne s,t\\
+        & f_e \ge 0 \quad \forall e \in E
+      \end{aligned}$$
+      </div>
+      <p class="fragment smaller">A maximisation with $\le$ rows and $=$ rows. Penalise each row:</p>
+      <ul class="smaller">
+        <li class="fragment">capacity constraint of edge $e$ &nbsp;$\to$&nbsp; dual variable $y_e \ge 0$</li>
+        <li class="fragment">conservation constraint at vertex $v$ &nbsp;$\to$&nbsp; dual variable $z_v$, <em>free</em> (it's an equality)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Deriving the dual</h2>
+      <p class="smaller">Penalise every row, as in Part II:</p>
+      <div style="font-size:0.8em;">
+      $$\begin{aligned}
+        L \;=\; & \textstyle\sum_{e \in \delta^+(s)} f_e
+          \;+\; \sum_{e} y_e\,(c_e - f_e)\\
+          & {}+\; \textstyle\sum_{v \ne s,t} z_v \Big(\sum_{e \in \delta^+(v)} f_e - \sum_{e \in \delta^-(v)} f_e\Big).
+      \end{aligned}$$
+      </div>
+      <p class="fragment smaller">Then regroup by variable. Each $f_e$ gets one coefficient; since $f_e \ge 0$, a finite bound needs that coefficient $\le 0$. <strong>That is the dual constraint for edge $e$.</strong></p>
+    </section>
+
+    <section>
+      <h2>One edge at a time</h2>
+      <p class="smaller">Take an edge $e = (u, v)$. Every term of $L$ that contains $f_e$:</p>
+      <table class="results smaller">
+        <thead><tr><th>Where $f_e$ appears</th><th>Adds to its coefficient</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td class="q">objective, if $u = s$</td><td>$+1$</td></tr>
+          <tr class="fragment"><td class="q">capacity row of $e$</td><td>$-y_e$</td></tr>
+          <tr class="fragment"><td class="q">conservation at $u$ ($e$ leaves $u$)</td><td>$+z_u$</td></tr>
+          <tr class="fragment"><td class="q">conservation at $v$ ($e$ enters $v$)</td><td>$-z_v$</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller">Coefficient $\le 0$: &ensp; $y_e \;\ge\; [u = s] + z_u - z_v$, &ensp; with no $z_s$ or $z_t$ term ($s$ and $t$ have no conservation row).</p>
+    </section>
+
+    <section>
+      <h2>One edge at a time</h2>
+      <p class="smaller">Set $z_s := 1$ and $z_t := 0$. Then every edge, including those at $s$ and $t$, reads the same way: &ensp; $y_e \ge z_u - z_v$.</p>
+      <div class="cols">
+        <div>
+          <figure>
+            <svg width="330" height="187" viewBox="0 0 300 170">
+              <defs>
+                <marker id="arrFdual" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#8d8678"/>
+                </marker>
+              </defs>
+              <g stroke="#8d8678" stroke-width="2" fill="none" marker-end="url(#arrFdual)">
+                <line x1="45.7" y1="78.5" x2="132.4" y2="42.3"/>
+                <line x1="45.7" y1="91.5" x2="132.4" y2="127.7"/>
+                <line x1="150" y1="52" x2="150" y2="116"/>
+                <line x1="165.7" y1="41.5" x2="252.4" y2="77.7"/>
+                <line x1="165.7" y1="128.5" x2="252.4" y2="92.3"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#6e3416">
+                <text x="88" y="52">4</text>
+                <text x="88" y="128">3</text>
+                <text x="158" y="89">2</text>
+                <text x="208" y="52">2</text>
+                <text x="208" y="128">4</text>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="middle">
+                <circle cx="30" cy="85" r="16" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/>
+                <text x="30" y="91" fill="#1d3c66">s</text>
+                <circle cx="150" cy="35" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="150" y="41" fill="#2a2a2a">a</text>
+                <circle cx="150" cy="135" r="16" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="150" y="141" fill="#2a2a2a">b</text>
+                <circle cx="270" cy="85" r="16" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+                <text x="270" y="91" fill="#2c4329">t</text>
+              </g>
+            </svg>
+            <figcaption>Week 9's network.</figcaption>
+          </figure>
+        </div>
+        <div class="fragment" style="font-size:0.85em;">
+          $$\begin{aligned}
+            sa:\quad & y_{sa} \ge 1 - z_a\\
+            sb:\quad & y_{sb} \ge 1 - z_b\\
+            ab:\quad & y_{ab} \ge z_a - z_b\\
+            at:\quad & y_{at} \ge z_a\\
+            bt:\quad & y_{bt} \ge z_b
+          \end{aligned}$$
+        </div>
+      </div>
+      <p class="fragment smaller">Five edges, five dual constraints. What is left of $L$ is $\sum_e c_e\, y_e$: minimise it.</p>
+    </section>
+
+    <section>
+      <h2>Deriving the dual</h2>
+      <div class="box"><span class="tag">Dual LP</span>
+        $$\begin{aligned}
+          \min\ \ & \textstyle\sum_{e} c_e\, y_e\\
+          \text{s.t.}\ \ & y_e \;\ge\; z_u - z_v \quad \forall e=(u,v) \in E\\
+          & z_s = 1,\quad z_t = 0,\quad y_e \ge 0
+        \end{aligned}$$</div>
+      <p class="fragment smaller"><strong>Intuition:</strong> pay $c_e$ per unit of $y_e$; $y_e$ must cover any <em>drop in the label $z$</em> along edge $e$; $s$ is labelled $1$, $t$ is labelled $0$.</p>
+    </section>
+
+    <section>
+      <h2>Reading the dual: it prices cuts</h2>
+      <div class="cols">
+        <div class="smaller">
+          <p>Try a $0/1$ solution: pick $S \subseteq V$ with $s \in S$, $t \notin S$, and set $z_v = 1$ if $v \in S$, else $0$.</p>
+          <p class="fragment">Then $y_e \ge z_u - z_v$ forces $y_e \ge 1$ exactly on edges <em>leaving</em> $S$ — and $y_e = 0$ works everywhere else.</p>
+          <p class="fragment">Dual objective $= \sum_{e\ \text{leaving}\ S} c_e$ = <strong>the capacity of the cut $S$</strong>.</p>
+        </div>
+        <div>
+          <figure>
+            <svg width="440" height="250" viewBox="0 0 480 250" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="fedge" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L7,3 L0,6 z" fill="#8d8678"/>
+                </marker>
+                <marker id="fcut" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L7,3 L0,6 z" fill="#b03a2e"/>
+                </marker>
+              </defs>
+              <!-- cut curve: S = {s,a,b} | {t} -->
+              <path d="M 318 15 Q 286 125 318 235" fill="none" stroke="#b03a2e" stroke-width="2.5" stroke-dasharray="8 6"/>
+              <!-- edges (capacities as in Week 9) -->
+              <line x1="82" y1="115.4" x2="196" y2="65.4" stroke="#8d8678" stroke-width="2.5" marker-end="url(#fedge)"/>
+              <text x="128" y="76" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#5f4910">4</text>
+              <line x1="82" y1="134.6" x2="196" y2="184.6" stroke="#8d8678" stroke-width="2.5" marker-end="url(#fedge)"/>
+              <text x="128" y="184" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#5f4910">3</text>
+              <line x1="220" y1="79" x2="220" y2="167" stroke="#8d8678" stroke-width="2.5" marker-end="url(#fedge)"/>
+              <text x="230" y="128" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#5f4910">2</text>
+              <line x1="242" y1="63.7" x2="374" y2="115" stroke="#b03a2e" stroke-width="3" marker-end="url(#fcut)"/>
+              <text x="340" y="88" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#7a2419">2</text>
+              <line x1="242" y1="186.3" x2="374" y2="135" stroke="#b03a2e" stroke-width="3" marker-end="url(#fcut)"/>
+              <text x="340" y="176" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#7a2419">4</text>
+              <!-- nodes: S shaded -->
+              <circle cx="60" cy="125" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2.5"/>
+              <text x="60" y="131" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#6e3416" text-anchor="middle">s</text>
+              <circle cx="220" cy="55" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2.5"/>
+              <text x="220" y="61" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#6e3416" text-anchor="middle">a</text>
+              <circle cx="220" cy="195" r="22" fill="#f1c79f" stroke="#b85a26" stroke-width="2.5"/>
+              <text x="220" y="201" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#6e3416" text-anchor="middle">b</text>
+              <circle cx="400" cy="125" r="22" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+              <text x="400" y="131" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">t</text>
+              <!-- z labels -->
+              <text x="60" y="170" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6e3416">z=1</text>
+              <text x="160" y="35" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6e3416">z=1</text>
+              <text x="160" y="228" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6e3416">z=1</text>
+              <text x="400" y="170" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6a737d">z=0</text>
+            </svg>
+            <figcaption>Week 9's network. $S=\{s,a,b\}$: $z=1$ on $S$, $z_t=0$; $y_e = 1$ on the two red edges. Value $2+4=6$ — exactly last week's max flow. ($S=\{s\}$ gives $4+3=7$: a valid bound, but not tight.)</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Rounding to a cut</h2>
+      <p class="smaller">Every cut is a $0/1$ dual solution, so the LP optimum is at most the min cut. For the other direction, take any optimal dual $(y, z)$ and <strong>round it to a cut</strong> that costs no more.</p>
+      <ul class="smaller">
+        <li class="fragment"><strong>Clip:</strong> raise each negative $z_v$ to $0$, lower each $z_v &gt; 1$ to $1$.<br>
+          Still feasible: each new gap $z_u - z_v \le \max(0, \text{old gap}) \le y_e$.</li>
+        <li class="fragment"><strong>Threshold:</strong> pick $\theta$ uniformly from $(0, 1]$ and let
+          $$S_\theta = \{v : z_v \ge \theta\}.$$
+          It contains $s$ ($z_s = 1$) and never $t$ ($z_t = 0$): an $s$–$t$ cut.</li>
+      </ul>
+    </section>
+
+    <section id="threshold-example" class="threshold-demo">
+      <h2>Threshold rounding: a picture</h2>
+      <p class="smaller">A feasible fractional dual: $z=(1,\tfrac34,\tfrac12,0)$ on $(s,a,b,t)$, with $y_{uv}=\max(0,z_u-z_v)$.</p>
+      <figure>
+        <svg width="860" height="280" viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="threshold-title threshold-description">
+          <title id="threshold-title">A threshold turns vertex potentials into a cut</title>
+          <desc id="threshold-description">Orange vertices belong to S. Red arrows leave S. The shaded interval on the potential scale runs from one half to three quarters: exactly the thresholds for which edge a to b leaves S.</desc>
+          <defs>
+            <marker id="threshold-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L7,3 L0,6 z" fill="#8d8678"/>
+            </marker>
+            <marker id="threshold-cut-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L7,3 L0,6 z" fill="#b03a2e"/>
+            </marker>
+          </defs>
+          <g font-family="Helvetica, Arial, sans-serif" font-size="20" text-anchor="middle">
+            <text x="230" y="22" fill="#6a737d">Capacities on edges</text>
+            <g transform="translate(0,15)">
+              <line class="threshold-edge" data-from="s" data-to="a" data-capacity="4" x1="82" y1="115.4" x2="196" y2="65.4"/>
+              <line class="threshold-edge crossing" data-from="s" data-to="b" data-capacity="3" x1="82" y1="134.6" x2="196" y2="184.6"/>
+              <line class="threshold-edge crossing" data-from="a" data-to="b" data-capacity="2" x1="220" y1="79" x2="220" y2="167"/>
+              <line class="threshold-edge crossing" data-from="a" data-to="t" data-capacity="2" x1="242" y1="63.7" x2="374" y2="115"/>
+              <line class="threshold-edge" data-from="b" data-to="t" data-capacity="4" x1="242" y1="186.3" x2="374" y2="135"/>
+              <g fill="#5f4910">
+                <text x="128" y="76">4</text><text x="128" y="190">3</text>
+                <text x="244" y="132">2</text><text x="340" y="88">2</text><text x="340" y="182">4</text>
+              </g>
+              <circle class="threshold-node inside" data-node="s" data-potential="1" cx="60" cy="125" r="22"/>
+              <circle class="threshold-node inside" data-node="a" data-potential="0.75" cx="220" cy="55" r="22"/>
+              <circle class="threshold-node" data-node="b" data-potential="0.5" cx="220" cy="195" r="22"/>
+              <circle class="threshold-node" data-node="t" data-potential="0" cx="400" cy="125" r="22"/>
+              <g fill="#2a2a2a" font-weight="600">
+                <text x="60" y="132">s</text><text x="220" y="62">a</text>
+                <text x="220" y="202">b</text><text x="400" y="132">t</text>
+              </g>
+            </g>
+            <text x="230" y="268" font-size="18" fill="#6a737d">Orange: S<tspan baseline-shift="sub" font-size="70%">θ</tspan>. Red: edges leaving S<tspan baseline-shift="sub" font-size="70%">θ</tspan>.</text>
+            <text x="655" y="22" fill="#6a737d">Vertex potentials</text>
+            <rect x="585" y="85" width="50" height="50" fill="#fff3b0"/>
+            <line x1="610" y1="35" x2="610" y2="235" stroke="#8d8678" stroke-width="2"/>
+            <g fill="#2a2a2a">
+              <circle cx="610" cy="35" r="4"/><circle cx="610" cy="85" r="4"/>
+              <circle cx="610" cy="135" r="4"/><circle cx="610" cy="235" r="4"/>
+            </g>
+            <g text-anchor="start" fill="#2a2a2a">
+              <text x="655" y="42">s: 1</text><text x="655" y="92">a: ¾</text>
+              <text x="655" y="142">b: ½</text><text x="655" y="242">t: 0</text>
+            </g>
+            <path d="M750,85 H760 M755,85 V135 M750,135 H760" fill="none" stroke="#b07400" stroke-width="2"/>
+            <text x="780" y="117" fill="#b07400" font-size="24">¼</text>
+            <g id="threshold-cutoff" transform="translate(0,115)">
+              <line x1="565" y1="0" x2="642" y2="0" stroke="#1f6feb" stroke-width="3" stroke-dasharray="6 4"/>
+              <text x="549" y="7" fill="#1f6feb" font-size="24">θ</text>
+            </g>
+            <text x="665" y="268" font-size="18" fill="#6a737d">Shaded interval: a → b crosses</text>
+          </g>
+        </svg>
+      </figure>
+      <div class="threshold-controls">
+        <label for="cut-threshold">Move $\theta$:</label>
+        <input id="cut-threshold" type="range" min="1" max="100" step="1" value="60" aria-label="Threshold theta" aria-describedby="threshold-status">
+        <output id="threshold-value" for="cut-threshold">0.60</output>
+      </div>
+      <output id="threshold-status" class="cut-status" for="cut-threshold" aria-live="polite" aria-atomic="true">S<sub>θ</sub><span id="threshold-details"> = {s, a}, cut capacity = 7.</span></output>
+      <p class="smaller">Edge $a\to b$ crosses exactly when $\tfrac12 &lt; \theta \le \tfrac34$, so it crosses with probability $\tfrac14=z_a-z_b$.</p>
+      <aside class="notes">Sweep the threshold down through 3/4 and 1/2. For 3/4 &lt; theta &le; 1 the cut is {s}, capacity 7. For 1/2 &lt; theta &le; 3/4 it is {s,a}, capacity 7. For 0 &lt; theta &le; 1/2 it is {s,a,b}, capacity 6. A uniform threshold therefore gives expected capacity (1/4)7 + (1/4)7 + (1/2)6 = 13/2, equal to this feasible dual's objective. These labels are not optimal: the minimum cut has capacity 6. The next slide returns to an optimal dual for the proof.</aside>
+    </section>
+
+    <section>
+      <h2>Rounding to a cut</h2>
+      <p class="smaller">For the proof, return to an optimal dual $(y,z)$ after clipping.</p>
+      <ul class="smaller">
+        <li class="fragment">Edge $e = (u, v)$ leaves $S_\theta$ exactly when $z_v &lt; \theta \le z_u$:
+          $$\Pr_{\theta}[e \text{ leaves } S_\theta] = \max(0,\, z_u - z_v) \;\le\; y_e.$$</li>
+        <li class="fragment">Sum over edges, weighted by capacity:
+          $$\begin{aligned}\mathbb{E}_{\theta}\big[\text{cap}(S_\theta)\big] &= \textstyle\sum_e c_e \Pr_{\theta}[e \text{ leaves } S_\theta]\\ &\le \textstyle\sum_e c_e\, y_e \;=\; \text{LP optimum}.\end{aligned}$$</li>
+        <li class="fragment">Some $\theta$ does at least as well as the average: a cut of capacity $\le$ LP optimum.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Rounding to a cut</h2>
+      <p>Cuts bound the LP from above, and rounding finds a cut no bigger than it. So the dual LP optimum <em>is</em> the min cut.</p>
+      <div class="box fragment"><span class="tag">Max-flow = min-cut</span>
+        <div style="font-size:0.85em;">$$\text{max flow} \;\overset{\text{strong duality}}{=}\; \text{dual LP optimum} \;\overset{\text{rounding}}{=}\; \text{min cut}.$$</div></div>
+    </section>
+
+    <section>
+      <h2>Same theorem, two proofs</h2>
+      <table class="results" style="font-size:0.72em;">
+        <thead><tr><th></th><th>Week 8: residual graph</th><th>Today: LP duality</th></tr></thead>
+        <tbody>
+          <tr><td class="q">what you build</td><td>an algorithm (Ford–Fulkerson)</td><td>a certificate framework, no algorithm</td></tr>
+          <tr><td class="q">integrality</td><td>integer capacities $\Rightarrow$ integer flow (integer augmentations)</td><td>$0/1$ cut labels via dual rounding, even for real capacities</td></tr>
+          <tr><td class="q">scope</td><td>flows and close relatives</td><td><strong>every</strong> linear program</td></tr>
+          <tr><td class="q">the certificate</td><td>the cut found by the last BFS</td><td>any optimal dual solution</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Same theorem, two proofs</h2>
+      <div class="box"><span class="tag">Takeaway</span>
+        The residual-graph proof generalises to <strong>algorithms</strong> (Ford–Fulkerson); the LP proof generalises to <strong>every LP</strong>. Knowing both, you can pick the lens that fits the problem in front of you.</div>
+    </section>
+
+    <!-- ============ PART V: THE MATCHING CAPSTONE (KÖNIG) ================= -->
+    <section class="center">
+      <h1>Part V — The Matching Capstone: K&#337;nig's Theorem</h1>
+    </section>
+
+    <section>
+      <h2>The matching thread so far</h2>
+      <table class="results smaller">
+        <thead><tr><th>Week</th><th>What we did with matchings</th></tr></thead>
+        <tbody>
+          <tr><td class="q">W3</td><td>maximum matching on <em>trees</em> by DP</td></tr>
+          <tr><td class="q">W4</td><td>greedy matching on trees + exchange arguments</td></tr>
+          <tr><td class="q">W8</td><td>maximum <em>bipartite</em> matching via max flow</td></tr>
+          <tr><td class="q">W9</td><td>the matching LP relaxation; integrality gaps</td></tr>
+          <tr class="hlrow"><td class="q">W10</td><td><strong>today: the capstone — duality explains it all</strong></td></tr>
+        </tbody>
+      </table>
+      <p class="fragment">The question left hanging since Week 8: when we found a maximum bipartite matching, <em>what certified that we could stop?</em></p>
+    </section>
+
+    <section>
+      <h2>Deriving the cover dual</h2>
+      <p class="smaller">Graph $G=(V,E)$; variable $x_e$ per edge (how much of $e$ we take). The matching LP:</p>
+      <div style="font-size:0.85em;">
+      $$\max\ \textstyle\sum_{e \in E} x_e \quad\text{s.t.}\quad \sum_{e \ni v} x_e \le 1 \ \ \forall v \in V,\quad x \ge 0.$$
+      </div>
+      <p class="fragment smaller">Penalise each vertex row with a price $y_v$. It is a $\le$ row, so $y_v \ge 0$:</p>
+      <div class="fragment" style="font-size:0.85em;">
+      $$L = \textstyle\sum_{e} x_e \;+\; \sum_{v} y_v \Big(1 - \sum_{e \ni v} x_e\Big).$$
+      </div>
+      <p class="fragment smaller">Then regroup by variable: the coefficient of each $x_e$ must be $\le 0$.</p>
+    </section>
+
+    <section>
+      <h2>One edge at a time</h2>
+      <p class="smaller">Take an edge $e = uv$. Every term of $L$ that contains $x_e$:</p>
+      <table class="results smaller">
+        <thead><tr><th>Where $x_e$ appears</th><th>Adds to its coefficient</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td class="q">objective</td><td>$+1$</td></tr>
+          <tr class="fragment"><td class="q">vertex row of $u$</td><td>$-y_u$</td></tr>
+          <tr class="fragment"><td class="q">vertex row of $v$</td><td>$-y_v$</td></tr>
+          <tr class="fragment"><td class="q">any other vertex row</td><td>nothing: $e$ doesn't touch it</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller">Coefficient $1 - y_u - y_v \le 0$: &ensp; $y_u + y_v \ge 1$.<br>What is left of $L$ is $\sum_v y_v$: minimise it.</p>
+    </section>
+
+    <section>
+      <h2>One edge at a time</h2>
+      <p class="smaller">Week 9's triangle: three vertex rows give $y_a, y_b, y_c \ge 0$; three edges give three dual constraints.</p>
+      <div class="cols">
+        <div>
+          <figure>
+            <svg width="230" height="200" viewBox="0 0 230 200">
+              <g stroke="#8d8678" stroke-width="2.5">
+                <line x1="115" y1="30" x2="35" y2="170"/>
+                <line x1="115" y1="30" x2="195" y2="170"/>
+                <line x1="35" y1="170" x2="195" y2="170"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+                <circle cx="115" cy="30" r="17" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="115" y="36" fill="#2a2a2a">a</text>
+                <circle cx="35" cy="170" r="17" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="35" y="176" fill="#2a2a2a">b</text>
+                <circle cx="195" cy="170" r="17" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+                <text x="195" y="176" fill="#2a2a2a">c</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+        <div class="fragment" style="font-size:0.85em;">
+          $$\begin{aligned}
+            \min\ \ & y_a + y_b + y_c\\
+            ab:\quad & y_a + y_b \ge 1\\
+            ac:\quad & y_a + y_c \ge 1\\
+            bc:\quad & y_b + y_c \ge 1
+          \end{aligned}$$
+        </div>
+      </div>
+      <p class="fragment smaller">Each edge must be covered by its two endpoints: a <strong>fractional vertex cover</strong>.</p>
+    </section>
+
+    <section>
+      <h2>Matching $\leftrightarrow$ vertex cover</h2>
+      <div class="cols" style="font-size:0.85em;">
+        <div>
+          <p class="smaller" style="text-align:center;"><strong>Matching LP (primal)</strong></p>
+          $$\begin{aligned}
+            \max\ \ & \textstyle\sum_{e \in E} x_e\\
+            & \textstyle\sum_{e \ni v} x_e \le 1 \quad \forall v \in V\\
+            & x_e \ge 0
+          \end{aligned}$$
+        </div>
+        <div class="fragment">
+          <p class="smaller" style="text-align:center;"><strong>Its dual (derived)</strong></p>
+          $$\begin{aligned}
+            \min\ \ & \textstyle\sum_{v \in V} y_v\\
+            & y_u + y_v \ge 1 \quad \forall uv \in E\\
+            & y_v \ge 0
+          \end{aligned}$$
+        </div>
+      </div>
+      <p class="fragment smaller">The dual is the <strong>fractional vertex cover</strong> LP: pay for vertices so that every edge is covered at least once. The two problems we kept meeting are <em>LP duals</em>.</p>
+    </section>
+
+    <section>
+      <h2>Weak duality, combinatorially</h2>
+      <div class="box"><span class="tag">Observation</span> For <em>any</em> matching $M$ and <em>any</em> vertex cover $C$ in <em>any</em> graph: $\;|M| \le |C|$.</div>
+      <p class="fragment"><strong>Why:</strong> each edge of $M$ must contain at least one vertex of $C$; and no vertex of $C$ can account for two edges of $M$, since matching edges are disjoint. So $C$ has at least one private vertex per matching edge. $\blacksquare$</p>
+      <p class="fragment smaller">This is exactly the weak duality inequality $c^{\mathsf T}x \le b^{\mathsf T}y$, specialised to $0/1$ solutions of the two LPs.</p>
+    </section>
+
+    <section>
+      <h2>Weak duality, combinatorially</h2>
+      <p>So: a matching and a cover <em>of the same size</em> would certify each other. Do they always exist? In general graphs, no (triangle: max matching $1$, min cover $2$). But&hellip;</p>
+    </section>
+
+    <section>
+      <h2>Bipartite: the Gap Closes</h2>
+      <div class="box"><span class="tag">Fact (integrality — Week 9)</span>
+        If $G$ is <strong>bipartite</strong>, the matching LP and the vertex cover LP both have optimal solutions that are $0/1$-valued.</div>
+      <p class="fragment smaller">(Week 9: the incidence matrix of a bipartite graph is <em>totally unimodular</em>, so by Cramer's rule every polytope vertex is integral.)</p>
+    </section>
+
+    <section>
+      <h2>Bipartite: the Gap Closes</h2>
+      <p class="fragment">Recall Week 9's warning example: on the triangle $C_3$, setting $x_e = \tfrac12$ on all three edges gives matching-LP value $\tfrac32 > 1$ — an integrality gap. Odd cycles are the culprit, and bipartite graphs have none.</p>
+      <p class="fragment">Now chain the equalities:</p>
+      <div class="fragment" style="font-size:0.9em;">
+      $$\begin{aligned}
+        \text{max matching} &\overset{\text{integrality}}{=} \text{LP}_{\text{match}} \\
+        &\overset{\text{strong duality}}{=} \text{LP}_{\text{cover}} \\
+        &\overset{\text{integrality}}{=} \text{min vertex cover}.
+      \end{aligned}$$
+      </div>
+    </section>
+
+    <section>
+      <h2>K&#337;nig's theorem</h2>
+      <div class="box"><span class="tag">Theorem (K&#337;nig, 1931)</span>
+        In every bipartite graph, the size of a maximum matching equals the size of a minimum vertex cover.</div>
+      <ul>
+        <li class="fragment">The chain on the previous slide <em>is</em> the proof — duality plus integrality, no new combinatorics needed.</li>
+        <li class="fragment">Practical upshot: a matching $M$ and a cover $C$ with $|M| = |C|$ form a <strong>mutual certificate</strong> — hand both to the skeptic.</li>
+      </ul>
+    </section>
+
+    <section id="triangle-exercise">
+      <h2>The triangle</h2>
+      <p>Which equalities from the bipartite chain survive on $K_3$?</p>
+      <div class="cols">
+        <div>
+          <figure>
+            <svg width="280" height="230" viewBox="0 0 280 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Triangle with vertices a, b, c and all three edges">
+              <path d="M140,35 L45,190 L235,190 Z" fill="none" stroke="#8d8678" stroke-width="3"/>
+              <g fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2">
+                <circle cx="140" cy="35" r="22"/><circle cx="45" cy="190" r="22"/><circle cx="235" cy="190" r="22"/>
+              </g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+                <text x="140" y="42">a</text><text x="45" y="197">b</text><text x="235" y="197">c</text>
+              </g>
+            </svg>
+          </figure>
+        </div>
+        <div class="smaller">
+          <p>Compute all four optima:</p>
+          <ol>
+            <li>Maximum matching</li>
+            <li>Maximum fractional matching</li>
+            <li>Minimum fractional cover</li>
+            <li>Minimum vertex cover</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="triangle-debrief">
+      <h2>The triangle: duality survives</h2>
+      <div style="font-size:0.85em;">
+      $$\underbrace{1}_{\substack{\text{max}\\\text{matching}}}
+        \;&lt;\; \underbrace{\tfrac32}_{\text{matching LP}}
+        \;=\; \underbrace{\tfrac32}_{\text{cover LP}}
+        \;&lt;\; \underbrace{2}_{\substack{\text{min}\\\text{cover}}}.$$
+      </div>
+      <p class="smaller">Put $x_e=\tfrac12$ on every edge and $y_v=\tfrac12$ on every vertex. Both LP solutions are feasible and have value $\tfrac32$, so weak duality certifies that both are optimal.</p>
+      <p class="smaller">Any two edges share a vertex, so a matching has size at most $1$. A vertex cover needs $2$ vertices.</p>
+      <div class="box"><span class="tag">What breaks?</span> Strong duality still gives the middle equality. Both <strong>integrality</strong> equalities fail.</div>
+    </section>
+
+    <section>
+      <h2>Worked example: a matching certifies a cover</h2>
+      <div class="cols">
+        <div>
+          <figure>
+            <svg width="340" height="275" viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg">
+              <!-- base edges -->
+              <line x1="123.9" y1="62.2" x2="296.1" y2="77.8" stroke="#8d8678" stroke-width="2.5"/>
+              <line x1="121.1" y1="71.5" x2="298.9" y2="168.5" stroke="#8d8678" stroke-width="2.5"/>
+              <line x1="123.2" y1="133.7" x2="296.8" y2="86.3" stroke="#8d8678" stroke-width="2.5"/>
+              <line x1="123.6" y1="215.7" x2="296.4" y2="184.3" stroke="#8d8678" stroke-width="2.5"/>
+              <line x1="123.2" y1="226.3" x2="296.8" y2="273.7" stroke="#8d8678" stroke-width="2.5"/>
+              <line x1="123.9" y1="297.8" x2="296.1" y2="282.2" stroke="#8d8678" stroke-width="2.5"/>
+              <!-- matching overlay (fragment 1) -->
+              <g class="fragment" data-fragment-index="1">
+                <line x1="121.1" y1="71.5" x2="298.9" y2="168.5" stroke="#b85a26" stroke-width="5.5"/>
+                <line x1="123.2" y1="133.7" x2="296.8" y2="86.3" stroke="#b85a26" stroke-width="5.5"/>
+                <line x1="123.9" y1="297.8" x2="296.1" y2="282.2" stroke="#b85a26" stroke-width="5.5"/>
+              </g>
+              <!-- left nodes -->
+              <circle cx="100" cy="60" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+              <text x="100" y="66" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">u&#8321;</text>
+              <circle cx="100" cy="140" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+              <text x="100" y="146" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">u&#8322;</text>
+              <circle cx="100" cy="220" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+              <text x="100" y="226" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">u&#8323;</text>
+              <circle cx="100" cy="300" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+              <text x="100" y="306" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">u&#8324;</text>
+              <!-- right nodes -->
+              <circle cx="320" cy="80" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+              <text x="320" y="86" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">v&#8321;</text>
+              <circle cx="320" cy="180" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+              <text x="320" y="186" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">v&#8322;</text>
+              <circle cx="320" cy="280" r="20" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+              <text x="320" y="286" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">v&#8323;</text>
+              <!-- cover rings (fragment 2) -->
+              <g class="fragment" data-fragment-index="2">
+                <circle cx="320" cy="80" r="27" fill="none" stroke="#b03a2e" stroke-width="4"/>
+                <circle cx="320" cy="180" r="27" fill="none" stroke="#b03a2e" stroke-width="4"/>
+                <circle cx="320" cy="280" r="27" fill="none" stroke="#b03a2e" stroke-width="4"/>
+              </g>
+            </svg>
+            <figcaption>Orange edges: matching $M$. Red rings: cover $C = \{v_1, v_2, v_3\}$.</figcaption>
+          </figure>
+        </div>
+        <div class="smaller">
+          <p>Bipartite graph: edges $u_1v_1$, $u_1v_2$, $u_2v_1$, $u_3v_2$, $u_3v_3$, $u_4v_3$.</p>
+          <p class="fragment" data-fragment-index="1"><strong>Matching</strong> $M = \{u_1v_2,\; u_2v_1,\; u_4v_3\}$, size $\mathbf{3}$ (only $u_3$ unmatched).</p>
+          <p class="fragment" data-fragment-index="2"><strong>Cover</strong> $C = \{v_1, v_2, v_3\}$, size $\mathbf{3}$: every edge ends on the right, so all six are covered.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Worked example: a matching certifies a cover</h2>
+      <div class="box"><span class="tag">Mutual certification</span> Any cover needs $\ge |M| = 3$ vertices, so $C$ is a minimum cover; any matching has $\le |C| = 3$ edges, so $M$ is a maximum matching. Each is the other's proof.</div>
+    </section>
+
+    <section>
+      <h2>The vertex cover arc</h2>
+      <table class="results" style="font-size:0.85em;">
+        <thead><tr><th>Graph</th><th>Min vertex cover</th><th>When</th></tr></thead>
+        <tbody>
+          <tr><td class="q">trees</td><td>easy — DP / Gallai</td><td>Week 3</td></tr>
+          <tr class="hlrow"><td class="q">bipartite</td><td>polynomial — K&#337;nig: reduce to matching</td><td>Week 10 (today)</td></tr>
+          <tr><td class="q">general graphs</td><td>&hellip;what do you think?</td><td>Week 11</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller">Duality gave us the bipartite case as a two-line corollary. For general graphs the matching–cover gap reopens (remember the triangle) — and something much deeper goes wrong. That story is <strong>NP-completeness, next week</strong>.</p>
+    </section>
+
+    <!-- ================ PART VI: COMPLEMENTARY SLACKNESS ================== -->
+    <section class="center">
+      <h1>Part VI — Complementary Slackness</h1>
+    </section>
+
+    <section>
+      <h2>Complementary slackness</h2>
+      <p class="smaller">When do a primal-feasible $x$ and dual-feasible $y$ actually meet, $c^{\mathsf T}x = b^{\mathsf T}y$?</p>
+      <div class="box"><span class="tag">Theorem (complementary slackness)</span>
+        Feasible $x$ and $y$ are <em>both optimal</em> if and only if:
+        <ul style="margin:0.3em 0 0 0;">
+          <li>for every $j$: &ensp; $x_j > 0 \;\Rightarrow\; (A^{\mathsf T}y)_j = c_j$ &ensp; <span class="credit">(used variable $\Rightarrow$ its dual constraint is tight)</span></li>
+          <li>for every $i$: &ensp; $y_i > 0 \;\Rightarrow\; (Ax)_i = b_i$ &ensp; <span class="credit">(paid-for constraint $\Rightarrow$ it is tight)</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Complementary slackness</h2>
+      <p>Slogan: <span class="hl">at the optimum, nothing is both <em>used</em> and <em>slack</em>.</span> You never pay a positive price $y_i$ for a constraint you aren't pressing against, and you never run a positive activity $x_j$ whose dual price exceeds its value.</p>
+    </section>
+
+    <section>
+      <h2>Why it holds: squeeze the weak duality chain</h2>
+      <p>Recall the one-line proof:
+      $$c^{\mathsf T} x \;\overset{(1)}{\le}\; y^{\mathsf T} A x \;\overset{(2)}{\le}\; y^{\mathsf T} b.$$</p>
+      <p class="fragment">If $x$ and $y$ are both optimal, strong duality says the two ends are <em>equal</em> — so $(1)$ and $(2)$ are equalities.</p>
+    </section>
+
+    <section>
+      <h2>Why it holds: squeeze the weak duality chain</h2>
+      <p class="smaller">Both $\le$ in $\;c^{\mathsf T} x \overset{(1)}{\le} y^{\mathsf T} A x \overset{(2)}{\le} y^{\mathsf T} b\;$ are equalities at an optimal pair. Now read each termwise.</p>
+      <p class="fragment smaller">Inequality $(1)$ written termwise: $\;\sum_j x_j\big((A^{\mathsf T}y)_j - c_j\big) = 0$, a sum of <em>nonnegative</em> terms. A nonnegative sum is zero only if every term is zero: $x_j > 0$ forces $(A^{\mathsf T}y)_j = c_j$.</p>
+      <p class="fragment smaller">Same for $(2)$: $\;\sum_i y_i\big(b_i - (Ax)_i\big) = 0\;$ gives $y_i > 0 \Rightarrow (Ax)_i = b_i$. And conversely, if all terms vanish the chain collapses to equality, so both are optimal. $\blacksquare$</p>
+    </section>
+
+    <section>
+      <h2>Worked check: the running example</h2>
+      <p class="smaller">Claimed optimal pair: $x^\star = (6,2)$ and $y^\star = (1,2,0)$. First, the two primal variables:</p>
+      <table class="results smaller">
+        <thead><tr><th>Condition</th><th>Check</th><th></th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td class="q">$x_1 = 6 > 0$</td><td>dual constraint 1 tight? &ensp;$y_1 + y_2 + y_3 = 1+2+0 = 3 = c_1$</td><td>&#10003;</td></tr>
+          <tr class="fragment"><td class="q">$x_2 = 2 > 0$</td><td>dual constraint 2 tight? &ensp;$y_2 + 3y_3 = 2+0 = 2 = c_2$</td><td>&#10003;</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Worked check: the running example</h2>
+      <p class="smaller">Then the three dual variables, one per resource:</p>
+      <table class="results smaller">
+        <thead><tr><th>Condition</th><th>Check</th><th></th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td class="q">$y_1 = 1 > 0$</td><td>machine tight? &ensp;$x_1 = 6 = b_1$</td><td>&#10003;</td></tr>
+          <tr class="fragment"><td class="q">$y_2 = 2 > 0$</td><td>wood tight? &ensp;$x_1 + x_2 = 6+2 = 8 = b_2$</td><td>&#10003;</td></tr>
+          <tr class="fragment"><td class="q">$y_3 = 0$</td><td>varnish is slack, $\;x_1 + 3x_2 = 12 < 18$ — allowed only because $y_3 = 0$</td><td>&#10003;</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Worked check: the running example</h2>
+      <p class="smaller">All conditions hold, and both points are feasible $\Rightarrow$ both optimal — <em>without computing either objective value</em>.</p>
+      <p class="fragment smaller">The varnish row is the one with content: a constraint with slack <em>must</em> get multiplier $0$. Attempt 1 put weight on varnish, and that is exactly why it could not reach $22$.</p>
+    </section>
+
+    <section>
+      <h2>Solving for the certificate</h2>
+      <p class="smaller">Given only the claimed optimum $x^\star = (6,2)$, complementary slackness hands us equations for $y^\star$:</p>
+      <ul class="smaller">
+        <li class="fragment">varnish is slack $\Rightarrow$ $y_3 = 0$;</li>
+        <li class="fragment">$x_2 > 0$ $\Rightarrow$ $y_2 + 3y_3 = 2$, so $y_2 = 2$;</li>
+        <li class="fragment">$x_1 > 0$ $\Rightarrow$ $y_1 + y_2 + y_3 = 3$, so $y_1 = 1$.</li>
+      </ul>
+      <p class="fragment smaller">Check $y^\star = (1,2,0) \ge 0$: it is dual feasible, so $(6,2)$ is certified. (These equations pin $y^\star$ down uniquely, so a negative entry would have meant $(6,2)$ is not optimal.)</p>
+    </section>
+
+    <section>
+      <h2>When a price goes negative</h2>
+      <p class="smaller">Try complementary slackness at a vertex that is <em>not</em> optimal: $x = (3,5)$, value $19$. Wood and varnish are tight; the machine is slack.</p>
+      <ul class="smaller">
+        <li class="fragment">machine slack $\Rightarrow$ $y_1 = 0$;</li>
+        <li class="fragment">$x_1, x_2 > 0$ $\Rightarrow$ $y_2 + y_3 = 3$ and $y_2 + 3y_3 = 2$;</li>
+        <li class="fragment">so $y_2 = \tfrac72$ and $y_3 = -\tfrac12$.</li>
+      </ul>
+      <p class="fragment smaller">The combination $\tfrac72\,(\text{wood}) - \tfrac12\,(\text{varnish})$ gives exactly $19$ — but subtracting a $\le$ constraint is not allowed. <strong>No certificate exists at $(3,5)$.</strong></p>
+    </section>
+
+    <section>
+      <h2>When a price goes negative</h2>
+      <p class="smaller">The negative price on varnish says: <em>loosening varnish pays</em>.</p>
+      <ul class="smaller">
+        <li class="fragment">Keep wood tight and move off varnish: trade one table for one chair, $(3,5) \to (4,4)$. Varnish loosens by $2$, and the objective gains $(-\tfrac12)(-2) = +1$.</li>
+        <li class="fragment">Continue until the machine becomes tight: $(6,2)$, value $22$.</li>
+        <li class="fragment">There the prices are $(1,2,0) \ge 0$: a valid certificate, so stop.</li>
+      </ul>
+      <p class="fragment smaller">This illustrates how the <strong>simplex method</strong> uses prices to choose pivots. To certify a feasible point, check <strong>dual feasibility</strong> ($y \ge 0$ and $A^{\mathsf T}y \ge c$) together with complementary slackness. (Week 12's <em>primal–dual</em> algorithms use complementary slackness as a design principle too.)</p>
+    </section>
+
+    <section>
+      <h2>Takeaways</h2>
+      <ul>
+        <li class="fragment">Every LP has a <strong>dual</strong>: the LP of best bounds obtained by combining constraints. To write it for any LP, penalise each constraint with a price $y_i$: the signs and dual constraints are whatever keeps the bound valid and finite.</li>
+        <li class="fragment"><strong>Weak duality</strong> ($c^{\mathsf T}x \le b^{\mathsf T}y$) is a one-line proof; <strong>strong duality</strong> says every finite primal optimum has a matching dual certificate.</li>
+        <li class="fragment"><strong>Max-flow = min-cut</strong> is LP duality: the dual of the flow LP prices cuts. Two proofs, two generalisations — algorithms vs. all of LP.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Takeaways</h2>
+      <ul>
+        <li class="fragment"><strong>K&#337;nig:</strong> in bipartite graphs, max matching $=$ min vertex cover — duality $+$ integrality; matching and cover certify each other.</li>
+        <li class="fragment"><strong>Complementary slackness:</strong> nothing optimal is both used and slack. Check primal and dual feasibility too; in our example, a negative price points to an improving move.</li>
+      </ul>
+    </section>
+
+  </div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [ RevealMath.MathJax3 ],
+
+    mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        macros: {
+          tO:   ['{\\widetilde{O}}'],
+          R:    ['{\\mathbb{R}}'],
+          E:    ['{\\mathbb{E}}']
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+
+  // The slider chooses a threshold; membership and capacity follow from the graph.
+  (() => {
+    const demo = document.getElementById('threshold-example');
+    const slider = document.getElementById('cut-threshold');
+    const nodes = [...demo.querySelectorAll('[data-node]')];
+    const edges = [...demo.querySelectorAll('[data-from]')];
+    const value = document.getElementById('threshold-value');
+    const statusDetails = document.getElementById('threshold-details');
+    const cutoff = document.getElementById('threshold-cutoff');
+
+    function updateThreshold() {
+      const theta = Number(slider.value) / 100;
+      const inside = new Set();
+      for (const node of nodes) {
+        const included = Number(node.dataset.potential) >= theta;
+        node.classList.toggle('inside', included);
+        if (included) inside.add(node.dataset.node);
+      }
+      let capacity = 0;
+      for (const edge of edges) {
+        const crosses = inside.has(edge.dataset.from) && !inside.has(edge.dataset.to);
+        edge.classList.toggle('crossing', crosses);
+        if (crosses) capacity += Number(edge.dataset.capacity);
+      }
+      value.textContent = theta.toFixed(2);
+      slider.setAttribute('aria-valuetext', `Theta ${theta.toFixed(2)}`);
+      cutoff.setAttribute('transform', `translate(0,${235 - 200 * theta})`);
+      statusDetails.textContent = ` = {${[...inside].join(', ')}}, cut capacity = ${capacity}.`;
+    }
+
+    slider.addEventListener('input', updateThreshold);
+    // Arrow keys adjust the focused slider without also changing slides.
+    slider.addEventListener('keydown', event => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) {
+        event.stopPropagation();
+      }
+    });
+    updateThreshold();
+  })();
+</script>
+</body>
+</html>
