@@ -87,6 +87,19 @@
     .threshold-edge.crossing { stroke: #b03a2e; stroke-width: 4; marker-end: url(#threshold-cut-arrow); }
     .threshold-node { fill: #fbf7ed; stroke: #2a2a2a; stroke-width: 2; }
     .threshold-node.inside { fill: #f1c79f; stroke: #b85a26; stroke-width: 2.5; }
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
+    /* Fragments print fully revealed, so show fade-out fragments in their final (gone) state. */
+    html.reveal-print .reveal .fragment.fade-out { visibility: hidden !important; opacity: 0 !important; }
   </style>
 </head>
 
@@ -453,6 +466,32 @@
     </section>
 
     <section>
+      <h2>Do the bounds meet?</h2>
+      <div class="cols">
+        <div>
+          <p class="smaller" style="text-align:center;"><strong>Primal</strong></p>
+          $$\begin{aligned}
+            \max\ \ & 3x_1 + x_2\\
+            & x_1 + x_2 = 4\\
+            & x_1 - x_2 \le 2\\
+            & x_1, x_2 \ge 0
+          \end{aligned}$$
+        </div>
+        <div>
+          <p class="smaller" style="text-align:center;"><strong>Dual</strong></p>
+          $$\begin{aligned}
+            \min\ \ & 4y_1 + 2y_2\\
+            & y_1 + y_2 \ge 3\\
+            & y_1 - y_2 \ge 1\\
+            & y_1\ \text{free},\ y_2 \ge 0
+          \end{aligned}$$
+        </div>
+      </div>
+      <p class="fragment smaller"><strong>Check with numbers.</strong> Primal: $x_2 = 4 - x_1$ and $x_1 - x_2 \le 2$ give $x_1 \le 3$; optimum $x^\star = (3,1)$, value $\mathbf{10}$.</p>
+      <p class="fragment smaller">Dual: $y^\star = (2,1)$ is feasible ($3 \ge 3$, $1 \ge 1$), value $8 + 2 = \mathbf{10}$. They meet!</p>
+    </section>
+
+    <section>
       <h2>The Lagrangian</h2>
       <p class="smaller">General primal: $\max\ c^{\mathsf T}x$ subject to rows $a_i^{\mathsf T}x \le b_i$ or $a_i^{\mathsf T}x = b_i$, and $x \ge 0$. The <strong>Lagrangian</strong> adds price $y_i$ times the slack of row $i$:</p>
       <div style="font-size:0.85em;">
@@ -478,32 +517,6 @@
         <li class="fragment">Best bound: <strong>minimise $b^{\mathsf T}y$</strong> over these $y$ — the dual.</li>
       </ul>
       <p class="fragment smaller"><strong>Sanity check:</strong> standard form ($Ax \le b$, $x \ge 0$) gives $\min\ b^{\mathsf T}y$ s.t. $A^{\mathsf T}y \ge c$, $y \ge 0$ — the dual from before.</p>
-    </section>
-
-    <section>
-      <h2>Do the bounds meet?</h2>
-      <div class="cols">
-        <div>
-          <p class="smaller" style="text-align:center;"><strong>Primal</strong></p>
-          $$\begin{aligned}
-            \max\ \ & 3x_1 + x_2\\
-            & x_1 + x_2 = 4\\
-            & x_1 - x_2 \le 2\\
-            & x_1, x_2 \ge 0
-          \end{aligned}$$
-        </div>
-        <div>
-          <p class="smaller" style="text-align:center;"><strong>Dual</strong></p>
-          $$\begin{aligned}
-            \min\ \ & 4y_1 + 2y_2\\
-            & y_1 + y_2 \ge 3\\
-            & y_1 - y_2 \ge 1\\
-            & y_1\ \text{free},\ y_2 \ge 0
-          \end{aligned}$$
-        </div>
-      </div>
-      <p class="fragment smaller"><strong>Check with numbers.</strong> Primal: $x_2 = 4 - x_1$ and $x_1 - x_2 \le 2$ give $x_1 \le 3$; optimum $x^\star = (3,1)$, value $\mathbf{10}$.</p>
-      <p class="fragment smaller">Dual: $y^\star = (2,1)$ is feasible ($3 \ge 3$, $1 \ge 1$), value $8 + 2 = \mathbf{10}$. They meet!</p>
     </section>
 
     <section>
@@ -540,7 +553,7 @@
         $\;c^{\mathsf T}x \le b^{\mathsf T}y$.</div>
       <p class="fragment"><strong>Proof</strong> (one line):
       $$c^{\mathsf T} x \;\le\; (A^{\mathsf T} y)^{\mathsf T} x \;=\; y^{\mathsf T}(Ax) \;\le\; y^{\mathsf T} b. \qquad \blacksquare$$</p>
-      <p class="fragment smaller">Notice: the proof is exactly the "combine the constraints" trick from Part I, written once and for all.</p>
+      <p class="fragment smaller">Note: the proof is exactly the "combine the constraints" trick from Part I.</p>
     </section>
 
     <section>
@@ -584,7 +597,7 @@
         </svg>
         <figcaption>The running example: vertex values $0, 12, 18, 19$ from below; Attempts 1–3 give bounds $30, 24, 22$ from above; they meet at $22$.</figcaption>
       </figure>
-      <p class="fragment smaller">This is the same logic as Week 8's worksheet: a flow of value $v$ plus a cut of capacity $v$ certify each other.</p>
+      <p class="fragment smaller">This is the same logic as Week 8's lecture: a flow of value $v$ plus a cut of capacity $v$ certify each other.</p>
     </section>
 
     <section>
@@ -597,14 +610,24 @@
 
     <section>
       <h2>Strong duality as minimax</h2>
-      <p class="smaller">Assume the standard-form primal has a finite optimum. With $x \ge 0$ and $y \ge 0$,
+      <p class="smaller">Assume the standard-form primal has a finite optimum. With $x \ge 0$ and $y \ge 0,$
       $\;L(x,y) = c^{\mathsf T}x + y^{\mathsf T}(b - Ax).$</p>
       <p class="smaller"><strong>Convention:</strong> write $\min = -\infty$ or $\max = +\infty$ when the expression is unbounded below or above, respectively.</p>
       <ul class="smaller">
         <li class="fragment"><strong>Fix $x$, let $y$ respond:</strong> a violated row lets $y_i \to \infty$, so
           $$\min_{y \ge 0} L(x,y) = \begin{cases} c^{\mathsf T}x & \text{if } Ax \le b,\\ -\infty & \text{otherwise.}\end{cases}$$
           Hence $\max_{x}\min_{y} L$ is the <strong>primal</strong> optimum.</li>
-        <li class="fragment"><strong>Fix $y$, let $x$ respond:</strong> $\max_{x \ge 0} L(x,y) = b^{\mathsf T}y$ if $A^{\mathsf T}y \ge c$, else $+\infty$ (Part II). Hence $\min_{y}\max_{x} L$ is the <strong>dual</strong> optimum.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Strong duality as minimax</h2>
+      <p class="smaller">Now regroup by variable, as in Part II:
+      $$L(x,y) = b^{\mathsf T}y + (c - A^{\mathsf T}y)^{\mathsf T}x.$$</p>
+      <ul class="smaller">
+        <li class="fragment"><strong>Fix $y$, let $x$ respond:</strong> a positive coefficient on $x_j$ lets $x_j \to \infty$, so
+          $$\max_{x \ge 0} L(x,y) = \begin{cases} b^{\mathsf T}y & \text{if } A^{\mathsf T}y \ge c,\\ +\infty & \text{otherwise.}\end{cases}$$
+          Hence $\min_{y}\max_{x} L$ is the <strong>dual</strong> optimum.</li>
       </ul>
     </section>
 
