@@ -33,8 +33,6 @@
                 letter-spacing: 0.04em; margin-right: 0.4em; }
     .box.warn { border-left-color: #d29922; background: #fff8ec; }
     .box.warn .tag { color: #b07400; }
-    .box.minimax-box { padding-top: 0.25em; padding-bottom: 0.25em; }
-    .reveal .minimax-box mjx-container[display="true"] { margin: 0.3em 0; }
 
     /* Result highlight pill. */
     .hl { background: #fff3b0; padding: 0.05em 0.25em; border-radius: 3px; }
@@ -275,6 +273,44 @@
     </section>
 
     <section>
+      <h2>The certificate, in the picture</h2>
+      <div class="cols">
+        <div style="font-size:0.8em;">
+          <p>$y = (1, 2, 0)$: positive weight on <strong>machine</strong> and <strong>wood</strong>, zero on varnish.</p>
+          <p class="fragment">Machine and wood are exactly the two lines that <em>pass through</em> $(6,2)$.</p>
+          <p class="fragment">Varnish misses $(6,2)$, and it had to get weight $0$. Keep this picture in mind for Part VI.</p>
+        </div>
+        <div>
+          <figure>
+            <svg width="420" height="320" viewBox="0 0 480 365" xmlns="http://www.w3.org/2000/svg">
+              <defs><marker id="p1-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b85a26"/></marker><marker id="p1-machine" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9a7a26"/></marker><marker id="p1-wood" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4d7349"/></marker><marker id="p1-varnish" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2e588f"/></marker></defs>
+              <polygon points="50,330 290,330 290,250 170,130 50,90" fill="#cad9ee" fill-opacity="0.55" stroke="#2e588f" stroke-width="2"/>
+              <line x1="50" y1="90" x2="450" y2="223" stroke="#2e588f" stroke-width="1.5" stroke-dasharray="7 5" opacity="0.55"/>
+              <text x="345" y="178" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1d3c66">varnish &#215;0</text>
+              <line x1="50" y1="10" x2="370" y2="330" stroke="#4d7349" stroke-width="4"/>
+              <text x="138" y="84" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#2c4329">wood &#215;2</text>
+              <line x1="290" y1="330" x2="290" y2="10" stroke="#9a7a26" stroke-width="4"/>
+              <text x="300" y="36" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#5f4910">machine &#215;1</text>
+              <g stroke="#2a2a2a" stroke-width="2"><line x1="50" y1="330" x2="458" y2="330"/><line x1="50" y1="330" x2="50" y2="8"/></g>
+              <g stroke="#2a2a2a" stroke-width="1.5"><line x1="130" y1="330" x2="130" y2="336"/><line x1="210" y1="330" x2="210" y2="336"/><line x1="290" y1="330" x2="290" y2="336"/><line x1="370" y1="330" x2="370" y2="336"/><line x1="44" y1="250" x2="50" y2="250"/><line x1="44" y1="170" x2="50" y2="170"/><line x1="44" y1="90" x2="50" y2="90"/><line x1="44" y1="10" x2="50" y2="10"/></g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d"><text x="130" y="352" text-anchor="middle">2</text><text x="210" y="352" text-anchor="middle">4</text><text x="290" y="352" text-anchor="middle">6</text><text x="370" y="352" text-anchor="middle">8</text><text x="36" y="255" text-anchor="end">2</text><text x="36" y="175" text-anchor="end">4</text><text x="36" y="95" text-anchor="end">6</text><text x="36" y="15" text-anchor="end">8</text></g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#2a2a2a"><text x="462" y="334">x&#8321;</text><text x="56" y="14">x&#8322;</text></g>
+              <line x1="150" y1="290" x2="187" y2="265" stroke="#b85a26" stroke-width="2.5" marker-end="url(#p1-c)"/>
+              <text x="128" y="312" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#6e3416">c = (3, 2)</text>
+              <circle cx="50" cy="330" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="290" cy="330" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="170" cy="130" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="50" cy="90" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="290" cy="250" r="8" fill="#f1c79f" stroke="#b85a26" stroke-width="2.5"/>
+              <text x="302" y="262" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#6e3416">(6,2)</text>
+              </svg>
+            <figcaption>The constraints in the certificate are the lines through the optimum.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
       <h2>The best bound is an LP</h2>
       <div style="font-size:0.8em;">
       $$\begin{aligned}
@@ -393,130 +429,64 @@
       <h2>Mixed constraints</h2>
       <p>Real LPs mix $\le$ rows and $=$ rows:</p>
       $$\begin{aligned}
-        \max\ \ & 3x_1 + x_2\\
-        \text{s.t.}\ \ & x_1 + x_2 = 4\\
-        & x_1 - x_2 \le 2\\
+        \max\ \ & x_1 - x_2\\
+        \text{s.t.}\ \ & x_1 + x_2 = 4 && (R_1)\\
+        & x_1 \le 3 && (R_2)\\
         & x_1, x_2 \ge 0
       \end{aligned}$$
-      <p class="fragment smaller">Combining constraints still works, but the signs need care: may the equality get a <em>negative</em> multiplier?</p>
-      <p class="fragment">One idea answers this: <strong>penalise, don't enforce</strong>.</p>
+      <p class="fragment smaller">The feasible points form the segment from $(0,4)$ to $(3,1)$. On it <span style="white-space:nowrap;">$x_2 = 4 - x_1$,</span> so the objective is <span style="white-space:nowrap;">$2x_1 - 4$:</span> the optimum is <span style="white-space:nowrap;">$\mathbf{2}$,</span> at <span style="white-space:nowrap;">$(3,1)$.</span></p>
+      <p class="fragment">Now certify it: combine $R_1$ and $R_2$ to prove $x_1 - x_2 \le 2$.</p>
     </section>
 
-    <section>
-      <h2>Penalise, don't enforce</h2>
-      <p class="smaller">Keep the sign constraints $x_1, x_2 \ge 0$. Drop the other constraints and add a term per row to the objective, with a price $y_i$:</p>
+    <section id="mixed-exercise">
+      <h2>Your turn: a bound of $2$</h2>
       <div style="font-size:0.85em;">
-      $$L(x,y) = 3x_1 + x_2 + y_1\,(4 - x_1 - x_2) + y_2\,(2 - x_1 + x_2).$$
-      </div>
-      <div class="box fragment"><span class="tag">Goal</span> $L$ never undercuts the objective on feasible points:
-        $$3x_1 + x_2 \;\le\; L(x,y) \quad\text{for every feasible } x.$$
-        Then $\max_x L(x,y)$ bounds OPT from above. Choose the signs of $y$ to make this hold.</div>
-    </section>
-
-    <section>
-      <h2>Penalise, don't enforce</h2>
-      <div style="font-size:0.85em;">
-      $$L(x,y) = 3x_1 + x_2 + y_1\,(4 - x_1 - x_2) + y_2\,(2 - x_1 + x_2)$$
-      </div>
-      <p class="smaller">Goal: every added term is $\ge 0$ on feasible points.</p>
-      <ul class="smaller">
-        <li class="fragment">Feasible $x$ has $4 - x_1 - x_2 = 0$: &ensp; the term vanishes, so $y_1$ may have <em>any sign</em>.</li>
-        <li class="fragment">Feasible $x$ has $2 - x_1 + x_2 \ge 0$: &ensp; we need $y_2 \ge 0$.</li>
-        <li class="fragment">Now a violated $\le$ row ($x_1 - x_2 &gt; 2$) makes its term negative. We are maximising, so that is a <strong>penalty</strong>: $y_2$ per unit of violation.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Every $y$ gives a bound</h2>
-      <p>For $y_1$ free and $y_2 \ge 0$:
-      $$\text{OPT} \;\le\; \max_{x_1, x_2 \ge 0} L(x,y).$$</p>
-      <p class="smaller">The max on the right is over <em>all</em> such $x$, feasible or not — that only makes it larger.</p>
-      <p class="fragment">Regroup $L$ by variable:</p>
-      <div class="fragment" style="font-size:0.85em;">
       $$\begin{aligned}
-        L(x,y) &= 3x_1 + x_2 + y_1\,(4 - x_1 - x_2) + y_2\,(2 - x_1 + x_2)\\
-               &= 4y_1 + 2y_2 + (3 - y_1 - y_2)\,x_1 + (1 - y_1 + y_2)\,x_2.
+        y_1 \times\quad & x_1 + x_2 = 4 && (R_1)\\
+        y_2 \times\quad & x_1 \le 3 && (R_2)\\[2pt]
+        \text{objective:}\quad & x_1 - x_2
       \end{aligned}$$
       </div>
+      <p>Choose weights and add. The combination must dominate $x_1 - x_2$ on $x \ge 0$, with right-hand side $2$.</p>
+      <p class="fragment smaller">Hint: with $y_1, y_2 \ge 0$ the best you can prove is $3$. What goes wrong? And what may you do to an <em>equation</em> that you may not do to an inequality?</p>
     </section>
 
     <section>
-      <h2>When is the bound finite?</h2>
-      <div style="font-size:0.85em;">
-      $$L(x,y) = 4y_1 + 2y_2 + (3 - y_1 - y_2)\,x_1 + (1 - y_1 + y_2)\,x_2$$
-      </div>
-      <p class="smaller">A bound of $+\infty$ is useless. Which $y$ keep $\max_x L(x,y)$ finite?</p>
-      <ul class="smaller">
-        <li class="fragment">A positive coefficient on $x_1$ lets $x_1 \to \infty$. &ensp; Need $y_1 + y_2 \ge 3$.</li>
-        <li class="fragment">Likewise for $x_2$. &ensp; Need $y_1 - y_2 \ge 1$.</li>
-        <li class="fragment">With both, each $x_j$ term is $\le 0$ for every $x_j \ge 0$ — largest at $x = 0$. So
-          $$\max_{x_1, x_2 \ge 0} L(x,y) = 4y_1 + 2y_2.$$</li>
-      </ul>
+      <h2>The obstruction</h2>
+      <p class="smaller">With nonnegative weights, $1 \times (R_2)$ gives $x_1 \le 3$, and since $x_2 \ge 0$, $\;x_1 - x_2 \le x_1 \le 3$. A bound of $3$, not $2$.</p>
+      <p class="fragment smaller">To do better the combination needs coefficient $-1$ on $x_2$. The only row containing $x_2$ is $R_1$, where it has coefficient $+1$. So $R_1$ needs weight $y_1 = -1$.</p>
+      <div class="box fragment"><span class="tag">Allowed</span> $R_1$ is an <em>equation</em>. Multiplying it by $-1$ gives $-x_1 - x_2 = -4$, which is just as true. An equation may be scaled by <strong>any</strong> real number; only an inequality cares about the sign.</div>
     </section>
 
     <section>
-      <h2>The best bound</h2>
-      <p class="smaller">Fix a $y$ with $y_2 \ge 0$ that satisfies the constraints from the previous slide. Then for every feasible $x$:</p>
-      <div style="font-size:0.85em;">
-      $$3x_1 + x_2 \;\le\; L(x,y) \;\le\; \max_{x'} L(x',y) \;=\; 4y_1 + 2y_2.$$
-      </div>
-      <p class="fragment">Every such $y$ bounds OPT. The best bound is the <em>smallest</em>:</p>
-      <div class="box fragment"><span class="tag">Dual &mdash; derived, not looked up</span>
-        <div style="font-size:0.85em;">$$\begin{gathered}\min\ 4y_1 + 2y_2 \quad\text{s.t.}\\ y_1 + y_2 \ge 3,\ \ y_1 - y_2 \ge 1,\ \ y_1 \text{ free},\ y_2 \ge 0\end{gathered}$$</div></div>
+      <h2>The perfect combination, again</h2>
+      <p>Take $(-1) \times (R_1) + 2 \times (R_2)$:</p>
+      <p class="fragment" style="font-size:0.85em;">$$-(x_1 + x_2) + 2x_1 \;=\; x_1 - x_2 \;\le\; -4 + 6 \;=\; 2.$$</p>
+      <p class="fragment smaller">Exactly the objective, bound $2$, and $(3,1)$ achieves $2$. <span class="hl">Certified.</span></p>
+      <p class="fragment smaller">The equation's weight was negative and nothing broke: scaling an equality never flips anything.</p>
     </section>
 
     <section>
-      <h2>Do the bounds meet?</h2>
-      <div class="cols">
-        <div>
-          <p class="smaller" style="text-align:center;"><strong>Primal</strong></p>
-          $$\begin{aligned}
-            \max\ \ & 3x_1 + x_2\\
-            & x_1 + x_2 = 4\\
-            & x_1 - x_2 \le 2\\
-            & x_1, x_2 \ge 0
-          \end{aligned}$$
-        </div>
-        <div>
-          <p class="smaller" style="text-align:center;"><strong>Dual</strong></p>
-          $$\begin{aligned}
-            \min\ \ & 4y_1 + 2y_2\\
-            & y_1 + y_2 \ge 3\\
-            & y_1 - y_2 \ge 1\\
-            & y_1\ \text{free},\ y_2 \ge 0
-          \end{aligned}$$
-        </div>
+      <h2>Mixed constraints: the dual</h2>
+      <div class="box"><span class="tag">Sign rule</span>
+        A $\le$ row may be multiplied by $y_i \ge 0$ only. An $=$ row may be multiplied by any $y_i$: its dual variable is <strong>free</strong>.</div>
+      <p class="fragment smaller">Everything else is as before. The combination $(y_1 + y_2)\,x_1 + y_1\,x_2 \le 4y_1 + 3y_2$ must dominate $x_1 - x_2$ coefficient by coefficient, and we want the smallest right-hand side:</p>
+      <div class="fragment" style="font-size:0.85em;">
+      $$\begin{gathered}\min\ 4y_1 + 3y_2 \quad\text{s.t.}\\ y_1 + y_2 \ge 1,\ \ y_1 \ge -1,\ \ y_1 \text{ free},\ y_2 \ge 0\end{gathered}$$
       </div>
-      <p class="fragment smaller"><strong>Check with numbers.</strong> Primal: $x_2 = 4 - x_1$ and $x_1 - x_2 \le 2$ give $x_1 \le 3$; optimum $x^\star = (3,1)$, value $\mathbf{10}$.</p>
-      <p class="fragment smaller">Dual: $y^\star = (2,1)$ is feasible ($3 \ge 3$, $1 \ge 1$), value $8 + 2 = \mathbf{10}$. They meet!</p>
+      <p class="fragment smaller">$y^\star = (-1, 2)$ is feasible, with value $-4 + 6 = 2$: the bounds meet.</p>
     </section>
 
     <section>
-      <h2>The Lagrangian</h2>
-      <p class="smaller">General primal: $\max\ c^{\mathsf T}x$ subject to rows $a_i^{\mathsf T}x \le b_i$ or $a_i^{\mathsf T}x = b_i$, and $x \ge 0$. The <strong>Lagrangian</strong> adds price $y_i$ times the slack of row $i$:</p>
-      <div style="font-size:0.85em;">
-      $$L(x,y) = c^{\mathsf T}x + \textstyle\sum_i y_i\,(b_i - a_i^{\mathsf T}x) = c^{\mathsf T}x + y^{\mathsf T}(b - Ax).$$
-      </div>
-      <p class="fragment smaller"><strong>Goal:</strong> $c^{\mathsf T}x \le L(x,y)$ for every feasible $x$, i.e. every term $y_i\,(b_i - a_i^{\mathsf T}x) \ge 0$:</p>
-      <ul class="smaller">
-        <li class="fragment">$a_i^{\mathsf T}x \le b_i$: &ensp; the slack is $\ge 0$, so $y_i \ge 0$.</li>
-        <li class="fragment">$a_i^{\mathsf T}x = b_i$: &ensp; the slack is $0$, so $y_i$ is unrestricted.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>The Lagrangian</h2>
-      <p class="smaller">Regroup by variable:</p>
-      <div style="font-size:0.85em;">
-      $$L(x,y) = b^{\mathsf T}y + (c - A^{\mathsf T}y)^{\mathsf T}x = b^{\mathsf T}y + \textstyle\sum_j \big(c_j - (A^{\mathsf T}y)_j\big)\, x_j.$$
-      </div>
-      <p class="fragment smaller">The max over $x$ is finite exactly when no $x_j$ can push $L$ to $+\infty$:</p>
-      <ul class="smaller">
-        <li class="fragment">Since $x_j \ge 0$, its coefficient must be $\le 0$: &ensp; $(A^{\mathsf T}y)_j \ge c_j$, i.e. $A^{\mathsf T}y \ge c$.</li>
-        <li class="fragment">Then every $x_j$ term is $\le 0$, the max is at $x = 0$, and it equals $b^{\mathsf T}y$.</li>
-        <li class="fragment">Best bound: <strong>minimise $b^{\mathsf T}y$</strong> over these $y$ — the dual.</li>
-      </ul>
-      <p class="fragment smaller"><strong>Sanity check:</strong> standard form ($Ax \le b$, $x \ge 0$) gives $\min\ b^{\mathsf T}y$ s.t. $A^{\mathsf T}y \ge c$, $y \ge 0$ — the dual from before.</p>
+      <h2>The recipe</h2>
+      <p class="smaller">For $\max\ c^{\mathsf T}x$ with rows $a_i^{\mathsf T}x \le b_i$ or $a_i^{\mathsf T}x = b_i$, and $x \ge 0$:</p>
+      <ol class="smaller">
+        <li class="fragment">Give row $i$ a weight $y_i$: &ensp; $y_i \ge 0$ for a $\le$ row, &ensp; $y_i$ free for an $=$ row.</li>
+        <li class="fragment">Add the rows: &ensp; $y^{\mathsf T}Ax \le y^{\mathsf T}b$ for every feasible $x$.</li>
+        <li class="fragment">Dominate the objective, one variable at a time: &ensp; $(A^{\mathsf T}y)_j \ge c_j$ for every $j$ (this uses $x \ge 0$). &ensp; Then $c^{\mathsf T}x \le y^{\mathsf T}Ax \le y^{\mathsf T}b$.</li>
+        <li class="fragment">Minimise the bound $b^{\mathsf T}y$. That is the dual.</li>
+      </ol>
+      <p class="fragment smaller">This is all max-flow will need. (A $\ge$ row works too: multiply it by $y_i \le 0$, which turns it into a $\le$ row.)</p>
     </section>
 
     <section>
@@ -609,41 +579,6 @@
     </section>
 
     <section>
-      <h2>Strong duality as minimax</h2>
-      <p class="smaller">Assume the standard-form primal has a finite optimum. With $x \ge 0$ and $y \ge 0,$
-      $\;L(x,y) = c^{\mathsf T}x + y^{\mathsf T}(b - Ax).$</p>
-      <p class="smaller"><strong>Convention:</strong> write $\min = -\infty$ or $\max = +\infty$ when the expression is unbounded below or above, respectively.</p>
-      <ul class="smaller">
-        <li class="fragment"><strong>Fix $x$, let $y$ respond:</strong> a violated row lets $y_i \to \infty$, so
-          $$\min_{y \ge 0} L(x,y) = \begin{cases} c^{\mathsf T}x & \text{if } Ax \le b,\\ -\infty & \text{otherwise.}\end{cases}$$
-          Hence $\max_{x}\min_{y} L$ is the <strong>primal</strong> optimum.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Strong duality as minimax</h2>
-      <p class="smaller">Now regroup by variable, as in Part II:
-      $$L(x,y) = b^{\mathsf T}y + (c - A^{\mathsf T}y)^{\mathsf T}x.$$</p>
-      <ul class="smaller">
-        <li class="fragment"><strong>Fix $y$, let $x$ respond:</strong> a positive coefficient on $x_j$ lets $x_j \to \infty$, so
-          $$\max_{x \ge 0} L(x,y) = \begin{cases} b^{\mathsf T}y & \text{if } A^{\mathsf T}y \ge c,\\ +\infty & \text{otherwise.}\end{cases}$$
-          Hence $\min_{y}\max_{x} L$ is the <strong>dual</strong> optimum.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Strong duality as minimax</h2>
-      <div class="box minimax-box"><span class="tag">Strong duality, restated</span>
-        If the primal has a finite optimum, then
-        $$\max_{x \ge 0}\ \min_{y \ge 0}\ L(x,y) \;=\; \min_{y \ge 0}\ \max_{x \ge 0}\ L(x,y).$$</div>
-      <ul class="smaller">
-        <li class="fragment"><strong>$\le$ is automatic</strong> — that is weak duality: &ensp; $\min_{y} L(x',y) \le L(x',y') \le \max_{x} L(x,y')$ for every $x', y'$.</li>
-        <li class="fragment"><strong>$=$ is the deep part</strong> (proof beyond this course). As a game: one player picks a production plan $x$, the other picks prices $y$. Strong duality says moving second gives no advantage.</li>
-        <li class="fragment">Von Neumann's minimax theorem for zero-sum games is a special case of LP duality.</li>
-      </ul>
-    </section>
-
-    <section>
       <h2>The feasibility cases</h2>
       <p class="smaller">Each LP has an optimum, is unbounded, or is infeasible. Of the nine pairings, only four occur:</p>
       <table class="results feas" style="font-size:0.62em; table-layout:fixed; width:88%;">
@@ -710,7 +645,7 @@
         & f_e \ge 0 \quad \forall e \in E
       \end{aligned}$$
       </div>
-      <p class="fragment smaller">A maximisation with $\le$ rows and $=$ rows. Penalise each row:</p>
+      <p class="fragment smaller">A maximisation with $\le$ rows and $=$ rows. Give each row a weight:</p>
       <ul class="smaller">
         <li class="fragment">capacity constraint of edge $e$ &nbsp;$\to$&nbsp; dual variable $y_e \ge 0$</li>
         <li class="fragment">conservation constraint at vertex $v$ &nbsp;$\to$&nbsp; dual variable $z_v$, <em>free</em> (it's an equality)</li>
@@ -719,30 +654,27 @@
 
     <section>
       <h2>Deriving the dual</h2>
-      <p class="smaller">Penalise every row, as in Part II:</p>
+      <p class="smaller">Multiply every row by its weight and add, as in Part II:</p>
       <div style="font-size:0.8em;">
-      $$\begin{aligned}
-        L \;=\; & \textstyle\sum_{e \in \delta^+(s)} f_e
-          \;+\; \sum_{e} y_e\,(c_e - f_e)\\
-          & {}+\; \textstyle\sum_{v \ne s,t} z_v \Big(\sum_{e \in \delta^+(v)} f_e - \sum_{e \in \delta^-(v)} f_e\Big).
-      \end{aligned}$$
+      $$\textstyle\sum_{e} y_e\, f_e
+          \;+\; \sum_{v \ne s,t} z_v \Big(\sum_{e \in \delta^-(v)} f_e - \sum_{e \in \delta^+(v)} f_e\Big)
+          \;\le\; \sum_{e} c_e\, y_e .$$
       </div>
-      <p class="fragment smaller">Then regroup by variable. Each $f_e$ gets one coefficient; since $f_e \ge 0$, a finite bound needs that coefficient $\le 0$. <strong>That is the dual constraint for edge $e$.</strong></p>
+      <p class="fragment smaller">Then collect the coefficient of each $f_e$ on the left. Since $f_e \ge 0$, it must dominate the objective's coefficient of $f_e$: $1$ if $e$ leaves $s$, else $0$. <strong>That is the dual constraint for edge $e$.</strong></p>
     </section>
 
     <section>
       <h2>One edge at a time</h2>
-      <p class="smaller">Take an edge $e = (u, v)$. Every term of $L$ that contains $f_e$:</p>
+      <p class="smaller">Take an edge $e = (u, v)$. Every row that contains $f_e$:</p>
       <table class="results smaller">
-        <thead><tr><th>Where $f_e$ appears</th><th>Adds to its coefficient</th></tr></thead>
+        <thead><tr><th>Row containing $f_e$</th><th>Adds to its coefficient</th></tr></thead>
         <tbody>
-          <tr class="fragment"><td class="q">objective, if $u = s$</td><td>$+1$</td></tr>
-          <tr class="fragment"><td class="q">capacity row of $e$</td><td>$-y_e$</td></tr>
-          <tr class="fragment"><td class="q">conservation at $u$ ($e$ leaves $u$)</td><td>$+z_u$</td></tr>
-          <tr class="fragment"><td class="q">conservation at $v$ ($e$ enters $v$)</td><td>$-z_v$</td></tr>
+          <tr class="fragment"><td class="q">capacity row of $e$</td><td>$+y_e$</td></tr>
+          <tr class="fragment"><td class="q">conservation at $u$ ($e$ leaves $u$)</td><td>$-z_u$</td></tr>
+          <tr class="fragment"><td class="q">conservation at $v$ ($e$ enters $v$)</td><td>$+z_v$</td></tr>
         </tbody>
       </table>
-      <p class="fragment smaller">Coefficient $\le 0$: &ensp; $y_e \;\ge\; [u = s] + z_u - z_v$, &ensp; with no $z_s$ or $z_t$ term ($s$ and $t$ have no conservation row).</p>
+      <p class="fragment smaller">Dominate the objective coefficient, $[u = s]$: &ensp; $y_e - z_u + z_v \ge [u = s]$, &ensp; i.e. $y_e \;\ge\; [u = s] + z_u - z_v$, with no $z_s$ or $z_t$ term ($s$ and $t$ have no conservation row).</p>
     </section>
 
     <section>
@@ -795,7 +727,7 @@
           \end{aligned}$$
         </div>
       </div>
-      <p class="fragment smaller">Five edges, five dual constraints. What is left of $L$ is $\sum_e c_e\, y_e$: minimise it.</p>
+      <p class="fragment smaller">Five edges, five dual constraints. The right-hand side of the combination is $\sum_e c_e\, y_e$: minimise it.</p>
     </section>
 
     <section>
@@ -1006,26 +938,25 @@
       <div style="font-size:0.85em;">
       $$\max\ \textstyle\sum_{e \in E} x_e \quad\text{s.t.}\quad \sum_{e \ni v} x_e \le 1 \ \ \forall v \in V,\quad x \ge 0.$$
       </div>
-      <p class="fragment smaller">Penalise each vertex row with a price $y_v$. It is a $\le$ row, so $y_v \ge 0$:</p>
+      <p class="fragment smaller">Give each vertex row a weight $y_v$. It is a $\le$ row, so $y_v \ge 0$. Multiply and add:</p>
       <div class="fragment" style="font-size:0.85em;">
-      $$L = \textstyle\sum_{e} x_e \;+\; \sum_{v} y_v \Big(1 - \sum_{e \ni v} x_e\Big).$$
+      $$\textstyle\sum_{v} y_v \sum_{e \ni v} x_e \;\le\; \sum_{v} y_v.$$
       </div>
-      <p class="fragment smaller">Then regroup by variable: the coefficient of each $x_e$ must be $\le 0$.</p>
+      <p class="fragment smaller">Then collect the coefficient of each $x_e$ on the left: it must be $\ge 1$, the objective's coefficient.</p>
     </section>
 
     <section>
       <h2>One edge at a time</h2>
-      <p class="smaller">Take an edge $e = uv$. Every term of $L$ that contains $x_e$:</p>
+      <p class="smaller">Take an edge $e = uv$. Every row that contains $x_e$:</p>
       <table class="results smaller">
-        <thead><tr><th>Where $x_e$ appears</th><th>Adds to its coefficient</th></tr></thead>
+        <thead><tr><th>Row containing $x_e$</th><th>Adds to its coefficient</th></tr></thead>
         <tbody>
-          <tr class="fragment"><td class="q">objective</td><td>$+1$</td></tr>
-          <tr class="fragment"><td class="q">vertex row of $u$</td><td>$-y_u$</td></tr>
-          <tr class="fragment"><td class="q">vertex row of $v$</td><td>$-y_v$</td></tr>
+          <tr class="fragment"><td class="q">vertex row of $u$</td><td>$+y_u$</td></tr>
+          <tr class="fragment"><td class="q">vertex row of $v$</td><td>$+y_v$</td></tr>
           <tr class="fragment"><td class="q">any other vertex row</td><td>nothing: $e$ doesn't touch it</td></tr>
         </tbody>
       </table>
-      <p class="fragment smaller">Coefficient $1 - y_u - y_v \le 0$: &ensp; $y_u + y_v \ge 1$.<br>What is left of $L$ is $\sum_v y_v$: minimise it.</p>
+      <p class="fragment smaller">Coefficient $y_u + y_v \ge 1$.<br>The right-hand side is $\sum_v y_v$: minimise it.</p>
     </section>
 
     <section>
@@ -1309,6 +1240,50 @@
     </section>
 
     <section>
+      <h2>The check, in the picture</h2>
+      <div class="cols">
+        <div style="font-size:0.78em;">
+          <p>At $(6,2)$ the tight rows are machine and wood. Draw their normals, $(1,0)$ and $(1,1)$, at the point.</p>
+          <p class="fragment">Both $x_j > 0$, so both dual constraints are tight: $y^{\mathsf T}A = c^{\mathsf T}$. That says $c$ is a combination of the row normals: $c = 1\cdot(1,0) + 2\cdot(1,1)$, so $y^\star = (1,2,0)$.</p>
+          <p class="fragment">$c$ lies <em>inside</em> the cone of the two normals, so both weights are positive. Varnish is slack; it gets $0$ and plays no part.</p>
+        </div>
+        <div>
+          <figure>
+            <svg width="420" height="320" viewBox="0 0 480 365" xmlns="http://www.w3.org/2000/svg">
+              <defs><marker id="p6a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b85a26"/></marker><marker id="p6a-machine" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9a7a26"/></marker><marker id="p6a-wood" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4d7349"/></marker><marker id="p6a-varnish" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2e588f"/></marker></defs>
+              <polygon points="50,330 290,330 290,250 170,130 50,90" fill="#cad9ee" fill-opacity="0.55" stroke="#2e588f" stroke-width="2"/>
+              <line x1="50" y1="90" x2="450" y2="223" stroke="#2e588f" stroke-width="1.5"/>
+              <text x="236" y="147" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1d3c66">varnish</text>
+              <line x1="50" y1="10" x2="370" y2="330" stroke="#4d7349" stroke-width="1.5"/>
+              <text x="138" y="84" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#2c4329">wood</text>
+              <line x1="290" y1="330" x2="290" y2="10" stroke="#9a7a26" stroke-width="1.5"/>
+              <text x="300" y="36" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#5f4910">machine</text>
+              <g stroke="#2a2a2a" stroke-width="2"><line x1="50" y1="330" x2="458" y2="330"/><line x1="50" y1="330" x2="50" y2="8"/></g>
+              <g stroke="#2a2a2a" stroke-width="1.5"><line x1="130" y1="330" x2="130" y2="336"/><line x1="210" y1="330" x2="210" y2="336"/><line x1="290" y1="330" x2="290" y2="336"/><line x1="370" y1="330" x2="370" y2="336"/><line x1="44" y1="250" x2="50" y2="250"/><line x1="44" y1="170" x2="50" y2="170"/><line x1="44" y1="90" x2="50" y2="90"/><line x1="44" y1="10" x2="50" y2="10"/></g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d"><text x="130" y="352" text-anchor="middle">2</text><text x="210" y="352" text-anchor="middle">4</text><text x="290" y="352" text-anchor="middle">6</text><text x="370" y="352" text-anchor="middle">8</text><text x="36" y="255" text-anchor="end">2</text><text x="36" y="175" text-anchor="end">4</text><text x="36" y="95" text-anchor="end">6</text><text x="36" y="15" text-anchor="end">8</text></g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#2a2a2a"><text x="462" y="334">x&#8321;</text><text x="56" y="14">x&#8322;</text></g>
+              <path d="M 290 250 L 390.0 250.0 A 100 100 0 0 0 360.7 179.3 Z" fill="#e8d6a8" fill-opacity="0.55" stroke="none"/>
+              <line x1="322" y1="250" x2="386" y2="186" stroke="#4d7349" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.9"/>
+              <line x1="354" y1="186" x2="386" y2="186" stroke="#9a7a26" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.9"/>
+              <line x1="290" y1="250" x2="354" y2="186" stroke="#4d7349" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.9"/>
+              <line x1="290" y1="250" x2="322" y2="250" stroke="#9a7a26" stroke-width="3" marker-end="url(#p6a-machine)"/>
+              <line x1="290" y1="250" x2="322" y2="218" stroke="#4d7349" stroke-width="3" marker-end="url(#p6a-wood)"/>
+              <line x1="290" y1="250" x2="386" y2="186" stroke="#b85a26" stroke-width="3" marker-end="url(#p6a-c)"/>
+              <text x="392" y="191" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#6e3416">c</text>
+              <circle cx="50" cy="330" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="290" cy="330" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="170" cy="130" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="50" cy="90" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="290" cy="250" r="8" fill="#f1c79f" stroke="#b85a26" stroke-width="2.5"/>
+              <text x="283" y="273" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#6e3416">(6,2)</text>
+              </svg>
+            <figcaption>The prices are the coordinates of $c$ in the cone of the tight constraints' normals.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
       <h2>Solving for the certificate</h2>
       <p class="smaller">Given only the claimed optimum $x^\star = (6,2)$, complementary slackness hands us equations for $y^\star$:</p>
       <ul class="smaller">
@@ -1342,9 +1317,53 @@
     </section>
 
     <section>
+      <h2>A negative price, in the picture</h2>
+      <div class="cols">
+        <div style="font-size:0.78em;">
+          <p>At $(3,5)$ the tight rows are wood and varnish. Their normals, $(1,1)$ and $(1,3)$, are drawn at the point.</p>
+          <p class="fragment">$c = \tfrac72\,(1,1) - \tfrac12\,(1,3)$. The only way to write $c$ uses a negative weight: $c$ lies <em>outside</em> the cone, on the far side of the wood normal.</p>
+          <p class="fragment">So sliding along the wood edge, away from varnish, moves in the direction of $c$. That is the improving move to $(6,2)$.</p>
+        </div>
+        <div>
+          <figure>
+            <svg width="420" height="320" viewBox="0 0 480 365" xmlns="http://www.w3.org/2000/svg">
+              <defs><marker id="p6b-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b85a26"/></marker><marker id="p6b-machine" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9a7a26"/></marker><marker id="p6b-wood" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4d7349"/></marker><marker id="p6b-varnish" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2e588f"/></marker></defs>
+              <polygon points="50,330 290,330 290,250 170,130 50,90" fill="#cad9ee" fill-opacity="0.55" stroke="#2e588f" stroke-width="2"/>
+              <line x1="50" y1="90" x2="450" y2="223" stroke="#2e588f" stroke-width="1.5"/>
+              <text x="345" y="178" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#1d3c66">varnish</text>
+              <line x1="50" y1="10" x2="370" y2="330" stroke="#4d7349" stroke-width="1.5"/>
+              <text x="138" y="84" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#2c4329">wood</text>
+              <line x1="290" y1="330" x2="290" y2="10" stroke="#9a7a26" stroke-width="1.5"/>
+              <text x="300" y="36" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#5f4910">machine</text>
+              <g stroke="#2a2a2a" stroke-width="2"><line x1="50" y1="330" x2="458" y2="330"/><line x1="50" y1="330" x2="50" y2="8"/></g>
+              <g stroke="#2a2a2a" stroke-width="1.5"><line x1="130" y1="330" x2="130" y2="336"/><line x1="210" y1="330" x2="210" y2="336"/><line x1="290" y1="330" x2="290" y2="336"/><line x1="370" y1="330" x2="370" y2="336"/><line x1="44" y1="250" x2="50" y2="250"/><line x1="44" y1="170" x2="50" y2="170"/><line x1="44" y1="90" x2="50" y2="90"/><line x1="44" y1="10" x2="50" y2="10"/></g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#6a737d"><text x="130" y="352" text-anchor="middle">2</text><text x="210" y="352" text-anchor="middle">4</text><text x="290" y="352" text-anchor="middle">6</text><text x="370" y="352" text-anchor="middle">8</text><text x="36" y="255" text-anchor="end">2</text><text x="36" y="175" text-anchor="end">4</text><text x="36" y="95" text-anchor="end">6</text><text x="36" y="15" text-anchor="end">8</text></g>
+              <g font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#2a2a2a"><text x="462" y="334">x&#8321;</text><text x="56" y="14">x&#8322;</text></g>
+              <path d="M 170 130 L 240.7 59.3 A 100 100 0 0 0 201.6 35.1 Z" fill="#e8d6a8" fill-opacity="0.55" stroke="none"/>
+              <line x1="170" y1="130" x2="282" y2="18" stroke="#4d7349" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.9"/>
+              <line x1="282" y1="18" x2="266" y2="66" stroke="#2e588f" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.9"/>
+              <line x1="170" y1="130" x2="202" y2="98" stroke="#4d7349" stroke-width="3" marker-end="url(#p6b-wood)"/>
+              <line x1="170" y1="130" x2="202" y2="34" stroke="#2e588f" stroke-width="3" marker-end="url(#p6b-varnish)"/>
+              <line x1="170" y1="130" x2="266" y2="66" stroke="#b85a26" stroke-width="3" marker-end="url(#p6b-c)"/>
+              <text x="272" y="71" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#6e3416">c</text>
+              <line x1="188" y1="148" x2="268" y2="228" stroke="#b85a26" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#p6b-c)"/>
+              <circle cx="50" cy="330" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="290" cy="330" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="170" cy="130" r="8" fill="#f1c79f" stroke="#b85a26" stroke-width="2.5"/>
+              <circle cx="50" cy="90" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="290" cy="250" r="5" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="160" y="152" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#6e3416">(3,5)</text>
+              </svg>
+            <figcaption>A vertex is optimal exactly when $c$ lies in the cone of its tight constraints' normals.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section>
       <h2>Takeaways</h2>
       <ul>
-        <li class="fragment">Every LP has a <strong>dual</strong>: the LP of best bounds obtained by combining constraints. To write it for any LP, penalise each constraint with a price $y_i$: the signs and dual constraints are whatever keeps the bound valid and finite.</li>
+        <li class="fragment">Every LP has a <strong>dual</strong>: the LP of best bounds obtained by combining constraints. Weights on $\le$ rows are $\ge 0$, weights on $=$ rows are free, and the combination must dominate the objective coefficient by coefficient.</li>
         <li class="fragment"><strong>Weak duality</strong> ($c^{\mathsf T}x \le b^{\mathsf T}y$) is a one-line proof; <strong>strong duality</strong> says every finite primal optimum has a matching dual certificate.</li>
         <li class="fragment"><strong>Max-flow = min-cut</strong> is LP duality: the dual of the flow LP prices cuts. Two proofs, two generalisations — algorithms vs. all of LP.</li>
       </ul>
@@ -1354,7 +1373,7 @@
       <h2>Takeaways</h2>
       <ul>
         <li class="fragment"><strong>K&#337;nig:</strong> in bipartite graphs, max matching $=$ min vertex cover — duality $+$ integrality; matching and cover certify each other.</li>
-        <li class="fragment"><strong>Complementary slackness:</strong> nothing optimal is both used and slack. Check primal and dual feasibility too; in our example, a negative price points to an improving move.</li>
+        <li class="fragment"><strong>Complementary slackness:</strong> nothing optimal is both used and slack. In the picture, $c$ sits inside the cone of the tight constraints' normals, and the prices are its coordinates there. A negative price points to an improving move.</li>
       </ul>
     </section>
 
