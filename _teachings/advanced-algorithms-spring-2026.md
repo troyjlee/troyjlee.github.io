@@ -141,7 +141,12 @@ schedule:
     description: >-
       Decision vs search problems · the verifier definition of NP ·
       polynomial-time reductions · SAT, 3SAT, independent set, vertex cover,
-      clique, Hamiltonian path
+      clique, Hamiltonian path, Subset Sum
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week11.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week11.pdf
   - week: 12
     topic: Approximation Algorithms
     description: >-
