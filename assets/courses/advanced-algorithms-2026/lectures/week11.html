@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 11: NP-completeness — Advanced Algorithms</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <style>
+    :root { --accent: #1f6feb; --muted: #6a737d; }
+
+    .reveal h1, .reveal h2, .reveal h3 { color: var(--accent); letter-spacing: -0.01em; }
+    .reveal h1 { font-size: 2.0em; }
+    /* Theme styling (uppercase headings, small-caps tags) garbles MathJax output. */
+    .reveal mjx-container { text-transform: none; font-variant: normal; letter-spacing: normal; }
+    .reveal h2 { text-align: center; }
+    .reveal section { font-size: 0.92em; }
+    .reveal a { color: var(--accent); }
+
+    /* Left-align most slides; titles stay centered via their own class. */
+    .reveal .slides section { text-align: left; }
+    .reveal .slides section.center { text-align: center; }
+
+    /* Boxes for theorems / definitions / takeaways. */
+    .box {
+      border-left: 5px solid var(--accent);
+      background: #f4f8ff;
+      padding: 0.5em 0.8em; margin: 0.4em 0; border-radius: 4px;
+    }
+    .box .tag { font-variant: small-caps; font-weight: 700; color: var(--accent);
+                letter-spacing: 0.04em; margin-right: 0.4em; }
+    .box.warn { border-left-color: #d29922; background: #fff8ec; }
+    .box.warn .tag { color: #b07400; }
+
+    /* Result highlight pill. */
+    .hl { background: #fff3b0; padding: 0.05em 0.08em; border-radius: 3px; }
+
+    /* Results table. */
+    .reveal table.results { margin: 0.7em auto; border-collapse: collapse; }
+    .reveal table.results th, .reveal table.results td {
+      padding: 0.4em 1.1em; border: none; text-align: left; }
+    .reveal table.results thead th { color: var(--accent);
+      border-bottom: 2px solid var(--accent); font-variant: small-caps; letter-spacing: 0.03em; }
+    .reveal table.results tbody tr { border-bottom: 1px solid #e7ebf0; }
+    .reveal table.results td.q { font-weight: 700; }
+    .reveal table.results tr.hlrow { background: #fff8d6; }
+    /* Digit tables (Subset Sum): tight centred cells, a rule between column groups. */
+    .reveal table.results.tight th, .reveal table.results.tight td { padding: 0.15em 0.9em; }
+    .reveal table.results.digits th, .reveal table.results.digits td {
+      padding: 0.12em 0.6em; text-align: center; }
+    .reveal table.results.digits .sep { border-left: 2px solid #d0d7de; }
+    .reveal table.results.digits tr.total { border-top: 2px solid var(--accent); }
+    /* Digit layout figure: n variable digits, then m clause digits. */
+    .dlayout { display: flex; justify-content: center; gap: 0.6em; margin: 0.5em auto 0.2em; }
+    .dlayout .grp { display: flex; flex-direction: column; align-items: center; }
+    .dlayout .cells { display: flex; }
+    .dlayout .cell { width: 2.3em; height: 1.7em; display: flex; align-items: center;
+      justify-content: center; border: 2px solid; margin-left: -2px; font-size: 0.9em; }
+    .dlayout .var .cell { border-color: var(--accent); background: #f4f8ff; }
+    .dlayout .cls .cell { border-color: #b85a26; background: #fdf1e9; }
+    .dlayout .brace { align-self: stretch; height: 0.45em; border: 2px solid;
+      border-top: none; margin: 0.15em 0.3em 0; }
+    .dlayout .var .brace { border-color: var(--accent); }
+    .dlayout .cls .brace { border-color: #b85a26; }
+    .dlayout .lbl { font-size: 0.75em; margin-top: 0.15em; }
+    .dlayout .var .lbl { color: var(--accent); }
+    .dlayout .cls .lbl { color: #b85a26; }
+    .dlayout-ends { display: flex; justify-content: space-between; width: 80%;
+      margin: 0 auto; font-size: 0.6em; color: var(--muted); }
+
+    /* Two-column layout helper:  <div class="cols"> <div>..</div> <div>..</div> </div> */
+    .cols { display: flex; gap: 1.2em; align-items: flex-start; }
+    .cols > * { flex: 1; min-width: 0; }
+
+    /* Pseudocode / algorithm blocks. */
+    .reveal pre.algo {
+      font-size: 0.5em; line-height: 1.35; box-shadow: none;
+      border: 1px solid #d0d7de; border-radius: 6px; background: #fbfcfd;
+      width: 100%;
+    }
+    .reveal pre.algo code { padding: 0.8em 1em; }
+    .algo .kw { color: var(--accent); font-weight: 700; }
+    .algo .cm { color: var(--muted); font-style: italic; }
+
+    .reveal .credit { color: var(--muted); font-size: 0.8em; }
+    .reveal .smaller { font-size: 0.82em; }
+    .reveal figure { margin: 0; text-align: center; }
+    .reveal figcaption { font-size: 0.7em; color: var(--muted); margin-top: 0.3em; }
+    .reveal .footnote { position: absolute; bottom: 0.2em; left: 0.6em;
+                        font-size: 0.55em; color: var(--muted); }
+
+    /* Inline-SVG figures: sized by the svg's own width attr, centered by figure. */
+    .reveal figure svg { max-width: 100%; height: auto; }
+    /* PDF export. Print pages are 727px tall with overflow:hidden, and any box
+       Chrome's print fragmentation cannot split that crosses that boundary is
+       pushed to the next sheet and silently clipped away. Three defences:
+       1. the reveal theme's inline-block lists are unsplittable — make them
+          block so they fragment line by line instead of vanishing whole;
+       2. trim MathJax's 1em display margins;
+       3. print at a slightly smaller font so every slide's layout ends well
+          above the boundary. */
+    html.reveal-print .reveal ul, html.reveal-print .reveal ol { display: block; }
+    html.reveal-print .reveal mjx-container[display="true"] { margin: 0.4em 0; }
+    html.reveal-print .reveal section { font-size: 0.84em; }
+    /* Fragments print fully revealed, so show fade-out fragments in their final (gone) state. */
+    html.reveal-print .reveal .fragment.fade-out { visibility: hidden !important; opacity: 0 !important; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== TITLE ============================== -->
+    <section class="center">
+      <h1>Week 11: NP-completeness</h1>
+      <p style="font-size:1.1em; margin-top:0.2em;">Advanced Algorithms</p>
+    </section>
+
+    <!-- ===================== PART 1: DECISION VS SEARCH =================== -->
+    <section class="center">
+      <h1>Decision vs Search</h1>
+    </section>
+
+    <section>
+      <h2>This course so far: find things</h2>
+      <p>Almost every algorithm we built this semester solves a <strong>search problem</strong>:</p>
+      <ul>
+        <li class="fragment"><strong>W3:</strong> find a maximum independent set of a tree</li>
+        <li class="fragment"><strong>W5–6:</strong> find a minimum spanning tree</li>
+        <li class="fragment"><strong>W8:</strong> find a maximum $s$-$t$ flow</li>
+        <li class="fragment"><strong>W10:</strong> find a maximum matching <em>and</em> a König cover certifying it</li>
+      </ul>
+      <p class="fragment">Today we study problems where we believe <em>no</em> efficient algorithm exists.
+        For that theory, it is cleaner to strip a problem down to a yes/no question.</p>
+    </section>
+
+    <section>
+      <h2>Decision problems</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A <strong>decision problem</strong> asks a yes/no question about the input.
+        A <strong>search problem</strong> asks to produce an object.
+      </div>
+      <ul>
+        <li class="fragment"><strong>Search:</strong> find a maximum matching of $G$.</li>
+        <li class="fragment"><strong>Decision:</strong> given $G$ and a number $k$, is there a
+          matching of size at least $k$?</li>
+      </ul>
+      <p class="fragment">The decision version is <strong>never harder</strong>: find a maximum
+        matching $M$, then answer yes if and only if $|M| \ge k$.</p>
+    </section>
+
+    <section>
+      <h2>Decision problems</h2>
+      <table class="results" style="font-size:0.9em;">
+        <thead><tr><th>Search</th><th>Decision</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>find a maximum matching of $G$</td>
+              <td>does $G$ have a matching of size $\ge k$?</td></tr>
+          <tr class="fragment"><td>find a minimum vertex cover of $G$</td>
+              <td>does $G$ have a vertex cover of size $\le k$?</td></tr>
+          <tr class="fragment"><td>find a satisfying assignment of $\varphi$</td>
+              <td>is $\varphi$ satisfiable?</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment">Same question in two costumes — the decision form keeps the
+        essential difficulty.</p>
+    </section>
+
+    <section>
+      <h2>Why complexity theory uses decision problems</h2>
+      <ul>
+        <li class="fragment">Uniform output: every problem returns one bit. Problems become
+          <em>sets of yes-instances</em>, easy to compare and to chain reductions through.</li>
+        <li class="fragment">Hardness transfers upward: if the decision version is hard,
+          the search version is at least as hard.</li>
+        <li class="fragment">And usually nothing is lost in the other direction&hellip;</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Decision $\Rightarrow$ search (usually)</h2>
+      <p>Suppose a magic box answers &ldquo;does $G$ have a matching of size $\ge k$?&rdquo;
+         How do we <em>find</em> a maximum matching?</p>
+      <ul>
+        <li class="fragment">Binary search on $k$ to learn the optimum value $k^*$.</li>
+        <li class="fragment">Pick any edge $e$. Ask: does $G - \{e\text{'s endpoints}\}$ have a matching
+          of size $\ge k^* - 1$?</li>
+        <li class="fragment">If yes: commit to $e$ and recurse. If no: delete $e$ and try another edge.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Decision $\Rightarrow$ search (usually)</h2>
+      <p>Polynomially many questions in total — this pattern
+        (<em>self-reducibility</em>) works for SAT, independent set, &hellip;</p>
+      <div class="box fragment"><span class="tag">Takeaway</span>
+        For the problems in this lecture, decision and search stand or fall together.
+        We study the decision versions.</div>
+    </section>
+
+    <!-- ===================== PART 2: THE CLASS NP ========================= -->
+    <section class="center">
+      <h1>The Class NP</h1>
+    </section>
+
+    <section>
+      <h2>Remember this from Week 2?</h2>
+      <p>The SAT problem: the input is an AND of ORs of variables and their negations.</p>
+      <p style="text-align:center; font-size:0.85em;">
+        $(x_3 \vee x_2 \vee x_4) \wedge (\neg x_4 \vee x_1 \vee \neg x_2) \wedge (\neg x_3 \vee \neg x_4 \vee \neg x_1)$
+      </p>
+      <p class="fragment">Is there a Boolean assignment to the variables making the formula true?</p>
+      <p class="fragment">Here, $x_1 = 1,\ x_2 = 0,\ x_3 = 1,\ x_4 = 0$ works — check each clause!</p>
+      <p class="fragment">In Week 2 we used SAT as the anchor for fine-grained lower bounds (ETH, SETH).
+        Today it anchors a coarser, older, and even more influential theory.</p>
+    </section>
+
+    <section>
+      <h2>Hard to find, easy to check</h2>
+      <p>Notice the asymmetry:</p>
+      <ul>
+        <li class="fragment" data-fragment-index="0"><strong>Finding</strong> a satisfying assignment: best known algorithms take
+          exponential time ($O(2^{0.39n})$ for 3SAT [HKZZ19]).</li>
+        <li class="fragment"><strong>Checking</strong> a proposed assignment: scan the clauses —
+          linear time.</li>
+      </ul>
+      <p class="fragment credit" data-fragment-index="0">[HKZZ19] Hansen, Kaplan, Zamir and Zwick,
+        &ldquo;Faster $k$-SAT Algorithms Using Biased-PPSZ&rdquo;, STOC 2019.</p>
+    </section>
+
+    <section>
+      <h2>Hard to find, easy to check</h2>
+      <p>A satisfying assignment is a <span class="hl">certificate</span>:
+        a short proof that the answer is yes, verifiable quickly.</p>
+      <p class="fragment">NP is exactly the class of problems with this &ldquo;easy to check&rdquo; property.</p>
+    </section>
+
+    <section>
+      <h2>NP via verifiers</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A decision problem $L$ is in <strong>NP</strong> if there is a polynomial-time
+        <strong>verifier</strong> $V$ and a polynomial $p$ such that for every input $x$:
+        <ul style="margin:0.3em 0 0 0;">
+          <li>$x$ is a yes-instance $\iff$ there exists a <strong>certificate</strong> $c$
+              with $|c| \le p(|x|)$ such that $V(x, c)$ accepts.</li>
+        </ul>
+      </div>
+      <p class="fragment">Two-sided requirement: yes-instances have <em>some</em> convincing certificate;
+         for no-instances, <em>no</em> certificate fools $V$.</p>
+      <p class="fragment smaller">$V$ never has to find $c$ — it only judges a $c$ handed to it.
+        Think of $c$ as a completed puzzle and $V$ as the person checking the rules.</p>
+    </section>
+
+    <section>
+      <h2>Certificates for our problems</h2>
+      <table class="results" style="font-size:0.85em;">
+        <thead><tr><th>Problem</th><th>Certificate</th><th>Verifier checks</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td class="q">SAT</td><td>an assignment</td>
+              <td>every clause has a true literal</td></tr>
+          <tr class="fragment"><td class="q">Independent set $\ge k$</td><td>the set $S$</td>
+              <td>$|S| \ge k$ and no edge inside $S$</td></tr>
+          <tr class="fragment"><td class="q">Vertex cover $\le k$</td><td>the set $C$</td>
+              <td>$|C| \le k$ and every edge has an endpoint in $C$</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment smaller">Each check is a simple loop over the input — comfortably polynomial time.</p>
+    </section>
+
+    <section>
+      <h2>P $\subseteq$ NP</h2>
+      <div class="box"><span class="tag">Fact</span>
+        $\mathrm{P} \subseteq \mathrm{NP}$: if $L$ is decidable in polynomial time,
+        take the empty certificate and let $V(x, c)$ just solve $x$ itself.
+      </div>
+      <p class="fragment">The converse is the most famous open problem in computer science:</p>
+      <p class="fragment" style="text-align:center; font-size:1.3em;">
+        $\mathrm{P} \overset{?}{=} \mathrm{NP}$</p>
+    </section>
+
+    <section>
+      <h2>The Big Question</h2>
+      <p class="fragment">Is checking a proof really no easier than finding one?
+        A million-dollar Clay Millennium problem; the wide belief is
+        $\mathrm{P} \ne \mathrm{NP}$.</p>
+      <p class="fragment smaller">Week 2's ETH is a stronger, quantitative version of
+        $\mathrm{P} \ne \mathrm{NP}$: 3SAT needs time $2^{cn}$ for some constant $c > 0$, not just super-polynomial time.</p>
+    </section>
+
+    <section>
+      <h2>Proving a negative</h2>
+      <p>Consider the complement question:</p>
+      <div class="box warn"><span class="tag">Puzzle</span>
+        &ldquo;$G$ has <strong>NO</strong> independent set of size $\ge k$.&rdquo;
+        What short certificate would convince you of that?
+      </div>
+      <ul>
+        <li class="fragment">Listing all $\binom{n}{k}$ candidate sets and their flaws — exponentially long.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Definition</span>
+        A decision problem is in <strong>co-NP</strong> if its complement is in NP:
+        every <em>no</em>-instance has a short certificate that a polynomial-time
+        verifier can check.
+      </div>
+    </section>
+
+    <section>
+      <h2>Proving a negative</h2>
+      <ul>
+        <li class="fragment">&ldquo;No independent set of size $\ge k$&rdquo; is in co-NP. Is it in NP?
+          No short proof of absence is known; NP $\overset{?}{=}$ co-NP is open too.</li>
+        <li class="fragment">Contrast Week 10: for <em>bipartite</em> graphs, König gave us short
+          certificates in both directions (a matching vs a vertex cover of equal size).
+          Duality put bipartite matching in NP $\cap$ co-NP.</li>
+        <li class="fragment">Certificates alone do not give an algorithm: we found the matching
+          with max flow.</li>
+      </ul>
+    </section>
+
+    <!-- ===================== PART 3: REDUCTIONS =========================== -->
+    <section class="center">
+      <h1>Polynomial-Time Reductions</h1>
+    </section>
+
+    <section>
+      <h2>Reductions as translations</h2>
+      <p>You already reduce all the time:</p>
+      <ul class="smaller">
+        <li class="fragment"><strong>W2:</strong> LIS as a special case of LCS (sort, then LCS).</li>
+        <li class="fragment"><strong>W6:</strong> minimax paths answered by the paths in an MST.</li>
+        <li class="fragment"><strong>W8:</strong> bipartite matching solved by translating to max flow.</li>
+      </ul>
+      <p class="fragment">A reduction is a <em>translation</em> between problem languages:
+        rewrite a question about $A$ as a question about $B$, so a $B$-solver answers it.</p>
+      <p class="fragment">So far we used translations to <strong>solve</strong> problems.
+        Today we run them in reverse — to <strong>spread hardness</strong>.</p>
+    </section>
+
+    <section>
+      <h2>Definition</h2>
+      <div class="box"><span class="tag">Definition</span>
+        $A \le_p B$ (&ldquo;$A$ reduces to $B$ in polynomial time&rdquo;) if there is a
+        polynomial-time computable function $f$ mapping instances of $A$ to instances of $B$
+        such that for every $x$: &nbsp;
+        $x$ is a yes-instance of $A$ $\iff$ $f(x)$ is a yes-instance of $B$.
+      </div>
+      <p class="fragment">Read $A \le_p B$ as: <em>&ldquo;$A$ is no harder than $B$
+        (up to polynomial factors)&rdquo;</em>.</p>
+      <p class="fragment smaller">Note both directions of the $\iff$ matter: the translation must
+        preserve yes <em>and</em> no answers.</p>
+    </section>
+
+    <section>
+      <h2>The reduction pipeline</h2>
+      <figure>
+        <svg width="920" height="200" viewBox="0 0 920 200" xmlns="http://www.w3.org/2000/svg"
+             font-family="Helvetica, Arial, sans-serif">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+          </defs>
+          <!-- instance of A -->
+          <rect x="20" y="60" width="170" height="70" rx="8" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <text x="105" y="90" text-anchor="middle" font-size="17" font-weight="600" fill="#2a2a2a">instance x</text>
+          <text x="105" y="113" text-anchor="middle" font-size="15" fill="#6a737d">of problem A</text>
+          <!-- translator -->
+          <rect x="250" y="55" width="180" height="80" rx="14" fill="#cad9ee" stroke="#2e588f" stroke-width="2"/>
+          <text x="340" y="88" text-anchor="middle" font-size="17" font-weight="600" fill="#1d3c66">translator f</text>
+          <text x="340" y="112" text-anchor="middle" font-size="15" fill="#1d3c66">poly time</text>
+          <!-- instance of B -->
+          <rect x="490" y="60" width="170" height="70" rx="8" fill="#fbf7ed" stroke="#2a2a2a" stroke-width="2"/>
+          <text x="575" y="90" text-anchor="middle" font-size="17" font-weight="600" fill="#2a2a2a">instance f(x)</text>
+          <text x="575" y="113" text-anchor="middle" font-size="15" fill="#6a737d">of problem B</text>
+          <!-- solver -->
+          <rect x="720" y="55" width="180" height="80" rx="14" fill="#c5d6c2" stroke="#4d7349" stroke-width="2"/>
+          <text x="810" y="88" text-anchor="middle" font-size="17" font-weight="600" fill="#2c4329">solver for B</text>
+          <text x="810" y="112" text-anchor="middle" font-size="15" fill="#2c4329">answer: yes / no</text>
+          <!-- arrows -->
+          <line x1="190" y1="95" x2="243" y2="95" stroke="#8d8678" stroke-width="2.5" marker-end="url(#arrow)"/>
+          <line x1="430" y1="95" x2="483" y2="95" stroke="#8d8678" stroke-width="2.5" marker-end="url(#arrow)"/>
+          <line x1="660" y1="95" x2="713" y2="95" stroke="#8d8678" stroke-width="2.5" marker-end="url(#arrow)"/>
+          <!-- return annotation -->
+          <path d="M 810 135 Q 460 205 110 135" fill="none" stroke="#b85a26" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+          <text x="460" y="192" text-anchor="middle" font-size="15" font-weight="600" fill="#6e3416">B's answer on f(x) = the answer for x</text>
+        </svg>
+        <figcaption>An algorithm for $B$ plus a translation $f$ gives an algorithm for $A$.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>What a reduction proves</h2>
+      <p>Suppose $A \le_p B$ — the same fact reads two ways:</p>
+      <div class="box fragment"><span class="tag">Easiness flows backward</span>
+        If $B$ has a polynomial-time algorithm, so does $A$:
+        translate, then solve.
+      </div>
+      <div class="box fragment"><span class="tag">Hardness flows forward</span>
+        Contrapositive: if $A$ has no polynomial-time algorithm, neither does $B$. (Today.)
+      </div>
+      <p class="fragment">And reductions compose: $A \le_p B$ and $B \le_p C$ give
+        $A \le_p C$ — polynomials of polynomials are polynomials.</p>
+    </section>
+
+    <section>
+      <h2>The classic pitfall</h2>
+      <div class="box warn"><span class="tag">Careful</span>
+        To prove that <strong>$B$ is hard</strong>, reduce <strong>FROM</strong> a known hard problem
+        <strong>TO</strong> $B$: &nbsp; $\underbrace{A}_{\text{known hard}} \le_p
+        \underbrace{B}_{\text{your problem}}$.
+        Reducing $B$ to a hard problem proves nothing — every problem in NP
+        reduces to SAT!
+      </div>
+      <ul>
+        <li class="fragment">$A \le_p B$ says &ldquo;$B$ is at least as hard as $A$&rdquo; —
+          the harder problem sits on the <em>right</em>.</li>
+      </ul>
+    </section>
+
+    <!-- ===================== PART 4: NP-COMPLETENESS ====================== -->
+    <section class="center">
+      <h1>NP-Completeness</h1>
+    </section>
+
+    <section>
+      <h2>The hardest problems in NP</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A problem $B$ is <strong>NP-hard</strong> if $A \le_p B$ for <em>every</em> $A \in$ NP.
+      </div>
+      <div class="box fragment"><span class="tag">Definition</span>
+        $B$ is <strong>NP-complete</strong> if $B$ is NP-hard <em>and</em> $B \in$ NP.
+      </div>
+    </section>
+
+    <section>
+      <h2>The hardest problems in NP</h2>
+      <p>NP-complete problems are the summit of NP: solve any one of them in
+        polynomial time and <em>everything</em> in NP collapses into P — so if
+        $\mathrm{P} \ne \mathrm{NP}$, none of them has a polynomial-time algorithm.</p>
+      <p class="fragment smaller">But wait — &ldquo;every problem in NP reduces to $B$&rdquo; is a claim about
+        infinitely many problems. How could we ever prove such a thing?</p>
+    </section>
+
+    <section>
+      <h2>Cook–Levin</h2>
+      <div class="box"><span class="tag">Theorem (Cook 1971, Levin 1973)</span>
+        SAT is NP-complete.
+      </div>
+      <p class="fragment">SAT $\in$ NP: the assignment is the certificate (we checked).
+        The remarkable part is NP-hardness: <em>every</em> problem with a
+        polynomial-time verifier reduces to SAT.</p>
+      <p class="fragment">This finally explains Week 2's remark: &ldquo;solving 3SAT in polynomial time
+        is equivalent to $\mathrm{P} = \mathrm{NP}$.&rdquo;</p>
+      <p class="fragment">We won't prove Cook–Levin — but the idea deserves one slide.</p>
+    </section>
+
+    <section>
+      <h2>Why SAT? Computation is local</h2>
+      <p>Take any $A \in$ NP with verifier $V$. Fix an input $x$.</p>
+      <ul>
+        <li class="fragment">Write the entire run of $V(x,c)$ as a <em>tableau</em>: one row per time
+          step, recording the machine's full state. Polynomial time $\Rightarrow$
+          polynomially many rows and columns.</li>
+        <li class="fragment">Each cell of the tableau is determined by a few neighbouring cells in the
+          row above — computation is <strong>local</strong>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Why SAT? Computation is local</h2>
+      <ul>
+        <li>Introduce a Boolean variable per cell value; each local consistency rule
+          becomes a few clauses; add clauses saying &ldquo;the final state accepts&rdquo;.</li>
+        <li class="fragment">The certificate bits $c$ stay as free variables. The formula is satisfiable
+          $\iff$ some certificate makes $V$ accept $\iff$ $x$ is a yes-instance.</li>
+      </ul>
+      <p class="fragment">One big (but polynomial-size) CNF formula simulates the whole computation.</p>
+    </section>
+
+    <section>
+      <h2>SAT $\le_p$ 3SAT</h2>
+      <p>3SAT: every clause has exactly 3 literals. To reduce SAT to 3SAT,
+        transform each clause:</p>
+      <ul>
+        <li class="fragment"><strong>Short clauses:</strong> pad by repeating a literal —
+          $(\ell_1 \vee \ell_2)$ becomes $(\ell_1 \vee \ell_2 \vee \ell_2)$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>SAT $\le_p$ 3SAT</h2>
+      <ul>
+        <li><strong>Long clauses:</strong> split, chaining fresh variables through:
+          $(\ell_1 \vee \ell_2 \vee \ell_3 \vee \ell_4 \vee \ell_5)$
+          <span class="fragment" data-fragment-index="0">becomes, with new variables $y_1, y_2$:</span></li>
+      </ul>
+      <p class="fragment" data-fragment-index="0" style="text-align:center;">
+        $(\ell_1 \vee \ell_2 \vee y_1) \wedge (\neg y_1 \vee \ell_3 \vee y_2)
+        \wedge (\neg y_2 \vee \ell_4 \vee \ell_5)$</p>
+      <p class="fragment">The $y_i$ act as a relay: a chain of &ldquo;if nothing so far was true,
+        the truth must still be ahead&rdquo;.</p>
+    </section>
+
+    <section>
+      <h2>Why the splitting gadget works</h2>
+      <p style="text-align:center;">$(\ell_1 \vee \ell_2 \vee y_1) \wedge (\neg y_1 \vee \ell_3 \vee y_2)
+        \wedge (\neg y_2 \vee \ell_4 \vee \ell_5)$</p>
+      <p class="fragment">($\Rightarrow$) If some $\ell_i$ is true, set the $y$'s to hand the baton to
+        its clause: e.g. if $\ell_3$ is true, set $y_1 = 1$, $y_2 = 0$ — all three clauses satisfied.</p>
+      <p class="fragment">($\Leftarrow$) If <em>all</em> $\ell_i$ are false, the first clause forces
+        $y_1 = 1$, then the second forces $y_2 = 1$, and the third clause
+        $(\neg y_2 \vee \ell_4 \vee \ell_5)$ dies. No assignment of the $y$'s can help.</p>
+    </section>
+
+    <section>
+      <h2>Why the splitting gadget works</h2>
+      <p>A clause of length $k$ becomes $k - 2$ clauses with $k - 3$ new variables:
+        the formula grows only linearly. Polynomial-time translation. $\checkmark$</p>
+      <div class="box fragment"><span class="tag">Corollary</span>
+        3SAT is NP-complete.
+      </div>
+    </section>
+
+    <section>
+      <h2>The plan from here</h2>
+      <p>With one hard problem in hand, hardness spreads by reductions — each arrow is a
+        polynomial-time translation:</p>
+      <p style="text-align:center; font-size:0.85em;" class="fragment">
+        $\text{SAT} \le_p \text{3SAT} \le_p \text{Independent Set} \le_p
+        \left\{\begin{array}{l}\text{Vertex Cover}\\ \text{Clique}\end{array}\right.$
+      </p>
+      <p class="fragment">Karp (1972) showed 21 problems NP-complete this way; today there are
+        thousands.</p>
+    </section>
+
+    <!-- ===================== PART 5: 3SAT TO IS =========================== -->
+    <section class="center">
+      <h1>3SAT $\le_p$ Independent Set</h1>
+    </section>
+
+    <section>
+      <h2>Target: independent set</h2>
+      <div class="box"><span class="tag">Problem</span>
+        <strong>Independent Set:</strong> given a graph $G$ and integer $k$, does $G$ have
+        a set of $\ge k$ vertices with no edge between any two of them?
+      </div>
+      <p class="fragment">On trees: linear-time DP (Week 3). In general graphs: we now show it's
+        NP-complete.</p>
+      <p class="fragment">We must translate an arbitrary 3SAT formula $\varphi$ with $m$ clauses into a
+        graph $G_\varphi$ and a number $k$ so that</p>
+      <p class="fragment" style="text-align:center;">
+        $\varphi$ satisfiable $\iff$ $G_\varphi$ has an independent set of size $k$.</p>
+      <p class="fragment">Logic in, graph out. This is where gadgets earn their name.</p>
+    </section>
+
+    <section>
+      <h2>The construction: a triangle per clause</h2>
+      <ul>
+        <li class="fragment">For each clause, create a <strong>triangle</strong> with one vertex per
+          literal occurrence.</li>
+        <li class="fragment">Triangle edges force a choice: an independent set can pick
+          <em>at most one</em> vertex per triangle.</li>
+        <li class="fragment">Add a <strong>conflict edge</strong> between every pair of vertices labelled
+          $x$ and $\neg x$ — you cannot commit to both a literal and its negation.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The construction: a triangle per clause</h2>
+      <ul>
+        <li>Set $k = m$, the number of clauses: to reach size $m$, the set must take
+          <em>exactly one</em> vertex from <em>every</em> triangle.</li>
+      </ul>
+      <p class="fragment">An independent set of size $m$ = a conflict-free choice of one literal per
+        clause = a satisfying assignment. Let's see it on our Week 2 formula.</p>
+    </section>
+
+    <section>
+      <h2>Worked example: the Week 2 formula</h2>
+      <p class="smaller" style="text-align:center; margin-bottom:0;">
+        $(x_3 \vee x_2 \vee x_4) \wedge (\neg x_4 \vee x_1 \vee \neg x_2) \wedge (\neg x_3 \vee \neg x_4 \vee \neg x_1)$
+        &nbsp;&nbsp; $k = 3$</p>
+      <figure>
+        <svg width="920" height="330" viewBox="0 0 920 330" xmlns="http://www.w3.org/2000/svg"
+             font-family="Helvetica, Arial, sans-serif">
+          <!-- triangle edges -->
+          <g stroke="#8d8678" stroke-width="2.5">
+            <line x1="160" y1="90" x2="85"  y2="230"/><line x1="160" y1="90" x2="235" y2="230"/><line x1="85"  y1="230" x2="235" y2="230"/>
+            <line x1="460" y1="90" x2="385" y2="230"/><line x1="460" y1="90" x2="535" y2="230"/><line x1="385" y1="230" x2="535" y2="230"/>
+            <line x1="760" y1="90" x2="685" y2="230"/><line x1="760" y1="90" x2="835" y2="230"/><line x1="685" y1="230" x2="835" y2="230"/>
+          </g>
+          <!-- conflict edges (dashed) -->
+          <g stroke="#b03a2e" stroke-width="2.5" stroke-dasharray="8 6" fill="none">
+            <path d="M 160 90 Q 425 -25 685 230"/>            <!-- x3 - ¬x3 -->
+            <path d="M 85 230 Q 310 320 535 230"/>            <!-- x2 - ¬x2 -->
+            <line x1="235" y1="230" x2="460" y2="90"/>        <!-- x4 - ¬x4 (C2) -->
+            <path d="M 235 230 Q 510 330 760 90"/>            <!-- x4 - ¬x4 (C3) -->
+            <path d="M 385 230 Q 610 315 835 230"/>           <!-- x1 - ¬x1 -->
+          </g>
+          <!-- nodes -->
+          <g stroke-width="2.5">
+            <circle cx="160" cy="90"  r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="85"  cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="235" cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="460" cy="90"  r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="385" cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="535" cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="760" cy="90"  r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="685" cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="835" cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+          </g>
+          <!-- labels -->
+          <g font-size="17" font-weight="600" fill="#2a2a2a" text-anchor="middle">
+            <text x="160" y="96">x₃</text><text x="85" y="236">x₂</text><text x="235" y="236">x₄</text>
+            <text x="460" y="96">¬x₄</text><text x="385" y="236">x₁</text><text x="535" y="236">¬x₂</text>
+            <text x="760" y="96">¬x₄</text><text x="685" y="236">¬x₃</text><text x="835" y="236">¬x₁</text>
+          </g>
+          <!-- clause labels -->
+          <g font-size="16" fill="#6a737d" text-anchor="middle">
+            <text x="160" y="300">clause 1</text>
+            <text x="460" y="300">clause 2</text>
+            <text x="760" y="300">clause 3</text>
+          </g>
+        </svg>
+        <figcaption>One triangle per clause (grey edges); dashed red conflict edges join $x$ to $\neg x$.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Finding the independent set</h2>
+      <p class="smaller" style="text-align:center; margin-bottom:0;">
+        Week 2's satisfying assignment $x_1 = 1,\ x_2 = 0,\ x_3 = 1,\ x_4 = 0$ picks one true literal per triangle:</p>
+      <figure>
+        <svg width="920" height="330" viewBox="0 0 920 330" xmlns="http://www.w3.org/2000/svg"
+             font-family="Helvetica, Arial, sans-serif">
+          <g stroke="#8d8678" stroke-width="2.5">
+            <line x1="160" y1="90" x2="85"  y2="230"/><line x1="160" y1="90" x2="235" y2="230"/><line x1="85"  y1="230" x2="235" y2="230"/>
+            <line x1="460" y1="90" x2="385" y2="230"/><line x1="460" y1="90" x2="535" y2="230"/><line x1="385" y1="230" x2="535" y2="230"/>
+            <line x1="760" y1="90" x2="685" y2="230"/><line x1="760" y1="90" x2="835" y2="230"/><line x1="685" y1="230" x2="835" y2="230"/>
+          </g>
+          <g stroke="#b03a2e" stroke-width="2.5" stroke-dasharray="8 6" fill="none" opacity="0.45">
+            <path d="M 160 90 Q 425 -25 685 230"/>
+            <path d="M 85 230 Q 310 320 535 230"/>
+            <line x1="235" y1="230" x2="460" y2="90"/>
+            <path d="M 235 230 Q 510 330 760 90"/>
+            <path d="M 385 230 Q 610 315 835 230"/>
+          </g>
+          <g stroke-width="2.5">
+            <circle cx="160" cy="90"  r="30" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+            <circle cx="85"  cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="235" cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="460" cy="90"  r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="385" cy="230" r="30" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+            <circle cx="535" cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="760" cy="90"  r="30" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+            <circle cx="685" cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="835" cy="230" r="30" fill="#fbf7ed" stroke="#2a2a2a"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="160" y="96" fill="#1f3520">x₃</text><text x="85" y="236" fill="#2a2a2a">x₂</text><text x="235" y="236" fill="#2a2a2a">x₄</text>
+            <text x="460" y="96" fill="#2a2a2a">¬x₄</text><text x="385" y="236" fill="#1f3520">x₁</text><text x="535" y="236" fill="#2a2a2a">¬x₂</text>
+            <text x="760" y="96" fill="#1f3520">¬x₄</text><text x="685" y="236" fill="#2a2a2a">¬x₃</text><text x="835" y="236" fill="#2a2a2a">¬x₁</text>
+          </g>
+          <g font-size="16" fill="#6a737d" text-anchor="middle">
+            <text x="160" y="300">picked: x₃</text>
+            <text x="460" y="300">picked: x₁</text>
+            <text x="760" y="300">picked: ¬x₄</text>
+          </g>
+        </svg>
+        <figcaption>$\{x_3,\ x_1,\ \neg x_4\}$: one per triangle, no conflict edge inside —
+          an independent set of size $3 = m$.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Correctness ($\Rightarrow$): satisfiable $\Rightarrow$ IS of size $m$</h2>
+      <ul>
+        <li class="fragment">Fix a satisfying assignment. Every clause has at least one true literal;
+          pick <em>one</em> true literal's vertex in each triangle. That's $m$ vertices.</li>
+        <li class="fragment">No triangle edge inside the set: we took one vertex per triangle.</li>
+        <li class="fragment">No conflict edge inside the set: a conflict edge joins $x$ and $\neg x$,
+          and a single assignment cannot make both true.</li>
+        <li class="fragment">So the chosen vertices form an independent set of size $m$. $\checkmark$</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Correctness ($\Leftarrow$): IS of size $m$ $\Rightarrow$ satisfiable</h2>
+      <ul>
+        <li class="fragment">Let $S$ be independent with $|S| = m$. Each triangle contributes at most
+          one vertex, and there are $m$ triangles — so <em>exactly one per triangle</em>.</li>
+        <li class="fragment">Read off an assignment: if a vertex labelled $x_i$ is in $S$, set
+          $x_i = 1$; if labelled $\neg x_i$, set $x_i = 0$.</li>
+        <li class="fragment">Consistent: $S$ contains no conflict edge, so it never selects both
+          $x_i$ and $\neg x_i$. Variables mentioned by no selected vertex: set arbitrarily.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Correctness ($\Leftarrow$): IS of size $m$ $\Rightarrow$ satisfiable</h2>
+      <ul>
+        <li>Every clause's triangle has a selected vertex whose literal is true —
+          every clause is satisfied. $\checkmark$</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Theorem</span>
+        Independent Set is NP-complete. (In NP: the set is the certificate.
+        NP-hard: 3SAT $\le_p$ IS above; the graph has $3m$ vertices — polynomial size.)
+      </div>
+    </section>
+
+    <!-- ===================== PART 6: IS / VC / CLIQUE ===================== -->
+    <section class="center">
+      <h1>Independent Set $\leftrightarrow$ Vertex Cover $\leftrightarrow$ Clique</h1>
+    </section>
+
+    <section>
+      <h2>IS and VC: Two Views</h2>
+      <div class="box"><span class="tag">Fact</span>
+        $S$ is an independent set of $G = (V, E)$ $\iff$ $V \setminus S$ is a vertex cover of $G$.
+      </div>
+      <p class="fragment smaller">Proof: $S$ independent $\iff$ no edge has both endpoints in $S$
+        $\iff$ every edge has an endpoint in $V \setminus S$ $\iff$ $V \setminus S$ covers all edges. $\square$</p>
+      <figure class="fragment">
+        <svg width="880" height="270" viewBox="0 0 880 270" xmlns="http://www.w3.org/2000/svg"
+             font-family="Helvetica, Arial, sans-serif">
+          <!-- left graph: IS highlighted -->
+          <g stroke="#8d8678" stroke-width="2.5">
+            <line x1="120" y1="60" x2="60"  y2="170"/><line x1="120" y1="60" x2="180" y2="170"/>
+            <line x1="60"  y1="170" x2="180" y2="170"/><line x1="180" y1="170" x2="290" y2="110"/>
+            <line x1="290" y1="110" x2="380" y2="60"/>
+          </g>
+          <g stroke-width="2.5">
+            <circle cx="120" cy="60"  r="26" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="60"  cy="170" r="26" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+            <circle cx="180" cy="170" r="26" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="290" cy="110" r="26" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="380" cy="60"  r="26" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="120" y="66" fill="#2a2a2a">A</text><text x="60" y="176" fill="#1f3520">B</text>
+            <text x="180" y="176" fill="#2a2a2a">C</text><text x="290" y="116" fill="#2a2a2a">D</text>
+            <text x="380" y="66" fill="#1f3520">E</text>
+          </g>
+          <text x="220" y="235" text-anchor="middle" font-size="16" font-weight="600" fill="#2c4329">independent set S = {B, E}</text>
+          <!-- right graph: VC highlighted -->
+          <g stroke="#8d8678" stroke-width="2.5">
+            <line x1="560" y1="60" x2="500" y2="170"/><line x1="560" y1="60" x2="620" y2="170"/>
+            <line x1="500" y1="170" x2="620" y2="170"/><line x1="620" y1="170" x2="730" y2="110"/>
+            <line x1="730" y1="110" x2="820" y2="60"/>
+          </g>
+          <g stroke-width="2.5">
+            <circle cx="560" cy="60"  r="26" fill="#f1c79f" stroke="#b85a26" stroke-width="4"/>
+            <circle cx="500" cy="170" r="26" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="620" cy="170" r="26" fill="#f1c79f" stroke="#b85a26" stroke-width="4"/>
+            <circle cx="730" cy="110" r="26" fill="#f1c79f" stroke="#b85a26" stroke-width="4"/>
+            <circle cx="820" cy="60"  r="26" fill="#fbf7ed" stroke="#2a2a2a"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="560" y="66" fill="#6e3416">A</text><text x="500" y="176" fill="#2a2a2a">B</text>
+            <text x="620" y="176" fill="#6e3416">C</text><text x="730" y="116" fill="#6e3416">D</text>
+            <text x="820" y="66" fill="#2a2a2a">E</text>
+          </g>
+          <text x="660" y="235" text-anchor="middle" font-size="16" font-weight="600" fill="#6e3416">vertex cover V∖S = {A, C, D}</text>
+        </svg>
+        <figcaption>The same graph: the complement of an independent set covers every edge.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>So vertex cover is NP-complete too</h2>
+      <p>The fact gives an instant two-way translation:</p>
+      <p class="fragment" style="text-align:center;">
+        $G$ has an independent set of size $\ge k$
+        $\iff$ $G$ has a vertex cover of size $\le n - k$.</p>
+      <ul>
+        <li class="fragment">The &ldquo;reduction&rdquo; $f$ barely does anything: same graph,
+          replace $k$ by $n - k$. Reductions can be this cheap.</li>
+        <li class="fragment">IS $\le_p$ VC, hence VC is NP-hard; the cover itself is a certificate,
+          so VC $\in$ NP.</li>
+      </ul>
+      <div class="box fragment"><span class="tag">Corollary</span>
+        Vertex Cover is NP-complete.
+      </div>
+    </section>
+
+    <section>
+      <h2>Clique: flip the edges</h2>
+      <div class="box"><span class="tag">Fact</span>
+        $S$ is an independent set of $G$ $\iff$ $S$ is a clique of the complement graph
+        $\bar G$ (same vertices; edges exactly where $G$ has none).
+      </div>
+      <figure class="fragment">
+        <svg width="640" height="204" viewBox="0 0 880 280" xmlns="http://www.w3.org/2000/svg"
+             font-family="Helvetica, Arial, sans-serif">
+          <!-- left: path graph, IS {A,C,E} -->
+          <g stroke="#8d8678" stroke-width="2.5">
+            <line x1="60" y1="130" x2="150" y2="130"/><line x1="150" y1="130" x2="240" y2="130"/>
+            <line x1="240" y1="130" x2="330" y2="130"/><line x1="330" y1="130" x2="420" y2="130"/>
+          </g>
+          <g stroke-width="2.5">
+            <circle cx="60"  cy="130" r="26" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+            <circle cx="150" cy="130" r="26" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="240" cy="130" r="26" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+            <circle cx="330" cy="130" r="26" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="420" cy="130" r="26" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="60" y="136" fill="#1f3520">A</text><text x="150" y="136" fill="#2a2a2a">B</text>
+            <text x="240" y="136" fill="#1f3520">C</text><text x="330" y="136" fill="#2a2a2a">D</text>
+            <text x="420" y="136" fill="#1f3520">E</text>
+          </g>
+          <text x="240" y="230" text-anchor="middle" font-size="16" font-weight="600" fill="#2c4329">G: independent set {A, C, E}</text>
+          <!-- right: complement, clique A-C-E highlighted; pentagon layout -->
+          <!-- pentagon: A(690,45) B(790,115) C(752,230) D(628,230) E(590,115) -->
+          <g stroke="#8d8678" stroke-width="2.5">
+            <line x1="690" y1="45"  x2="628" y2="230"/>  <!-- A-D -->
+            <line x1="790" y1="115" x2="628" y2="230"/>  <!-- B-D -->
+            <line x1="790" y1="115" x2="590" y2="115"/>  <!-- B-E -->
+          </g>
+          <g stroke="#b85a26" stroke-width="4.5">
+            <line x1="690" y1="45"  x2="752" y2="230"/>  <!-- A-C -->
+            <line x1="690" y1="45"  x2="590" y2="115"/>  <!-- A-E -->
+            <line x1="752" y1="230" x2="590" y2="115"/>  <!-- C-E -->
+          </g>
+          <g stroke-width="2.5">
+            <circle cx="690" cy="45"  r="26" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+            <circle cx="790" cy="115" r="26" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="752" cy="230" r="26" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+            <circle cx="628" cy="230" r="26" fill="#fbf7ed" stroke="#2a2a2a"/>
+            <circle cx="590" cy="115" r="26" fill="#b5cdb0" stroke="#2c4329" stroke-width="4"/>
+          </g>
+          <g font-size="17" font-weight="600" text-anchor="middle">
+            <text x="690" y="51" fill="#1f3520">A</text><text x="790" y="121" fill="#2a2a2a">B</text>
+            <text x="752" y="236" fill="#1f3520">C</text><text x="628" y="236" fill="#2a2a2a">D</text>
+            <text x="590" y="121" fill="#1f3520">E</text>
+          </g>
+          <text x="690" y="277" text-anchor="middle" font-size="16" font-weight="600" fill="#2c4329">Ḡ: clique {A, C, E}</text>
+        </svg>
+        <figcaption>Non-edges of $G$ become edges of $\bar G$: mutual strangers become mutual friends.</figcaption>
+      </figure>
+      <p class="fragment smaller">Reduction: map $(G, k)$ to $(\bar G, k)$ — computable in polynomial
+        time. So Clique is NP-complete as well.</p>
+    </section>
+
+    <section>
+      <h2>Three problems, one hardness</h2>
+      <table class="results" style="font-size:0.85em;">
+        <thead><tr><th>Problem</th><th>Question</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="q">Independent Set</td><td>$\ge k$ mutually non-adjacent vertices?</td>
+              <td>NP-complete</td></tr>
+          <tr><td class="q">Vertex Cover</td><td>$\le k$ vertices touching all edges?</td>
+              <td>NP-complete</td></tr>
+          <tr><td class="q">Clique</td><td>$\ge k$ mutually adjacent vertices?</td>
+              <td>NP-complete</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Three problems, one hardness</h2>
+      <p class="fragment">They are the <em>same problem</em> wearing three costumes — complementing
+        the set, or complementing the edges, translates between them for free.</p>
+      <p class="fragment">This is the power of $\le_p$: hardness proved once radiates outward.</p>
+    </section>
+
+    <!-- ===================== PART 7: HAMILTONIAN PATH ===================== -->
+    <section class="center">
+      <h1>Hamiltonian Path</h1>
+    </section>
+
+    <section>
+      <h2>Definition and example</h2>
+      <div class="box"><span class="tag">Definition</span>
+        A <strong>Hamiltonian path</strong> in $G$ visits every <em>vertex</em> exactly once.
+        Decision problem: does $G$ have one?
+      </div>
+      <figure>
+        <svg width="348" height="220" viewBox="110 8 380 240" xmlns="http://www.w3.org/2000/svg"
+             font-family="Helvetica, Arial, sans-serif">
+          <!-- non-path edges -->
+          <g stroke="#8d8678" stroke-width="2.5">
+            <line x1="280" y1="60" x2="160" y2="190"/>  <!-- b-d -->
+            <line x1="160" y1="190" x2="300" y2="190"/> <!-- d-e -->
+            <line x1="300" y1="190" x2="400" y2="60"/>  <!-- e-c -->
+          </g>
+          <!-- Hamiltonian path d-a-b-c-f-e -->
+          <g stroke="#b85a26" stroke-width="4.5">
+            <line x1="160" y1="190" x2="160" y2="60"/>  <!-- d-a -->
+            <line x1="160" y1="60"  x2="280" y2="60"/>  <!-- a-b -->
+            <line x1="280" y1="60"  x2="400" y2="60"/>  <!-- b-c -->
+            <line x1="400" y1="60"  x2="440" y2="190"/> <!-- c-f -->
+            <line x1="440" y1="190" x2="300" y2="190"/> <!-- f-e -->
+          </g>
+          <g stroke-width="2.5">
+            <circle cx="160" cy="60"  r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="280" cy="60"  r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="400" cy="60"  r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="160" cy="190" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="300" cy="190" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="440" cy="190" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+          </g>
+          <g font-size="17" font-weight="600" fill="#2c4329" text-anchor="middle">
+            <text x="160" y="66">a</text><text x="280" y="66">b</text><text x="400" y="66">c</text>
+            <text x="160" y="196">d</text><text x="300" y="196">e</text><text x="440" y="196">f</text>
+          </g>
+        </svg>
+        <figcaption>A Hamiltonian path $d \to a \to b \to c \to f \to e$ (orange).</figcaption>
+      </figure>
+      <p class="fragment">The certificate is the ordering — easy to verify, so the problem is in NP.</p>
+    </section>
+
+    <section>
+      <h2>Hamiltonian path is NP-complete</h2>
+      <div class="box"><span class="tag">Theorem</span>
+        Hamiltonian Path is NP-complete (via 3SAT $\le_p$ Hamiltonian Path).
+      </div>
+      <p class="fragment">We skip the construction. Each variable becomes a chain of vertices,
+        traversed left-to-right for <em>true</em> and right-to-left for <em>false</em>; each
+        clause becomes a vertex that can be visited only by a chain going the satisfying way.</p>
+      <p class="fragment">The lesson isn't the wiring: NP-completeness proofs are
+        <em>constructions</em>, and gadget engineering is a real skill.</p>
+    </section>
+
+    <section>
+      <h2>Eulerian path</h2>
+      <div class="box"><span class="tag">Definition</span>
+        An <strong>Eulerian path</strong> in $G$ uses every <em>edge</em> exactly once
+        (vertices may repeat). Decision problem: does $G$ have one?
+      </div>
+      <figure>
+        <svg width="348" height="220" viewBox="110 8 380 240" xmlns="http://www.w3.org/2000/svg"
+             font-family="Helvetica, Arial, sans-serif">
+          <g stroke="#8d8678" stroke-width="2.5">
+            <line x1="280" y1="60" x2="160" y2="190"/>  <!-- b-d -->
+            <line x1="160" y1="190" x2="300" y2="190"/>  <!-- d-e -->
+            <line x1="300" y1="190" x2="400" y2="60"/>  <!-- e-c -->
+            <line x1="160" y1="190" x2="160" y2="60"/>  <!-- d-a -->
+            <line x1="160" y1="60" x2="280" y2="60"/>  <!-- a-b -->
+            <line x1="280" y1="60" x2="400" y2="60"/>  <!-- b-c -->
+            <line x1="400" y1="60" x2="440" y2="190"/>  <!-- c-f -->
+            <line x1="440" y1="190" x2="300" y2="190"/>  <!-- f-e -->
+          </g>
+          <g stroke-width="2.5">
+            <circle cx="160" cy="60" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="280" cy="60" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="400" cy="60" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="160" cy="190" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="300" cy="190" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="440" cy="190" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+          </g>
+          <g font-size="17" font-weight="600" fill="#2c4329" text-anchor="middle">
+            <text x="160" y="66">a</text><text x="280" y="66">b</text><text x="400" y="66">c</text><text x="160" y="196">d</text><text x="300" y="196">e</text><text x="440" y="196">f</text>
+          </g>
+        </svg>
+        <figcaption>The graph from the Hamiltonian path example.</figcaption>
+      </figure>
+      <p class="fragment">It has a Hamiltonian path. Does it have an Eulerian path?</p>
+    </section>
+
+    <section>
+      <h2>Contrast: Eulerian path is easy</h2>
+      <table class="results">
+        <thead><tr><th></th><th>Eulerian path</th><th>Hamiltonian path</th></tr></thead>
+        <tbody>
+          <tr><td class="q">visits every&hellip;</td><td><em>edge</em> exactly once</td>
+              <td><em>vertex</em> exactly once</td></tr>
+          <tr class="fragment"><td class="q">complexity</td><td>polynomial (linear!)</td><td>NP-complete</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Contrast: Eulerian path is easy</h2>
+      <p><strong>Why?</strong> Eulerian path has a clean characterisation — connected +
+        at most two odd-degree vertices. For Hamiltonian path, no such characterisation
+        is known (or expected).</p>
+      <p class="fragment">Euler's condition is just degree counting; Hamiltonicity refuses
+        to localise.</p>
+      <p class="fragment">Moral: problem statements one word apart can sit on opposite sides
+        of the P / NP-complete divide. Only proofs — algorithms or reductions — tell you which.</p>
+    </section>
+
+    <section>
+      <h2>Back to our graph</h2>
+      <figure>
+        <svg width="348" height="220" viewBox="110 8 380 240" xmlns="http://www.w3.org/2000/svg"
+             font-family="Helvetica, Arial, sans-serif">
+          <g stroke="#8d8678" stroke-width="2.5">
+            <line x1="280" y1="60" x2="160" y2="190"/>  <!-- b-d -->
+            <line x1="160" y1="190" x2="300" y2="190"/>  <!-- d-e -->
+            <line x1="300" y1="190" x2="400" y2="60"/>  <!-- e-c -->
+            <line x1="160" y1="190" x2="160" y2="60"/>  <!-- d-a -->
+            <line x1="160" y1="60" x2="280" y2="60"/>  <!-- a-b -->
+            <line x1="280" y1="60" x2="400" y2="60"/>  <!-- b-c -->
+            <line x1="400" y1="60" x2="440" y2="190"/>  <!-- c-f -->
+            <line x1="440" y1="190" x2="300" y2="190"/>  <!-- f-e -->
+          </g>
+          <g stroke-width="2.5">
+            <circle cx="160" cy="60" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+            <circle cx="280" cy="60" r="26" fill="#f4d3bd" stroke="#b85a26"/>
+            <circle cx="400" cy="60" r="26" fill="#f4d3bd" stroke="#b85a26"/>
+            <circle cx="160" cy="190" r="26" fill="#f4d3bd" stroke="#b85a26"/>
+            <circle cx="300" cy="190" r="26" fill="#f4d3bd" stroke="#b85a26"/>
+            <circle cx="440" cy="190" r="26" fill="#c5d6c2" stroke="#4d7349"/>
+          </g>
+          <g font-size="17" font-weight="600" fill="#2c4329" text-anchor="middle">
+            <text x="160" y="66">a</text><text x="280" y="66">b</text><text x="400" y="66">c</text><text x="160" y="196">d</text><text x="300" y="196">e</text><text x="440" y="196">f</text>
+          </g>
+          <!-- degrees -->
+          <g font-size="15" fill="#6a737d" text-anchor="middle">
+            <text x="160" y="24">deg 2</text><text x="280" y="24">deg 3</text><text x="400" y="24">deg 3</text><text x="160" y="240">deg 3</text><text x="300" y="240">deg 3</text><text x="440" y="240">deg 2</text>
+          </g>
+        </svg>
+        <figcaption>$b, c, d, e$ have odd degree (orange).</figcaption>
+      </figure>
+      <ul>
+        <li class="fragment">Four odd-degree vertices, so <strong>no</strong> Eulerian path &mdash;
+          found by counting degrees.</li>
+        <li class="fragment">Yet $d \to a \to b \to c \to f \to e$ is a Hamiltonian path.
+          The two problems really are different.</li>
+      </ul>
+    </section>
+
+    <!-- ===================== PART 8: SUBSET SUM =========================== -->
+    <section class="center">
+      <h1>Subset Sum</h1>
+    </section>
+
+    <section>
+      <h2>Subset Sum</h2>
+      <div class="box"><span class="tag">Problem</span>
+        <strong>Subset Sum:</strong> given positive integers $a_1, \dots, a_n$ and a target $T$,
+        is there a subset of the $a_i$ that sums to <em>exactly</em> $T$?
+      </div>
+      <p class="fragment">Example: $\{3, 5, 8, 13\}$ with $T = 21$. Yes: $8 + 13 = 21$.</p>
+      <p class="fragment">In NP: the subset is the certificate. Add it up and compare with $T$.</p>
+      <p class="fragment">Our first problem today with <em>numbers</em> in it &mdash; and the numbers
+        will matter.</p>
+    </section>
+
+    <section>
+      <h2>A DP for Subset Sum</h2>
+      <p>Let $R[i][s]$ be true if some subset of $a_1, \dots, a_i$ sums to exactly $s$.</p>
+      <ul>
+        <li class="fragment">Base: $R[0][s]$ is true only for $s = 0$ (the empty subset).</li>
+        <li class="fragment">Either $a_i$ is left out, or it is used ($s \ge a_i$):
+          $$R[i][s] = R[i-1][s] \;\vee\; R[i-1][s - a_i]$$</li>
+        <li class="fragment">Answer: $R[n][T]$. There are $(n+1)(T+1)$ entries, each $O(1)$:
+          time $O(nT)$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>A DP for Subset Sum</h2>
+      <p>On $\{3, 5, 8, 13\}$ with $T = 21$: the sums $s \le 21$ with $R[i][s]$ true.</p>
+      <table class="results tight" style="font-size:0.85em;">
+        <thead><tr><th>$i$</th><th>$a_i$</th><th>Reachable sums</th></tr></thead>
+        <tbody>
+          <tr><td>$0$</td><td></td><td>$0$</td></tr>
+          <tr class="fragment"><td>$1$</td><td>$3$</td><td>$0, 3$</td></tr>
+          <tr class="fragment"><td>$2$</td><td>$5$</td><td>$0, 3, 5, 8$</td></tr>
+          <tr class="fragment"><td>$3$</td><td>$8$</td><td>$0, 3, 5, 8, 11, 13, 16$</td></tr>
+          <tr class="fragment"><td>$4$</td><td>$13$</td>
+              <td>$0, 3, 5, 8, 11, 13, 16, 18,$ <span class="hl">$21$</span></td></tr>
+        </tbody>
+      </table>
+      <p class="fragment">Each row is the previous row, together with the previous row shifted
+        up by $a_i$.</p>
+    </section>
+
+    <section>
+      <h2>A paradox?</h2>
+      <div class="box warn"><span class="tag">Puzzle</span>
+        We are about to prove that Subset Sum is NP-complete. But we just solved it in
+        $O(nT)$ time &mdash; a polynomial! Have we proved P $=$ NP?
+      </div>
+      <p class="fragment">Hint: what is the <em>size of the input</em>?</p>
+    </section>
+
+    <section>
+      <h2>Input size counts bits</h2>
+      <ul>
+        <li class="fragment">Input size is measured in bits, and the number $T$ takes only
+          about $\log_2 T$ of them.</li>
+        <li class="fragment">So $O(nT) = O(n \cdot 2^{\log_2 T})$ is <strong>exponential</strong>
+          in the length of $T$.</li>
+        <li class="fragment">Concretely: $100$ numbers of $100$ bits each is a $10{,}000$-bit input,
+          but the table has about $100 \cdot 2^{100} \approx 10^{32}$ entries.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Input size counts bits</h2>
+      <div class="box"><span class="tag">Definition</span>
+        An algorithm is <strong>pseudo-polynomial</strong> if its running time is polynomial in
+        $n$ and the <em>values</em> of the numbers &mdash; equivalently, polynomial if the
+        numbers were written in unary.
+      </div>
+      <p class="fragment">The DP is fast exactly when the numbers are small: if $T \le n^{c}$,
+        then $O(nT)$ is polynomial.</p>
+      <p class="fragment">So a reduction 3SAT $\le_p$ Subset Sum <em>must</em> produce numbers
+        with polynomially many digits but exponentially large values. That is our design
+        constraint.</p>
+    </section>
+
+    <section>
+      <h2>Designing the reduction</h2>
+      <p>Given a 3SAT formula $\varphi$ with variables $x_1, \dots, x_n$ and clauses
+        $C_1, \dots, C_m$, build numbers and a target $T$ so that</p>
+      <p style="text-align:center;">$\varphi$ satisfiable $\iff$ some subset sums to exactly $T$.</p>
+      <ul>
+        <li class="fragment">Choosing a subset must encode a truth assignment: for each of the
+          $n$ variables, <em>exactly one</em> of $x_i$, $\neg x_i$.</li>
+        <li class="fragment">Hitting $T$ must certify that each of the $m$ clauses has a true
+          literal.</li>
+      </ul>
+      <p class="fragment">That is $n + m$ constraints. But Subset Sum gives us only
+        <em>one</em> equation&hellip;</p>
+    </section>
+
+    <section>
+      <h2>Digits as counters</h2>
+      <p>Trick: one equation between big numbers can hide many equations between
+        digits.</p>
+      <ul>
+        <li class="fragment">Give each constraint its own decimal column.</li>
+        <li class="fragment">Put a $1$ in a number's column if choosing that number should
+          count toward that constraint.</li>
+      </ul>
+      <table class="results digits fragment" style="font-size:0.8em; margin:0.4em auto;">
+        <thead><tr><th></th><th>col A</th><th>col B</th><th>col C</th></tr></thead>
+        <tbody>
+          <tr><td class="q">$110$</td><td>1</td><td>1</td><td>0</td></tr>
+          <tr><td class="q">$011$</td><td>0</td><td>1</td><td>1</td></tr>
+          <tr class="total"><td class="q">sum $121$</td><td>1</td><td>2</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Digits as counters</h2>
+      <p>Each digit of the sum <em>counts</em> the chosen numbers marked in that column
+        &mdash; as long as no column reaches $10$ and carries into its neighbour.</p>
+      <div class="box fragment"><span class="tag">Key idea</span>
+        With no carries, &ldquo;the subset sums to $T$&rdquo; means &ldquo;in
+        <em>every</em> column, the count equals $T$'s digit.&rdquo; That is $n + m$
+        checks packed into one equation.
+      </div>
+    </section>
+
+    <section>
+      <h2>Layout of every number</h2>
+      <p>Every number we build, and $T$, has exactly $n + m$ decimal digits:</p>
+      <div class="dlayout-ends"><span>&larr; high-order</span><span>low-order &rarr;</span></div>
+      <div class="dlayout">
+        <div class="grp var">
+          <div class="cells"><div class="cell">$x_1$</div><div class="cell">$x_2$</div>
+            <div class="cell">$\cdots$</div><div class="cell">$x_n$</div></div>
+          <div class="brace"></div>
+          <div class="lbl">$n$ variable digits</div>
+        </div>
+        <div class="grp cls">
+          <div class="cells"><div class="cell">$C_1$</div><div class="cell">$C_2$</div>
+            <div class="cell">$\cdots$</div><div class="cell">$C_m$</div></div>
+          <div class="brace"></div>
+          <div class="lbl">$m$ clause digits</div>
+        </div>
+      </div>
+      <ul>
+        <li class="fragment">Digit $x_i$: does this number set the value of $x_i$?</li>
+        <li class="fragment">Digit $C_j$: does this number help satisfy $C_j$?</li>
+        <li class="fragment">Only $n + m$ digits long, yet values up to $10^{n+m}$ &mdash; exactly
+          the design constraint.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>One column per variable</h2>
+      <ul>
+        <li>For each variable $x_i$, make two numbers: $t_i$ (&ldquo;$x_i$ is true&rdquo;)
+          and $f_i$ (&ldquo;$x_i$ is false&rdquo;).</li>
+        <li class="fragment">Both have a $1$ in column $x_i$ and a $0$ in every other
+          variable column.</li>
+        <li class="fragment">$T$ has a $1$ in column $x_i$.</li>
+      </ul>
+      <p class="fragment">Column $x_i$ sums to $1$ $\iff$ <em>exactly one</em> of $t_i, f_i$ is
+        chosen $\iff$ $x_i$ gets exactly one truth value.</p>
+      <div class="box warn fragment"><span class="tag">So far</span>
+        $t_i$ and $f_i$ look identical. They will differ in the <em>clause</em> columns,
+        which record what each choice makes true.
+      </div>
+    </section>
+
+    <section>
+      <h2>One column per clause</h2>
+      <ul>
+        <li>Put a $1$ in column $C_j$ of $t_i$ if $x_i$ appears in $C_j$, and of $f_i$ if
+          $\neg x_i$ appears in $C_j$.</li>
+        <li class="fragment">Then column $C_j$ sums to the number of <em>true literals</em> in
+          $C_j$: <span style="white-space:nowrap;">$0, 1, 2$ or $3$.</span></li>
+      </ul>
+      <div class="box warn fragment"><span class="tag">Obstruction</span>
+        A clause needs <em>at least one</em> true literal, but Subset Sum only tests
+        <em>equality</em>. Which digit should $T$ have in column $C_j$?
+      </div>
+    </section>
+
+    <section>
+      <h2>Slack closes the gap</h2>
+      <ul>
+        <li>For each clause $C_j$, add two <strong>slack numbers</strong> $s_j, s_j'$, each
+          with a single $1$ in column $C_j$.</li>
+        <li class="fragment">Give $T$ the digit $3$ in column $C_j$.</li>
+        <li class="fragment">$1$, $2$ or $3$ true literals: top up with $2$, $1$ or $0$
+          slack numbers.</li>
+        <li class="fragment">$0$ true literals: slack adds at most $2 &lt; 3$, so the column
+          cannot reach $3$ &mdash; exactly the unsatisfied case.</li>
+      </ul>
+      <p class="fragment">Largest column sum: $3 + 2 = 5 \le 9$, so nothing ever carries.</p>
+    </section>
+
+    <section>
+      <h2>Worked example</h2>
+      <p class="smaller" style="text-align:center; margin-bottom:0;">
+        $\varphi = (x_1 \vee \neg x_2 \vee x_3) \wedge (\neg x_1 \vee x_2 \vee x_3)$</p>
+      <div class="cols" style="align-items:center;">
+        <table class="results digits" style="font-size:0.75em;">
+          <thead><tr><th></th><th>$x_1$</th><th>$x_2$</th><th>$x_3$</th>
+            <th class="sep">$C_1$</th><th>$C_2$</th></tr></thead>
+          <tbody>
+            <tr><td class="q">$t_1$</td><td>1</td><td>0</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+            <tr><td class="q">$f_1$</td><td>1</td><td>0</td><td>0</td><td class="sep">0</td><td>1</td></tr>
+            <tr><td class="q">$t_2$</td><td>0</td><td>1</td><td>0</td><td class="sep">0</td><td>1</td></tr>
+            <tr><td class="q">$f_2$</td><td>0</td><td>1</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+            <tr><td class="q">$t_3$</td><td>0</td><td>0</td><td>1</td><td class="sep">1</td><td>1</td></tr>
+            <tr><td class="q">$f_3$</td><td>0</td><td>0</td><td>1</td><td class="sep">0</td><td>0</td></tr>
+            <tr><td class="q">$s_1, s_1'$</td><td>0</td><td>0</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+            <tr><td class="q">$s_2, s_2'$</td><td>0</td><td>0</td><td>0</td><td class="sep">0</td><td>1</td></tr>
+            <tr class="total"><td class="q">$T$</td><td>1</td><td>1</td><td>1</td><td class="sep">3</td><td>3</td></tr>
+          </tbody>
+        </table>
+        <div>
+          <p class="fragment">Each row is a base-10 number: $t_1 = 10010$, $f_3 = 100$,
+            $T = 11133$.</p>
+          <p class="fragment">In general: $2n + 2m$ numbers of $n + m$ digits each &mdash;
+            polynomial size.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Worked example</h2>
+      <p class="smaller" style="text-align:center; margin:0;">
+        $\varphi = (x_1 \vee \neg x_2 \vee x_3) \wedge (\neg x_1 \vee x_2 \vee x_3)$</p>
+      <p class="smaller" style="text-align:center; margin-top:0.1em; margin-bottom:0;">
+        $x_1 = 1,\ x_2 = 0,\ x_3 = 1$ &nbsp; picks $t_1, f_2, t_3$; then slack tops up $C_2$</p>
+      <div class="cols" style="align-items:center;">
+        <table class="results digits" style="font-size:0.75em;">
+          <thead><tr><th></th><th>$x_1$</th><th>$x_2$</th><th>$x_3$</th>
+            <th class="sep">$C_1$</th><th>$C_2$</th></tr></thead>
+          <tbody>
+            <tr class="hlrow"><td class="q">$t_1$</td><td>1</td><td>0</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+            <tr><td class="q">$f_1$</td><td>1</td><td>0</td><td>0</td><td class="sep">0</td><td>1</td></tr>
+            <tr><td class="q">$t_2$</td><td>0</td><td>1</td><td>0</td><td class="sep">0</td><td>1</td></tr>
+            <tr class="hlrow"><td class="q">$f_2$</td><td>0</td><td>1</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+            <tr class="hlrow"><td class="q">$t_3$</td><td>0</td><td>0</td><td>1</td><td class="sep">1</td><td>1</td></tr>
+            <tr><td class="q">$f_3$</td><td>0</td><td>0</td><td>1</td><td class="sep">0</td><td>0</td></tr>
+            <tr><td class="q">$s_1, s_1'$</td><td>0</td><td>0</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+            <tr class="hlrow"><td class="q">$s_2, s_2'$</td><td>0</td><td>0</td><td>0</td><td class="sep">0</td><td>1</td></tr>
+            <tr class="total"><td class="q">$T$</td><td>1</td><td>1</td><td>1</td><td class="sep">3</td><td>3</td></tr>
+          </tbody>
+        </table>
+        <div>
+          <p>$C_1$: three true literals, no slack.</p>
+          <p>$C_2$: one true literal, plus $s_2$ and $s_2'$.</p>
+          <p class="fragment">$10010 + 1010 + 111$<br>$+\, 1 + 1 = 11133 = T$ $\checkmark$</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Worked example</h2>
+      <p class="smaller" style="text-align:center; margin:0;">
+        $\varphi = (x_1 \vee \neg x_2 \vee x_3) \wedge (\neg x_1 \vee x_2 \vee x_3)$</p>
+      <p class="smaller" style="text-align:center; margin-top:0.1em; margin-bottom:0;">
+        $x_1 = 1,\ x_2 = 0,\ x_3 = 0$ &nbsp; picks $t_1, f_2, f_3$, but $C_2$ is unsatisfied</p>
+      <div class="cols" style="align-items:center;">
+        <table class="results digits" style="font-size:0.75em;">
+          <thead><tr><th></th><th>$x_1$</th><th>$x_2$</th><th>$x_3$</th>
+            <th class="sep">$C_1$</th><th>$C_2$</th></tr></thead>
+          <tbody>
+            <tr class="hlrow"><td class="q">$t_1$</td><td>1</td><td>0</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+            <tr><td class="q">$f_1$</td><td>1</td><td>0</td><td>0</td><td class="sep">0</td><td>1</td></tr>
+            <tr><td class="q">$t_2$</td><td>0</td><td>1</td><td>0</td><td class="sep">0</td><td>1</td></tr>
+            <tr class="hlrow"><td class="q">$f_2$</td><td>0</td><td>1</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+            <tr><td class="q">$t_3$</td><td>0</td><td>0</td><td>1</td><td class="sep">1</td><td>1</td></tr>
+            <tr class="hlrow"><td class="q">$f_3$</td><td>0</td><td>0</td><td>1</td><td class="sep">0</td><td>0</td></tr>
+            <tr><td class="q">$s_1, s_1'$</td><td>0</td><td>0</td><td>0</td><td class="sep">1</td><td>0</td></tr>
+            <tr class="hlrow"><td class="q">$s_2, s_2'$</td><td>0</td><td>0</td><td>0</td><td class="sep">0</td><td>1</td></tr>
+            <tr class="total"><td class="q">$T$</td><td>1</td><td>1</td><td>1</td><td class="sep">3</td><td>3</td></tr>
+          </tbody>
+        </table>
+        <div>
+          <p>$C_2$: no true literal. Column $C_2$ gets $0$ from $t_1, f_2, f_3$.</p>
+          <p class="fragment">Even with both $s_2, s_2'$ it reaches only $2 \ne 3$.
+            No subset hits $T$ with this choice.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Correctness ($\Rightarrow$)</h2>
+      <p>Given a satisfying assignment:</p>
+      <ul>
+        <li class="fragment">Choose $t_i$ if $x_i = 1$, else $f_i$. Every variable column
+          sums to $1$.</li>
+        <li class="fragment">Clause $C_j$ has $\ell_j \in \{1, 2, 3\}$ true literals, so column
+          $C_j$ gets $\ell_j$; add $3 - \ell_j \le 2$ of its slack numbers.</li>
+        <li class="fragment">Every column matches $T$'s digit and nothing carries, so the chosen
+          numbers sum to $T$. $\checkmark$</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Correctness ($\Leftarrow$)</h2>
+      <p>Given a subset that sums to $T$:</p>
+      <ul>
+        <li class="fragment">Every column sums to at most $5$, so nothing carries: each column
+          of the subset matches $T$'s digit.</li>
+        <li class="fragment">Column $x_i$ is $1$: exactly one of $t_i, f_i$ is chosen.
+          Set $x_i$ accordingly.</li>
+        <li class="fragment">Column $C_j$ is $3$ and slack supplies at most $2$, so some chosen
+          $t_i$ or $f_i$ has a $1$ there: a true literal of $C_j$. $\checkmark$</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The paradox, resolved</h2>
+      <div class="box"><span class="tag">Theorem</span>
+        Subset Sum is NP-complete. (In NP: the subset is the certificate.
+        NP-hard: 3SAT $\le_p$ Subset Sum above.)
+      </div>
+      <p class="fragment">The reduction's target $T = 1\cdots1\,3\cdots3$ has $n + m$ digits:
+        short to write down, but its <em>value</em> is about $10^{n+m}$.</p>
+      <p class="fragment">On these instances the $O(nT)$ DP takes exponential time. No
+        contradiction &mdash; just as the design constraint predicted.</p>
+    </section>
+
+    <section>
+      <h2>Weak and strong hardness</h2>
+      <ul>
+        <li class="fragment"><strong>Weakly NP-hard:</strong> hard only when the numbers are
+          huge; a pseudo-polynomial algorithm exists. Subset Sum, Knapsack.</li>
+        <li class="fragment"><strong>Strongly NP-hard:</strong> hard even when every number is
+          polynomially bounded &mdash; or there are no numbers at all. 3SAT, Independent Set,
+          Vertex Cover, Hamiltonian path.</li>
+      </ul>
+      <p class="fragment">Practical moral: when an NP-hard problem's numbers are small, look for
+        a DP over the values.</p>
+    </section>
+
+    <section>
+      <h2>Meet in the middle</h2>
+      <p>Back to <em>solving</em> Subset Sum: given $n$ numbers and a target $T$, brute force
+        tries all $2^n$ subsets. Can we do better when the numbers are large?</p>
+      <ul>
+        <li class="fragment">Split the numbers into two halves $A$ and $B$, each of size $n/2$.</li>
+        <li class="fragment">Any subset is a part of $A$ plus a part of $B$, so its sum is $x + y$,
+          with $x$ a subset sum of $A$ and $y$ a subset sum of $B$.</li>
+        <li class="fragment">Let $L_A$, $L_B$ list all subset sums of each half:
+          $2^{n/2}$ entries each.</li>
+      </ul>
+      <p class="fragment">New question: is there $x \in L_A$ with $T - x \in L_B$?</p>
+    </section>
+
+    <section>
+      <h2>Meet in the middle</h2>
+      <ol>
+        <li>List $L_A$ and $L_B$.</li>
+        <li class="fragment">Sort $L_B$.</li>
+        <li class="fragment">For each $x \in L_A$, binary-search $L_B$ for $T - x$.</li>
+      </ol>
+      <p class="fragment">Sorting $2^{n/2}$ numbers and doing $2^{n/2}$ binary searches costs
+        $O(2^{n/2} \cdot n)$ time: the <em>square root</em> of brute force.</p>
+      <p class="fragment">The price is $\Omega(2^{n/2})$ space for the lists.</p>
+      <p class="fragment credit">Horowitz and Sahni, &ldquo;Computing Partitions with Applications
+        to the Knapsack Problem&rdquo;, JACM 1974.</p>
+    </section>
+
+    <section>
+      <h2>Meet in the middle</h2>
+      <p>On $\{3, 5, 8, 13\}$ with $T = 21$:</p>
+      <p style="text-align:center; margin:0.2em 0;">$A = \{3, 5\}$: &ensp; $L_A = \{0, 3, 5, 8\}$</p>
+      <p style="text-align:center; margin:0.2em 0;">$B = \{8, 13\}$: &ensp; $L_B = \{0, 8, 13, 21\}$</p>
+      <table class="results tight" style="font-size:0.85em;">
+        <thead><tr><th>$x \in L_A$</th><th>$T - x$</th><th>In $L_B$?</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>$0$</td><td>$21$</td><td>yes: $8 + 13$</td></tr>
+          <tr class="fragment"><td>$3$</td><td>$18$</td><td>no</td></tr>
+          <tr class="fragment"><td>$5$</td><td>$16$</td><td>no</td></tr>
+          <tr class="fragment"><td>$8$</td><td>$13$</td><td>yes: $3 + 5 + 13$</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Two ways to beat brute force</h2>
+      <table class="results" style="font-size:0.85em;">
+        <thead><tr><th>Algorithm</th><th>Time</th><th>Wins when&hellip;</th></tr></thead>
+        <tbody>
+          <tr><td class="q">DP over sums</td><td>$O(nT)$</td><td>the numbers are small</td></tr>
+          <tr class="fragment"><td class="q">Meet in the middle</td><td>$O(2^{n/2} \cdot n)$</td>
+              <td>there are few numbers</td></tr>
+        </tbody>
+      </table>
+      <p class="fragment">Can we get $2^{o(n)}$? Not under ETH. Our reduction turns a 3SAT formula
+        into $2n + 2m$ numbers, and we may assume $m = O(n)$ clauses (the sparsification lemma).
+        So a $2^{o(n)}$ Subset Sum algorithm would solve 3SAT in $2^{o(n)}$ time.</p>
+    </section>
+
+    <section>
+      <h2>Below $2^{n/2}$?</h2>
+      <p>So the question is the constant: is $\tfrac12$ the right exponent?</p>
+      <ul>
+        <li class="fragment">For 50 years, worst-case progress saved only space, down to $2^{n/4}$
+          (Schroeppel&ndash;Shamir 1981), or polynomial factors in time.</li>
+        <li class="fragment">On <em>random</em> instances, $2^{0.291n}$ was known
+          (Becker&ndash;Coron&ndash;Joux 2011) &mdash; but not for every input.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Below $2^{n/2}$?</h2>
+      <div class="box"><span class="tag">October 2026</span>
+        A randomized algorithm for Subset Sum running in time $O(2^{0.49n})$ on
+        <em>every</em> input, found by an internal OpenAI model [OAI26].
+      </div>
+      <p class="fragment smaller">It is a preprint: not yet peer-reviewed or formally verified.
+        Read it as a claim, and watch this space.</p>
+      <p class="fragment credit">[OAI26] OpenAI, &ldquo;Subset Sum in Time $O(2^{0.49n})$&rdquo;,
+        preprint, October 4, 2026.</p>
+    </section>
+
+    <!-- ===================== PART 9: VERTEX COVER ARC ===================== -->
+    <section class="center">
+      <h1>The Vertex Cover Story</h1>
+    </section>
+
+    <section>
+      <h2>One problem, a whole course</h2>
+      <figure>
+        <svg width="940" height="290" viewBox="0 0 940 290" xmlns="http://www.w3.org/2000/svg"
+             font-family="Helvetica, Arial, sans-serif">
+          <defs>
+            <marker id="tarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d8678"/>
+            </marker>
+            <marker id="tarrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#9a7a26"/>
+            </marker>
+          </defs>
+          <!-- timeline -->
+          <line x1="40" y1="150" x2="700" y2="150" stroke="#8d8678" stroke-width="3" marker-end="url(#tarrow)"/>
+          <line x1="712" y1="150" x2="880" y2="150" stroke="#9a7a26" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#tarrow2)"/>
+          <!-- W3 -->
+          <circle cx="130" cy="150" r="34" fill="#c5d6c2" stroke="#4d7349" stroke-width="3"/>
+          <text x="130" y="157" text-anchor="middle" font-size="17" font-weight="600" fill="#2c4329">W3</text>
+          <text x="130" y="80"  text-anchor="middle" font-size="16" font-weight="600" fill="#2c4329">trees</text>
+          <text x="130" y="103" text-anchor="middle" font-size="15" fill="#2c4329">O(n) via DP</text>
+          <text x="130" y="215" text-anchor="middle" font-size="14" fill="#6a737d">leaf-up recurrence</text>
+          <!-- W10 -->
+          <circle cx="390" cy="150" r="34" fill="#cad9ee" stroke="#2e588f" stroke-width="3"/>
+          <text x="390" y="157" text-anchor="middle" font-size="17" font-weight="600" fill="#1d3c66">W10</text>
+          <text x="390" y="80"  text-anchor="middle" font-size="16" font-weight="600" fill="#1d3c66">bipartite</text>
+          <text x="390" y="103" text-anchor="middle" font-size="15" fill="#1d3c66">polynomial via König</text>
+          <text x="390" y="215" text-anchor="middle" font-size="14" fill="#6a737d">min VC = max matching</text>
+          <!-- W11 -->
+          <circle cx="640" cy="150" r="34" fill="#f4c5c2" stroke="#b03a2e" stroke-width="3"/>
+          <text x="640" y="157" text-anchor="middle" font-size="17" font-weight="600" fill="#7a2419">W11</text>
+          <text x="640" y="80"  text-anchor="middle" font-size="16" font-weight="600" fill="#7a2419">general graphs</text>
+          <text x="640" y="103" text-anchor="middle" font-size="15" fill="#7a2419">NP-complete (today)</text>
+          <text x="640" y="215" text-anchor="middle" font-size="14" fill="#6a737d">3SAT ≤ₚ IS ≤ₚ VC</text>
+          <!-- W12 tease -->
+          <circle cx="850" cy="150" r="34" fill="#e8d6a8" stroke="#9a7a26" stroke-width="3" stroke-dasharray="7 5"/>
+          <text x="850" y="157" text-anchor="middle" font-size="17" font-weight="600" fill="#5f4910">W12</text>
+          <text x="850" y="80"  text-anchor="middle" font-size="16" font-weight="600" fill="#5f4910">approximation?</text>
+          <text x="850" y="103" text-anchor="middle" font-size="15" fill="#5f4910">within factor 2…</text>
+          <text x="850" y="215" text-anchor="middle" font-size="14" fill="#6a737d">next week</text>
+        </svg>
+        <figcaption>Minimum vertex cover across the course: the input class decides everything.</figcaption>
+      </figure>
+      <ul class="smaller">
+        <li class="fragment"><strong>Trees (W3):</strong> a linear-time DP — hard problems can have easy special cases.</li>
+        <li class="fragment"><strong>Bipartite (W10):</strong> LP duality and König make it a matching problem.</li>
+        <li class="fragment"><strong>General (today):</strong> NP-complete — no polynomial algorithm unless P = NP.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Matching vs vertex cover</h2>
+      <table class="results tight" style="font-size:0.85em;">
+        <thead><tr><th>Graphs</th><th>Max matching</th><th>Min vertex cover</th></tr></thead>
+        <tbody>
+          <tr><td class="q">Trees</td><td>tree DP</td><td>tree DP</td></tr>
+          <tr class="fragment"><td class="q">Bipartite</td><td>max flow</td><td>König: $=$ max matching</td></tr>
+          <tr class="fragment hlrow"><td class="q">General</td><td><strong>polynomial</strong> (Edmonds)</td>
+              <td><strong>NP-complete</strong></td></tr>
+        </tbody>
+      </table>
+      <p class="fragment">On bipartite graphs König made them one problem. On general graphs they
+        split across the P / NP-complete divide.</p>
+      <p class="fragment credit">Edmonds' blossom algorithm: &ldquo;Paths, Trees, and Flowers&rdquo;, 1965 &mdash; the
+        same paper argued that &ldquo;polynomial time&rdquo; is the right meaning of
+        <em>efficient</em>.</p>
+    </section>
+
+    <section>
+      <h2>Matching vs vertex cover</h2>
+      <ul>
+        <li class="fragment">Weak duality survives on every graph: each matching edge needs its own
+          cover vertex, so $|M| \le |C|$ for any matching $M$ and cover $C$.</li>
+        <li class="fragment">Equality does not: on a triangle the maximum matching has $1$ edge,
+          but every vertex cover needs $2$ vertices.</li>
+        <li class="fragment">How large can the gap get? Next week: never more than a factor of $2$
+          &mdash; and that bound becomes an algorithm.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>So&hellip; what now?</h2>
+      <p>NP-completeness is not a licence to give up. It redirects the question:</p>
+      <ul>
+        <li class="fragment">Exploit structure: is your instance a tree? bipartite? small? (W3, W10)</li>
+        <li class="fragment">Beat brute force without reaching polynomial: $O(2^{0.39n})$ for 3SAT.</li>
+        <li class="fragment"><span class="hl">If we can't solve it exactly, how close can we get?</span></li>
+      </ul>
+      <p class="fragment">Next week: a polynomial-time algorithm that always finds a vertex cover
+        at most <strong>twice</strong> the minimum — using LP relaxations (W9) and duality (W10).
+        The vertex cover arc gets its final chapter.</p>
+    </section>
+
+    <section>
+      <h2>Takeaways</h2>
+      <ul>
+        <li class="fragment"><strong>NP</strong> = short certificates + fast verifiers.
+          Finding vs checking is the whole question.</li>
+        <li class="fragment"><strong>$A \le_p B$</strong>: easiness flows backward, hardness flows
+          forward. Mind the arrow's direction.</li>
+        <li class="fragment"><strong>Cook–Levin</strong> seeds the theory: SAT is NP-complete because
+          computation is local and locality is clauses.</li>
+        <li class="fragment"><strong>Gadgets</strong> (clause splitting, triangles, complements)
+          carry hardness from logic into graphs and numbers.</li>
+        <li class="fragment">SAT, 3SAT, IS, VC, Clique, Hamiltonian path, Subset Sum: all NP-complete —
+          one polynomial algorithm for any of them would crack them all.</li>
+      </ul>
+    </section>
+
+  </div><!-- .slides -->
+</div><!-- .reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [ RevealMath.MathJax3 ],
+
+    mathjax3: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js',
+      // tex-chtml, not the default tex-mml-chtml: the MathML input jax re-finds the
+      // assistive <math> on every slide change and duplicates all the math (DOM bloat, lag).
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        macros: {
+          tO:   ['{\\widetilde{O}}'],
+          R:    ['{\\mathbb{R}}'],
+          E:    ['{\\mathbb{E}}']
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+</script>
+</body>
+</html>
