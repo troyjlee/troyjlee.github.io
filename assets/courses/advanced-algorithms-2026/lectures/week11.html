@@ -131,7 +131,7 @@
         <li class="fragment"><strong>W3:</strong> find a maximum independent set of a tree</li>
         <li class="fragment"><strong>W5–6:</strong> find a minimum spanning tree</li>
         <li class="fragment"><strong>W8:</strong> find a maximum $s$-$t$ flow</li>
-        <li class="fragment"><strong>W10:</strong> find a maximum matching <em>and</em> a König cover certifying it</li>
+        <li class="fragment"><strong>W10:</strong> find a maximum matching <em>and</em> a Kőnig cover certifying it</li>
       </ul>
       <p class="fragment">Today we study problems where we believe <em>no</em> efficient algorithm exists.
         For that theory, it is cleaner to strip a problem down to a yes/no question.</p>
@@ -312,7 +312,7 @@
       <ul>
         <li class="fragment">&ldquo;No independent set of size $\ge k$&rdquo; is in co-NP. Is it in NP?
           No short proof of absence is known; NP $\overset{?}{=}$ co-NP is open too.</li>
-        <li class="fragment">Contrast Week 10: for <em>bipartite</em> graphs, König gave us short
+        <li class="fragment">Contrast Week 10: for <em>bipartite</em> graphs, Kőnig gave us short
           certificates in both directions (a matching vs a vertex cover of equal size).
           Duality put bipartite matching in NP $\cap$ co-NP.</li>
         <li class="fragment">Certificates alone do not give an algorithm: we found the matching
@@ -1476,7 +1476,7 @@
           <circle cx="390" cy="150" r="34" fill="#cad9ee" stroke="#2e588f" stroke-width="3"/>
           <text x="390" y="157" text-anchor="middle" font-size="17" font-weight="600" fill="#1d3c66">W10</text>
           <text x="390" y="80"  text-anchor="middle" font-size="16" font-weight="600" fill="#1d3c66">bipartite</text>
-          <text x="390" y="103" text-anchor="middle" font-size="15" fill="#1d3c66">polynomial via König</text>
+          <text x="390" y="103" text-anchor="middle" font-size="15" fill="#1d3c66">polynomial via Kőnig</text>
           <text x="390" y="215" text-anchor="middle" font-size="14" fill="#6a737d">min VC = max matching</text>
           <!-- W11 -->
           <circle cx="640" cy="150" r="34" fill="#f4c5c2" stroke="#b03a2e" stroke-width="3"/>
@@ -1495,7 +1495,7 @@
       </figure>
       <ul class="smaller">
         <li class="fragment"><strong>Trees (W3):</strong> a linear-time DP — hard problems can have easy special cases.</li>
-        <li class="fragment"><strong>Bipartite (W10):</strong> LP duality and König make it a matching problem.</li>
+        <li class="fragment"><strong>Bipartite (W10):</strong> LP duality and Kőnig make it a matching problem.</li>
         <li class="fragment"><strong>General (today):</strong> NP-complete — no polynomial algorithm unless P = NP.</li>
       </ul>
     </section>
@@ -1506,12 +1506,12 @@
         <thead><tr><th>Graphs</th><th>Max matching</th><th>Min vertex cover</th></tr></thead>
         <tbody>
           <tr><td class="q">Trees</td><td>tree DP</td><td>tree DP</td></tr>
-          <tr class="fragment"><td class="q">Bipartite</td><td>max flow</td><td>König: $=$ max matching</td></tr>
+          <tr class="fragment"><td class="q">Bipartite</td><td>max flow</td><td>Kőnig: $=$ max matching</td></tr>
           <tr class="fragment hlrow"><td class="q">General</td><td><strong>polynomial</strong> (Edmonds)</td>
               <td><strong>NP-complete</strong></td></tr>
         </tbody>
       </table>
-      <p class="fragment">On bipartite graphs König made them one problem. On general graphs they
+      <p class="fragment">On bipartite graphs Kőnig made them one problem. On general graphs they
         split across the P / NP-complete divide.</p>
       <p class="fragment credit">Edmonds' blossom algorithm: &ldquo;Paths, Trees, and Flowers&rdquo;, 1965 &mdash; the
         same paper argued that &ldquo;polynomial time&rdquo; is the right meaning of

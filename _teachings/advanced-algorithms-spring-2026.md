@@ -130,7 +130,7 @@ schedule:
     topic: Linear Programming II — Duality
     description: >-
       Weak and strong duality · writing the dual of an LP · max-flow/min-cut
-      as LP duality · König's theorem · complementary slackness
+      as LP duality · Kőnig's theorem · complementary slackness
     materials:
       - name: Lecture slides
         url: /assets/courses/advanced-algorithms-2026/lectures/week10.html
