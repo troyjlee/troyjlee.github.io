@@ -147,6 +147,8 @@ schedule:
         url: /assets/courses/advanced-algorithms-2026/lectures/week11.html
       - name: Lecture slides (PDF)
         url: /assets/courses/advanced-algorithms-2026/lectures/week11.pdf
+      - name: "Animation: 3SAT → Independent Set"
+        url: /assets/courses/advanced-algorithms-2026/animations/reductions.html
   - week: 12
     topic: Approximation Algorithms
     description: >-
