@@ -1179,51 +1179,6 @@
     </section>
 
     <section>
-      <h2>One column per variable</h2>
-      <ul>
-        <li>For each variable $x_i$, make two numbers: $t_i$ (&ldquo;$x_i$ is true&rdquo;)
-          and $f_i$ (&ldquo;$x_i$ is false&rdquo;).</li>
-        <li class="fragment">Both have a $1$ in column $x_i$ and a $0$ in every other
-          variable column.</li>
-        <li class="fragment">$T$ has a $1$ in column $x_i$.</li>
-      </ul>
-      <p class="fragment">Column $x_i$ sums to $1$ $\iff$ <em>exactly one</em> of $t_i, f_i$ is
-        chosen $\iff$ $x_i$ gets exactly one truth value.</p>
-      <div class="box warn fragment"><span class="tag">So far</span>
-        $t_i$ and $f_i$ look identical. They will differ in the <em>clause</em> columns,
-        which record what each choice makes true.
-      </div>
-    </section>
-
-    <section>
-      <h2>One column per clause</h2>
-      <ul>
-        <li>Put a $1$ in column $C_j$ of $t_i$ if $x_i$ appears in $C_j$, and of $f_i$ if
-          $\neg x_i$ appears in $C_j$.</li>
-        <li class="fragment">Then column $C_j$ sums to the number of <em>true literals</em> in
-          $C_j$: <span style="white-space:nowrap;">$0, 1, 2$ or $3$.</span></li>
-      </ul>
-      <div class="box warn fragment"><span class="tag">Obstruction</span>
-        A clause needs <em>at least one</em> true literal, but Subset Sum only tests
-        <em>equality</em>. Which digit should $T$ have in column $C_j$?
-      </div>
-    </section>
-
-    <section>
-      <h2>Slack closes the gap</h2>
-      <ul>
-        <li>For each clause $C_j$, add two <strong>slack numbers</strong> $s_j, s_j'$, each
-          with a single $1$ in column $C_j$.</li>
-        <li class="fragment">Give $T$ the digit $3$ in column $C_j$.</li>
-        <li class="fragment">$1$, $2$ or $3$ true literals: top up with $2$, $1$ or $0$
-          slack numbers.</li>
-        <li class="fragment">$0$ true literals: slack adds at most $2 &lt; 3$, so the column
-          cannot reach $3$ &mdash; exactly the unsatisfied case.</li>
-      </ul>
-      <p class="fragment">Largest column sum: $3 + 2 = 5 \le 9$, so nothing ever carries.</p>
-    </section>
-
-    <section>
       <h2>Worked example</h2>
       <p class="smaller" style="text-align:center; margin-bottom:0;">
         $\varphi = (x_1 \vee \neg x_2 \vee x_3) \wedge (\neg x_1 \vee x_2 \vee x_3)$</p>
@@ -1243,11 +1198,13 @@
             <tr class="total"><td class="q">$T$</td><td>1</td><td>1</td><td>1</td><td class="sep">3</td><td>3</td></tr>
           </tbody>
         </table>
-        <div>
+        <div class="smaller">
+          <p>$t_i$: &ldquo;$x_i$ is true&rdquo;. $f_i$: &ldquo;$x_i$ is false&rdquo;.</p>
+          <p class="fragment">$t_1$ has a $1$ in $C_1$, as $x_1 \in C_1$.<br>
+            $f_1$ has a $1$ in $C_2$, as $\neg x_1 \in C_2$.</p>
+          <p class="fragment">$s_j, s_j'$: two <em>slack</em> numbers per clause.</p>
           <p class="fragment">Each row is a base-10 number: $t_1 = 10010$, $f_3 = 100$,
             $T = 11133$.</p>
-          <p class="fragment">In general: $2n + 2m$ numbers of $n + m$ digits each &mdash;
-            polynomial size.</p>
         </div>
       </div>
     </section>
@@ -1310,6 +1267,53 @@
             No subset hits $T$ with this choice.</p>
         </div>
       </div>
+    </section>
+
+    <section>
+      <h2>One column per variable</h2>
+      <ul>
+        <li>In general, for each variable $x_i$, make two numbers: $t_i$ (&ldquo;$x_i$ is true&rdquo;)
+          and $f_i$ (&ldquo;$x_i$ is false&rdquo;).</li>
+        <li class="fragment">Both have a $1$ in column $x_i$ and a $0$ in every other
+          variable column.</li>
+        <li class="fragment">$T$ has a $1$ in column $x_i$.</li>
+      </ul>
+      <p class="fragment">Column $x_i$ sums to $1$ $\iff$ <em>exactly one</em> of $t_i, f_i$ is
+        chosen $\iff$ $x_i$ gets exactly one truth value.</p>
+      <div class="box warn fragment"><span class="tag">So far</span>
+        $t_i$ and $f_i$ look identical. They will differ in the <em>clause</em> columns,
+        which record what each choice makes true.
+      </div>
+    </section>
+
+    <section>
+      <h2>One column per clause</h2>
+      <ul>
+        <li>Put a $1$ in column $C_j$ of $t_i$ if $x_i$ appears in $C_j$, and of $f_i$ if
+          $\neg x_i$ appears in $C_j$.</li>
+        <li class="fragment">Then column $C_j$ sums to the number of <em>true literals</em> in
+          $C_j$: <span style="white-space:nowrap;">$0, 1, 2$ or $3$.</span></li>
+      </ul>
+      <div class="box warn fragment"><span class="tag">Obstruction</span>
+        A clause needs <em>at least one</em> true literal, but Subset Sum only tests
+        <em>equality</em>. Which digit should $T$ have in column $C_j$?
+      </div>
+    </section>
+
+    <section>
+      <h2>Slack closes the gap</h2>
+      <ul>
+        <li>For each clause $C_j$, add two <strong>slack numbers</strong> $s_j, s_j'$, each
+          with a single $1$ in column $C_j$.</li>
+        <li class="fragment">Give $T$ the digit $3$ in column $C_j$.</li>
+        <li class="fragment">$1$, $2$ or $3$ true literals: top up with $2$, $1$ or $0$
+          slack numbers.</li>
+        <li class="fragment">$0$ true literals: slack adds at most $2 &lt; 3$, so the column
+          cannot reach $3$ &mdash; exactly the unsatisfied case.</li>
+      </ul>
+      <p class="fragment">Largest column sum: $3 + 2 = 5 \le 9$, so nothing ever carries.
+        <span class="fragment">In total, $2n + 2m$ numbers of $n + m$ digits each:
+        polynomial size.</span></p>
     </section>
 
     <section>
