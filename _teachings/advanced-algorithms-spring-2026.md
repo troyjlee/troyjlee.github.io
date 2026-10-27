@@ -155,6 +155,11 @@ schedule:
       LP-rounding and primal–dual 2-approximations for vertex cover ·
       2-approximation for metric TSP via MST · greedy ln(n)-approximation for
       set cover
+    materials:
+      - name: Lecture slides
+        url: /assets/courses/advanced-algorithms-2026/lectures/week12.html
+      - name: Lecture slides (PDF)
+        url: /assets/courses/advanced-algorithms-2026/lectures/week12.pdf
 ---
 
 A 12-week course on advanced algorithm design and analysis, continuing on from
